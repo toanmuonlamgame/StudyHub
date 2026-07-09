@@ -4,7 +4,10 @@
 StudyHub uses this stack:
 
 - Frontend: Flutter / Dart
-- Backend: Node.js
+- Backend runtime: Node.js
+- Backend language: TypeScript
+- Backend framework: Fastify
+- ORM / database access layer: Prisma
 - Database: PostgreSQL
 
 These choices are already confirmed and should not be re-proposed unless the project owner explicitly reopens the decision.
@@ -26,7 +29,9 @@ Frontend must not:
 - Act as the source of truth for roles, permissions, credits, rewards, unlocks, or database logic.
 
 ## Backend
-Node.js is the backend API layer.
+Node.js is the backend runtime. Backend application code should be written in TypeScript.
+
+Fastify is the backend framework for V1.
 
 Responsibilities:
 
@@ -38,7 +43,12 @@ Responsibilities:
 - Write audit logs for sensitive credit/reward/admin actions.
 - Apply rate limiting where needed.
 
-The Node.js API framework is still pending.
+Why this choice fits StudyHub:
+
+- Node.js fits the JavaScript ecosystem.
+- TypeScript makes backend data shapes clearer, reduces avoidable runtime mistakes, and makes AI review easier.
+- Fastify is lightweight, fast, and less over-engineered than NestJS for V1.
+- This stack supports the learning goal, internship portfolio goal, and future codebase growth.
 
 ## Database
 PostgreSQL is the database layer.
@@ -49,7 +59,14 @@ Responsibilities:
 - Support structured relational data.
 - Support future content quality, moderation, unlock, credit, and audit-log data.
 
-The PostgreSQL access layer / ORM is still pending.
+Prisma is the ORM / database access layer.
+
+Prisma responsibilities:
+
+- Define and manage the database schema.
+- Run migrations.
+- Provide clear TypeScript-friendly PostgreSQL queries.
+- Keep database access explicit and reviewable.
 
 ## V1 Technical Scope
 V1 should use the confirmed stack to support:

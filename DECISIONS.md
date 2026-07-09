@@ -192,6 +192,28 @@ Reason:
 - It is common in web/mobile app stacks and useful for internship preparation.
 - It can stay simple for the first milestone.
 
+## 2026-07-09 - Backend V1 TypeScript, Fastify, And Prisma
+Decision: Use Node.js runtime with TypeScript, Fastify, Prisma, and PostgreSQL for the V1 backend.
+
+Confirmed backend V1 stack:
+- Runtime: Node.js
+- Language: TypeScript
+- Framework: Fastify
+- ORM / database access layer: Prisma
+- Database: PostgreSQL
+
+Reason:
+- Node.js fits the JavaScript ecosystem.
+- TypeScript makes backend data shapes clearer, reduces avoidable runtime mistakes, and makes AI review easier.
+- Fastify is lightweight, fast, and less over-engineered than NestJS for V1.
+- Prisma gives clear schema management, migrations, and PostgreSQL queries.
+- This stack fits the learning goal, internship portfolio goal, and future codebase growth.
+
+Rule:
+- StudyHub remains in the JavaScript ecosystem, but backend application code should be written in TypeScript.
+- Keep the Fastify API simple for V1.
+- Use Prisma for database schema, migrations, and query access instead of ad hoc SQL in app code unless there is a specific reason.
+
 ## 2026-07-09 - Database
 Decision: Use PostgreSQL as the database.
 
@@ -242,6 +264,4 @@ Secrets rule:
 
 ## Pending Decisions
 - Deployment target:
-- API framework for Node.js:
-- PostgreSQL access layer / ORM:
 - Moderation approach for uploaded content:

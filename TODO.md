@@ -19,9 +19,10 @@ Foundation / planning.
 - [x] Decide authentication approach for V1: local/demo auth only.
 - [x] Decide required taxonomy field for V1: Subject.
 - [x] Decide optional taxonomy fields for V1: school, program/system, major, topic.
+- [x] Decide backend language for V1: TypeScript.
+- [x] Decide Node.js API framework: Fastify.
+- [x] Decide PostgreSQL access layer / ORM: Prisma.
 - [ ] Decide deployment target.
-- [ ] Decide Node.js API framework.
-- [ ] Decide PostgreSQL access layer / ORM.
 - [ ] Configure GitHub remote.
 
 ## V1 Checklist
@@ -67,11 +68,13 @@ Foundation / planning.
 - [ ] StudyMaterialUpload
 
 ## Near-Term Tasks
-- [ ] Choose Node.js API framework.
-- [ ] Choose PostgreSQL access layer / ORM.
 - [ ] Decide deployment target.
 - [ ] Define V1 API boundaries using the security rules in ReadBeforeWork.md.
 - [ ] Create first milestone implementation checklist.
+- [ ] Learn JavaScript fundamentals needed for the StudyHub backend.
+- [ ] Learn TypeScript fundamentals needed for the StudyHub backend.
+- [ ] Learn Fastify basics for routing, validation, and plugins.
+- [ ] Learn Prisma basics for schema, migrations, and PostgreSQL queries.
 
 ## Roadmap
 ### V1 - Core Learning Flow
