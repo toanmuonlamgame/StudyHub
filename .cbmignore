@@ -1,0 +1,9 @@
+/.agents/
+/.codex/
+/frontend/linux/
+/frontend/windows/
+/frontend/macos/
+/frontend/ios/
+/frontend/android/
+build/
+.dart_tool/
