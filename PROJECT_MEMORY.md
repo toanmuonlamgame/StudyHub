@@ -49,6 +49,45 @@ Question Set means a practiceable collection of questions used for quizzes, revi
 
 Study Material and Question Set should stay distinct even when a document later produces questions.
 
+## V1 Milestone Scope
+V1 is the first usable demo milestone. It should prove the core learning flow without building the full platform economy, marketplace, admin system, or AI pipeline.
+
+### V1 Includes
+- Basic flexible taxonomy.
+- Subject is required.
+- School, program/system, major, and topic are optional in V1.
+- Browse Question Sets by subject/topic.
+- Take a simple multiple-choice quiz.
+- View quiz result:
+  - correct count
+  - wrong count
+  - percentage score
+  - correct answers
+- Upload placeholder for document/exam/question set with basic metadata.
+- Local/demo auth for V1 only.
+- Real authentication is deferred to the backend phase.
+
+### V1 Excludes
+- Full Study Credits economy.
+- Content unlock system.
+- Ads.
+- Payments.
+- AI question generation.
+- Complex moderation.
+- Marketplace.
+- Full admin dashboard.
+
+### Minimal V1 Data Model
+- User
+- Subject
+- Topic
+- QuestionSet
+- Question
+- AnswerOption
+- QuizAttempt
+- QuizAttemptAnswer
+- StudyMaterialUpload
+
 ## Long-Term Core Loop
 1. User browses or filters content using the flexible taxonomy.
 2. User opens a Question Set or Study Material.

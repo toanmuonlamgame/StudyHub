@@ -114,6 +114,68 @@ Reason:
 - V2 can improve community quality and controlled unlock mechanics.
 - V3 can add AI and monetization options after the platform has a stronger content foundation.
 
+## 2026-07-09 - V1 Milestone Scope
+Decision: V1 focuses on the smallest useful learning flow: basic taxonomy, browsing Question Sets, taking a simple multiple-choice quiz, viewing results, and adding an upload placeholder.
+
+V1 includes:
+- Basic flexible taxonomy.
+- Subject is required.
+- School, program/system, major, and topic are optional in V1.
+- Browse Question Sets by subject/topic.
+- Take a simple multiple-choice quiz.
+- View quiz result with correct count, wrong count, percentage score, and correct answers.
+- Upload placeholder for document/exam/question set with basic metadata.
+- Local/demo auth for V1 only.
+
+V1 excludes:
+- Full Study Credits economy.
+- Content unlock system.
+- Ads.
+- Payments.
+- AI question generation.
+- Complex moderation.
+- Marketplace.
+- Full admin dashboard.
+
+Reason:
+- V1 should prove the core learning loop before adding platform economy, monetization, AI, moderation complexity, or admin tooling.
+- A smaller V1 is easier to build, test, and present as an internship portfolio milestone.
+- The upload placeholder keeps the future contribution loop visible without requiring the full moderation/content pipeline yet.
+
+## 2026-07-09 - V1 Taxonomy Requirements
+Decision: Subject is required in V1. School, program/system, major, and topic are optional in V1.
+
+Reason:
+- Subject is the minimum useful anchor for browsing and organizing Question Sets.
+- Topic improves filtering, but not every upload or Question Set will have a precise topic at the start.
+- School, program/system, and major are useful long-term but should not block V1 content entry or browsing.
+
+Rule:
+- V1 should not force users through the full taxonomy.
+- V1 content must have a Subject.
+- V1 content may optionally include school, program/system, major, and topic.
+
+## 2026-07-09 - V1 Local/Demo Auth
+Decision: Use local/demo auth for V1 only. Real authentication is deferred to the backend phase.
+
+Reason:
+- V1 should focus on the learning flow, taxonomy, quiz, results, and upload placeholder.
+- Real authentication adds backend security, account lifecycle, session/token handling, and production concerns that can slow the first demo milestone.
+- The project already has a strict security boundary decision for the backend phase.
+
+Rule:
+- Do not treat local/demo auth as production auth.
+- Do not use frontend-provided identity as a source of truth for real permissions, credits, unlocks, or rewards.
+- When real authentication is added, the backend must own authentication and authorization.
+
+## 2026-07-09 - Minimal V1 Data Model
+Decision: V1 uses this minimal data model: User, Subject, Topic, QuestionSet, Question, AnswerOption, QuizAttempt, QuizAttemptAnswer, and StudyMaterialUpload.
+
+Reason:
+- These entities cover browsing, quiz-taking, results, and upload placeholder behavior.
+- The model stays small while leaving room for future Study Material, moderation, credits, unlocks, and AI-generated question workflows.
+- Keeping the model explicit helps implementation stay simple and portfolio-readable.
+
 ## 2026-07-09 - Frontend Stack
 Decision: Use Flutter / Dart for the frontend.
 
@@ -179,10 +241,7 @@ Secrets rule:
 - Use environment variables or a proper secret management approach for backend/runtime secrets.
 
 ## Pending Decisions
-- V1 milestone scope:
-- Authentication approach:
 - Deployment target:
 - API framework for Node.js:
 - PostgreSQL access layer / ORM:
 - Moderation approach for uploaded content:
-- Required vs optional taxonomy fields in V1:

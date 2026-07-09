@@ -15,32 +15,63 @@ Foundation / planning.
 - [x] Confirm user upload and community contribution direction.
 - [x] Confirm admin may create a small amount of legal seed content.
 - [x] Confirm Study Credits are internal only and not withdrawable as real money.
-- [ ] Define V1 milestone scope in detail.
-- [ ] Decide authentication approach for V1.
+- [x] Define V1 milestone scope in detail.
+- [x] Decide authentication approach for V1: local/demo auth only.
+- [x] Decide required taxonomy field for V1: Subject.
+- [x] Decide optional taxonomy fields for V1: school, program/system, major, topic.
 - [ ] Decide deployment target.
 - [ ] Decide Node.js API framework.
 - [ ] Decide PostgreSQL access layer / ORM.
 - [ ] Configure GitHub remote.
 
+## V1 Checklist
+### Taxonomy And Browsing
+- [ ] Create basic flexible taxonomy model for V1.
+- [ ] Make Subject required for Question Sets and uploads.
+- [ ] Keep school optional in V1.
+- [ ] Keep program/system optional in V1.
+- [ ] Keep major optional in V1.
+- [ ] Keep topic optional in V1.
+- [ ] Browse Question Sets by subject.
+- [ ] Browse/filter Question Sets by topic when topic exists.
+
+### Quiz Flow
+- [ ] Start a simple multiple-choice quiz from a Question Set.
+- [ ] Display one or more answer options per question.
+- [ ] Record selected answers in a QuizAttempt.
+- [ ] Calculate correct count.
+- [ ] Calculate wrong count.
+- [ ] Calculate percentage score.
+- [ ] Show correct answers on the result screen.
+
+### Upload Placeholder
+- [ ] Add upload placeholder for document/exam/question set.
+- [ ] Capture basic upload metadata.
+- [ ] Store upload as StudyMaterialUpload.
+- [ ] Keep moderation simple for V1.
+
+### Local/Demo Auth
+- [ ] Use local/demo auth for V1 only.
+- [ ] Do not implement production authentication in V1.
+- [ ] Keep real authentication deferred to the backend phase.
+
+### Minimal V1 Data Model
+- [ ] User
+- [ ] Subject
+- [ ] Topic
+- [ ] QuestionSet
+- [ ] Question
+- [ ] AnswerOption
+- [ ] QuizAttempt
+- [ ] QuizAttemptAnswer
+- [ ] StudyMaterialUpload
+
 ## Near-Term Tasks
-- [ ] Define V1 user flows:
-  - browse taxonomy
-  - browse question sets
-  - take quiz
-  - view quiz result
-  - upload document/exam/question set
-- [ ] Define minimal V1 data model:
-  - user
-  - taxonomy nodes
-  - study material
-  - question set
-  - question
-  - quiz attempt
-  - upload/contribution status
-- [ ] Decide which taxonomy levels are required vs optional in V1.
-- [ ] Define moderation states for uploaded content.
-- [ ] Decide whether V1 auth is required or can be simplified for demo.
-- [ ] Create first milestone checklist after V1 scope is approved.
+- [ ] Choose Node.js API framework.
+- [ ] Choose PostgreSQL access layer / ORM.
+- [ ] Decide deployment target.
+- [ ] Define V1 API boundaries using the security rules in ReadBeforeWork.md.
+- [ ] Create first milestone implementation checklist.
 
 ## Roadmap
 ### V1 - Core Learning Flow
@@ -49,6 +80,7 @@ Foundation / planning.
 - [ ] Take quiz from a question set.
 - [ ] View quiz result.
 - [ ] Upload study material, exam, or question set.
+- [ ] Use local/demo auth only.
 - [ ] Keep Study Credits out of V1 except as future-facing terminology if needed.
 
 ### V2 - Community Quality And Unlocks
@@ -90,3 +122,9 @@ Foundation / planning.
 - [ ] Do not write app code until the first milestone is approved.
 - [ ] Do not implement full credit economy in V1.
 - [ ] Do not reward users only for uploading content.
+- [ ] Do not implement content unlocks in V1.
+- [ ] Do not implement ads in V1.
+- [ ] Do not implement payments in V1.
+- [ ] Do not implement AI question generation in V1.
+- [ ] Do not implement marketplace in V1.
+- [ ] Do not implement full admin dashboard in V1.
