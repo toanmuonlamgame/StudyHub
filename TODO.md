@@ -9,29 +9,69 @@ Foundation / planning.
 - [x] Confirm frontend stack: Flutter / Dart.
 - [x] Confirm backend stack: Node.js.
 - [x] Confirm database: PostgreSQL.
-- [x] Confirm content model: users upload their own question banks / study content.
 - [x] Confirm AI workflow roles.
-- [ ] Define the first usable feature.
-- [ ] Create the first milestone plan.
-- [ ] Decide authentication approach.
+- [x] Confirm flexible taxonomy direction.
+- [x] Confirm Study Material and Question Set as separate content types.
+- [x] Confirm user upload and community contribution direction.
+- [x] Confirm admin may create a small amount of legal seed content.
+- [x] Confirm Study Credits are internal only and not withdrawable as real money.
+- [ ] Define V1 milestone scope in detail.
+- [ ] Decide authentication approach for V1.
 - [ ] Decide deployment target.
+- [ ] Decide Node.js API framework.
+- [ ] Decide PostgreSQL access layer / ORM.
 - [ ] Configure GitHub remote.
 
-## Candidate First Features
-- [ ] User-created question bank list.
-- [ ] Add/edit/delete question bank.
-- [ ] Add/edit/delete questions inside a bank.
-- [ ] Basic study/review flow for a selected question bank.
-- [ ] Simple progress indicator for study sessions.
+## Near-Term Tasks
+- [ ] Define V1 user flows:
+  - browse taxonomy
+  - browse question sets
+  - take quiz
+  - view quiz result
+  - upload document/exam/question set
+- [ ] Define minimal V1 data model:
+  - user
+  - taxonomy nodes
+  - study material
+  - question set
+  - question
+  - quiz attempt
+  - upload/contribution status
+- [ ] Decide which taxonomy levels are required vs optional in V1.
+- [ ] Define moderation states for uploaded content.
+- [ ] Decide whether V1 auth is required or can be simplified for demo.
+- [ ] Create first milestone checklist after V1 scope is approved.
 
-## Recommended First Milestone
-Build a minimal vertical slice:
+## Roadmap
+### V1 - Core Learning Flow
+- [ ] Basic flexible taxonomy: school, program/system, major, subject, topic.
+- [ ] Browse question sets.
+- [ ] Take quiz from a question set.
+- [ ] View quiz result.
+- [ ] Upload study material, exam, or question set.
+- [ ] Keep Study Credits out of V1 except as future-facing terminology if needed.
 
-- Flutter mobile UI for viewing question banks.
-- Node.js API for creating and listing user-owned question banks.
-- PostgreSQL storage for users, question banks, and questions.
-- No pre-seeded question data.
-- Keep authentication simple or defer it if the first milestone is local/demo-only.
+### V2 - Community Quality And Unlocks
+- [ ] Contributor profile.
+- [ ] Rating and report system.
+- [ ] Duplicate content prevention.
+- [ ] Study Credits.
+- [ ] Unlock selected content or features using Study Credits.
+- [ ] Reward valid, used, high-quality content instead of raw upload count.
+
+### V3 - AI And Monetization Options
+- [ ] AI-generated questions from uploaded documents.
+- [ ] Human review step before AI-generated questions become available.
+- [ ] Ads-for-credit flow.
+- [ ] Consider payments after the credit model and content quality loop are proven.
+
+## Content Model Tasks
+- [ ] Define Study Material fields.
+- [ ] Define Question Set fields.
+- [ ] Define how Study Material can be linked to generated or related Question Sets.
+- [ ] Define contribution approval rules.
+- [ ] Define quality signals for future rewards.
+- [ ] Define duplicate detection requirements for V2.
 
 ## Documentation Tasks
 - [ ] Create docs/PROJECT_OVERVIEW.md after review.
@@ -48,3 +88,5 @@ Build a minimal vertical slice:
 ## Not Doing Yet
 - [ ] Do not create docs/ files until explicitly requested.
 - [ ] Do not write app code until the first milestone is approved.
+- [ ] Do not implement full credit economy in V1.
+- [ ] Do not reward users only for uploading content.

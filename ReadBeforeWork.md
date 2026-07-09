@@ -61,6 +61,17 @@ Update this file only when the collaboration process changes.
 - Commit after each working milestone.
 - Do not rely on chat history as the only memory. Important context must be written into the project files.
 
+## Security And Code Standards
+
+- Flutter App must never call the database directly.
+- The standard data flow is Flutter App -> Backend API -> Database.
+- Frontend is not the source of truth for account data, roles, permissions, Study Credits, rewards, content unlocks, or database logic.
+- Backend is the source of truth for authentication, authorization, roles/permissions, admin/moderator actions, upload validation, content access, Study Credit transactions, reward calculation, audit logs, and rate limiting.
+- Frontend should only render UI from backend data and call approved APIs.
+- Backend must not trust userId, role, credit amount, unlock status, or reward requests sent by the frontend.
+- Database secrets, JWT secrets, admin keys, and service keys must never be stored in the Flutter app or GitHub.
+- Credit/reward logic must be controlled by backend transactions and audit logs.
+
 ## Handoff Format
 
 When switching from one AI/tool to another, provide this summary:
