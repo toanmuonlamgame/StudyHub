@@ -1,14 +1,14 @@
 # Exclude AI assistant tooling from GitHub language statistics
 .agent/** linguist-vendored
+.agent/skills/** linguist-vendored
 .codex/** linguist-vendored
+.codex/skills/** linguist-vendored
 .agents/** linguist-vendored
 
-# Exclude generated Flutter desktop platform folders from GitHub language statistics
+# Exclude generated Flutter desktop/platform folders from GitHub language statistics
 frontend/linux/** linguist-vendored
 frontend/windows/** linguist-vendored
 frontend/macos/** linguist-vendored
-
-# Optional: exclude other generated platform folders from language stats
 frontend/android/** linguist-vendored
 frontend/ios/** linguist-vendored
 
