@@ -21,10 +21,10 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  final Map<String, String> _selectedAnswerIds = {};
+  final Map<String, String> _examSelectedAnswerIds = {};
   late Future<List<Question>> _questionsFuture;
   bool _showValidation = false;
-  bool _isSubmitting = false;
+  bool _isSubmittingExamModeQuiz = false;
 
   @override
   void initState() {
@@ -74,14 +74,14 @@ class _QuizScreenState extends State<QuizScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          '${_selectedAnswerIds.length} of ${questions.length} answered',
+          '${_examSelectedAnswerIds.length} of ${questions.length} answered',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 10),
         LinearProgressIndicator(
-          value: _selectedAnswerIds.length / questions.length,
+          value: _examSelectedAnswerIds.length / questions.length,
         ),
         const SizedBox(height: 24),
         for (var index = 0; index < questions.length; index++) ...[
@@ -90,10 +90,10 @@ class _QuizScreenState extends State<QuizScreen> {
             question: questions[index],
             questionNumber: index + 1,
             totalQuestions: questions.length,
-            selectedAnswerId: _selectedAnswerIds[questions[index].id],
+            selectedAnswerId: _examSelectedAnswerIds[questions[index].id],
             showError:
                 _showValidation &&
-                !_selectedAnswerIds.containsKey(questions[index].id),
+                !_examSelectedAnswerIds.containsKey(questions[index].id),
             onSelected: (answerOptionId) {
               _selectAnswer(questions[index].id, answerOptionId);
             },
@@ -102,14 +102,18 @@ class _QuizScreenState extends State<QuizScreen> {
         ],
         const SizedBox(height: 6),
         FilledButton.icon(
-          onPressed: _isSubmitting ? null : () => _submitQuiz(questions),
-          icon: _isSubmitting
+          onPressed: _isSubmittingExamModeQuiz
+              ? null
+              : () => _submitExamModeQuiz(questions),
+          icon: _isSubmittingExamModeQuiz
               ? const SizedBox.square(
                   dimension: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.check),
-          label: Text(_isSubmitting ? 'Submitting...' : 'Submit Quiz'),
+          label: Text(
+            _isSubmittingExamModeQuiz ? 'Submitting...' : 'Submit Quiz',
+          ),
           style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
         ),
       ],
@@ -124,24 +128,24 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void _retryLoadingQuestions() {
     setState(() {
-      _selectedAnswerIds.clear();
+      _examSelectedAnswerIds.clear();
       _showValidation = false;
       _questionsFuture = _loadQuestions();
     });
   }
 
   void _selectAnswer(String questionId, String answerOptionId) {
-    if (_isSubmitting) {
+    if (_isSubmittingExamModeQuiz) {
       return;
     }
 
     setState(() {
-      _selectedAnswerIds[questionId] = answerOptionId;
+      _examSelectedAnswerIds[questionId] = answerOptionId;
     });
   }
 
-  Future<void> _submitQuiz(List<Question> questions) async {
-    if (_selectedAnswerIds.length != questions.length) {
+  Future<void> _submitExamModeQuiz(List<Question> questions) async {
+    if (_examSelectedAnswerIds.length != questions.length) {
       setState(() {
         _showValidation = true;
       });
@@ -156,18 +160,18 @@ class _QuizScreenState extends State<QuizScreen> {
       return;
     }
 
-    final selectedAnswerIds = Map<String, String>.unmodifiable(
-      _selectedAnswerIds,
+    final examSelectedAnswerIds = Map<String, String>.unmodifiable(
+      _examSelectedAnswerIds,
     );
 
     setState(() {
-      _isSubmitting = true;
+      _isSubmittingExamModeQuiz = true;
     });
 
     try {
       final result = await widget.learningRepository.submitQuiz(
         questionSetId: widget.questionSet.id,
-        selectedAnswerOptionIdsByQuestionId: selectedAnswerIds,
+        selectedAnswerOptionIdsByQuestionId: examSelectedAnswerIds,
       );
 
       if (!mounted) {
@@ -188,7 +192,7 @@ class _QuizScreenState extends State<QuizScreen> {
         const SnackBar(content: Text('Quiz could not be submitted.')),
       );
       setState(() {
-        _isSubmitting = false;
+        _isSubmittingExamModeQuiz = false;
       });
     }
   }

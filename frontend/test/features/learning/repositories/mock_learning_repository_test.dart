@@ -94,5 +94,16 @@ void main() {
     expect(result.answerReviews.first.correctAnswerText, 'let');
     expect(result.answerReviews.first.isCorrect, isFalse);
     expect(result.answerReviews[1].isCorrect, isTrue);
+
+    for (final answerReview in result.answerReviews) {
+      expect(answerReview.questionText, isNotEmpty);
+      expect(
+        answerReview.selectedAnswerOptionId,
+        selectedAnswerIds[answerReview.questionId],
+      );
+      expect(answerReview.selectedAnswerText, isNotEmpty);
+      expect(answerReview.correctAnswerOptionId, isNotEmpty);
+      expect(answerReview.correctAnswerText, isNotEmpty);
+    }
   });
 }

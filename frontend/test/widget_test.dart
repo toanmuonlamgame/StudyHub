@@ -1,11 +1,14 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:frontend/app/studyhub_app.dart';
+import 'package:frontend/features/learning/models/answer_review.dart';
 import 'package:frontend/features/learning/models/question.dart';
 import 'package:frontend/features/learning/models/question_set.dart';
 import 'package:frontend/features/learning/models/quiz_result.dart';
 import 'package:frontend/features/learning/repositories/learning_repository.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
+import 'package:frontend/features/learning/screens/quiz_result_screen.dart';
 
 void main() {
   testWidgets('opens the StudyHub app', (WidgetTester tester) async {
@@ -65,6 +68,40 @@ void main() {
     await tester.scrollUntilVisible(secondQuestion, 250);
 
     expect(find.text('Correct'), findsWidgets);
+  });
+
+  testWidgets('renders answer review directly from QuizResult', (
+    WidgetTester tester,
+  ) async {
+    const result = QuizResult(
+      questionSetId: 'result_only_set',
+      questionSetTitle: 'Result-only Question Set',
+      correctCount: 0,
+      wrongCount: 1,
+      totalCount: 1,
+      percentageScore: 0,
+      answerReviews: [
+        AnswerReview(
+          questionId: 'result_only_question',
+          questionText: 'Review supplied by QuizResult',
+          selectedAnswerOptionId: 'selected_option',
+          selectedAnswerText: 'Selected from result',
+          correctAnswerOptionId: 'correct_option',
+          correctAnswerText: 'Correct from result',
+          isCorrect: false,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(home: QuizResultScreen(result: result)),
+    );
+
+    expect(find.text('Result-only Question Set'), findsOneWidget);
+    expect(find.text('Review supplied by QuizResult'), findsOneWidget);
+    expect(find.text('Your answer: Selected from result'), findsOneWidget);
+    expect(find.text('Correct answer: Correct from result'), findsOneWidget);
+    expect(find.text('Incorrect'), findsOneWidget);
   });
 
   testWidgets('retries loading question sets after an error', (

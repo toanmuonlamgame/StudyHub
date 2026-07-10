@@ -165,6 +165,7 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Add simple loading and error states using Flutter SDK tools only.
 - [x] Separate safe pre-submit answer options from mock-only correctness metadata.
 - [x] Define post-submit answer review data returned by `submitQuiz`.
+- [x] Harden the Exam Mode foundation and result-review contract.
 - [ ] Design Practice Mode and a `checkAnswer` contract after Exam Mode is stable.
 - [x] Add repository contract tests using the mock adapter.
 - [ ] Add an API service and `ApiLearningRepository` only when backend endpoints exist.
