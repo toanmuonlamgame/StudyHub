@@ -74,7 +74,10 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
   void _openSubject(BuildContext context, Subject subject) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => QuestionSetListScreen(subject: subject),
+        builder: (context) => QuestionSetListScreen(
+          subject: subject,
+          learningRepository: widget.learningRepository,
+        ),
       ),
     );
   }

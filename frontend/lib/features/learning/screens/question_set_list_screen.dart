@@ -1,49 +1,97 @@
 import 'package:flutter/material.dart';
 
-import '../data/mock_learning_data.dart';
 import '../models/question_set.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
+import '../repositories/learning_repository.dart';
 import 'question_set_detail_screen.dart';
 
-class QuestionSetListScreen extends StatelessWidget {
-  const QuestionSetListScreen({super.key, required this.subject});
+class QuestionSetListScreen extends StatefulWidget {
+  const QuestionSetListScreen({
+    super.key,
+    required this.subject,
+    required this.learningRepository,
+  });
 
   final Subject subject;
+  final LearningRepository learningRepository;
+
+  @override
+  State<QuestionSetListScreen> createState() => _QuestionSetListScreenState();
+}
+
+class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
+  late Future<_QuestionSetListData> _dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _dataFuture = _loadData();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final questionSets = getQuestionSetsBySubjectId(subject.id);
-    final topics = getTopicsBySubjectId(subject.id);
-
     return Scaffold(
       appBar: AppBar(title: const Text('Question Sets')),
       body: SafeArea(
-        child: questionSets.isEmpty
-            ? _EmptyQuestionSets(subjectName: subject.name)
-            : ListView.separated(
-                padding: const EdgeInsets.all(20),
-                itemCount: questionSets.length + 1,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return _QuestionSetListHeader(subjectName: subject.name);
-                  }
+        child: FutureBuilder<_QuestionSetListData>(
+          future: _dataFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-                  final questionSet = questionSets[index - 1];
-                  final topic = _findTopic(topics, questionSet.topicId);
+            if (snapshot.hasError) {
+              return _QuestionSetLoadError(onRetry: _retryLoadingData);
+            }
 
-                  return _QuestionSetCard(
-                    key: ValueKey(questionSet.id),
-                    questionSet: questionSet,
-                    topic: topic,
-                    onTap: () => _openQuestionSet(context, questionSet, topic),
+            final data = snapshot.data;
+            if (data == null || data.questionSets.isEmpty) {
+              return _EmptyQuestionSets(subjectName: widget.subject.name);
+            }
+
+            return ListView.separated(
+              padding: const EdgeInsets.all(20),
+              itemCount: data.questionSets.length + 1,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return _QuestionSetListHeader(
+                    subjectName: widget.subject.name,
                   );
-                },
-              ),
+                }
+
+                final questionSet = data.questionSets[index - 1];
+                final topic = _findTopic(data.topics, questionSet.topicId);
+
+                return _QuestionSetCard(
+                  key: ValueKey(questionSet.id),
+                  questionSet: questionSet,
+                  topic: topic,
+                  onTap: () => _openQuestionSet(context, questionSet, topic),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
+  }
+
+  Future<_QuestionSetListData> _loadData() async {
+    final questionSets = await widget.learningRepository
+        .getQuestionSetsBySubjectId(widget.subject.id);
+    final topics = await widget.learningRepository.getTopicsBySubjectId(
+      widget.subject.id,
+    );
+
+    return _QuestionSetListData(questionSets: questionSets, topics: topics);
+  }
+
+  void _retryLoadingData() {
+    setState(() {
+      _dataFuture = _loadData();
+    });
   }
 
   Topic? _findTopic(List<Topic> topics, String? topicId) {
@@ -68,9 +116,49 @@ class QuestionSetListScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => QuestionSetDetailScreen(
-          subject: subject,
+          subject: widget.subject,
           questionSet: questionSet,
           topic: topic,
+        ),
+      ),
+    );
+  }
+}
+
+class _QuestionSetListData {
+  const _QuestionSetListData({
+    required this.questionSets,
+    required this.topics,
+  });
+
+  final List<QuestionSet> questionSets;
+  final List<Topic> topics;
+}
+
+class _QuestionSetLoadError extends StatelessWidget {
+  const _QuestionSetLoadError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Question sets could not be loaded.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try again'),
+            ),
+          ],
         ),
       ),
     );

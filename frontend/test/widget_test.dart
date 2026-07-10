@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:frontend/app/studyhub_app.dart';
+import 'package:frontend/features/learning/models/question_set.dart';
+import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
 
 void main() {
   testWidgets('opens the StudyHub app', (WidgetTester tester) async {
@@ -58,6 +60,26 @@ void main() {
 
     expect(find.text('Correct'), findsWidgets);
   });
+
+  testWidgets('retries loading question sets after an error', (
+    WidgetTester tester,
+  ) async {
+    final repository = _RetryQuestionSetRepository();
+    await tester.pumpWidget(StudyHubApp(learningRepository: repository));
+
+    await tester.tap(find.text('Start learning'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('JavaScript Basics'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Question sets could not be loaded.'), findsOneWidget);
+
+    await tester.tap(find.text('Try again'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('JavaScript Basics Check'), findsOneWidget);
+    expect(repository.questionSetLoadCount, 2);
+  });
 }
 
 Future<void> _openJavaScriptBasicsQuiz(WidgetTester tester) async {
@@ -86,4 +108,19 @@ Future<void> _selectAnswer(WidgetTester tester, String answer) async {
   await tester.scrollUntilVisible(answerFinder, 250);
   await tester.tap(answerFinder);
   await tester.pump();
+}
+
+class _RetryQuestionSetRepository extends MockLearningRepository {
+  int questionSetLoadCount = 0;
+
+  @override
+  Future<List<QuestionSet>> getQuestionSetsBySubjectId(String subjectId) {
+    questionSetLoadCount++;
+
+    if (questionSetLoadCount == 1) {
+      return Future.error(Exception('Temporary question set error'));
+    }
+
+    return super.getQuestionSetsBySubjectId(subjectId);
+  }
 }
