@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:frontend/app/studyhub_app.dart';
+import 'package:frontend/features/learning/models/question.dart';
 import 'package:frontend/features/learning/models/question_set.dart';
+import 'package:frontend/features/learning/repositories/learning_repository.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
 
 void main() {
@@ -80,10 +82,28 @@ void main() {
     expect(find.text('JavaScript Basics Check'), findsOneWidget);
     expect(repository.questionSetLoadCount, 2);
   });
+
+  testWidgets('retries loading quiz questions after an error', (
+    WidgetTester tester,
+  ) async {
+    final repository = _RetryQuestionRepository();
+    await _openJavaScriptBasicsQuiz(tester, learningRepository: repository);
+
+    expect(find.text('Questions could not be loaded.'), findsOneWidget);
+
+    await tester.tap(find.text('Try again'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Question 1 of 3'), findsOneWidget);
+    expect(repository.questionLoadCount, 2);
+  });
 }
 
-Future<void> _openJavaScriptBasicsQuiz(WidgetTester tester) async {
-  await tester.pumpWidget(const StudyHubApp());
+Future<void> _openJavaScriptBasicsQuiz(
+  WidgetTester tester, {
+  LearningRepository learningRepository = const MockLearningRepository(),
+}) async {
+  await tester.pumpWidget(StudyHubApp(learningRepository: learningRepository));
 
   await tester.tap(find.text('Start learning'));
   await tester.pumpAndSettle();
@@ -122,5 +142,20 @@ class _RetryQuestionSetRepository extends MockLearningRepository {
     }
 
     return super.getQuestionSetsBySubjectId(subjectId);
+  }
+}
+
+class _RetryQuestionRepository extends MockLearningRepository {
+  int questionLoadCount = 0;
+
+  @override
+  Future<List<Question>> getQuestionsByQuestionSetId(String id) {
+    questionLoadCount++;
+
+    if (questionLoadCount == 1) {
+      return Future.error(Exception('Temporary question error'));
+    }
+
+    return super.getQuestionsByQuestionSetId(id);
   }
 }

@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../data/mock_learning_data.dart';
 import '../models/answer_option.dart';
 import '../models/question.dart';
 import '../models/question_set.dart';
 import '../models/quiz_result.dart';
+import '../repositories/learning_repository.dart';
 import 'quiz_result_screen.dart';
 
 class QuizScreen extends StatefulWidget {
-  const QuizScreen({super.key, required this.questionSet});
+  const QuizScreen({
+    super.key,
+    required this.questionSet,
+    required this.learningRepository,
+  });
 
   final QuestionSet questionSet;
+  final LearningRepository learningRepository;
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -18,75 +23,106 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   final Map<String, String> _selectedAnswerIds = {};
-  late final List<Question> _questions;
+  late Future<List<Question>> _questionsFuture;
   bool _showValidation = false;
 
   @override
   void initState() {
     super.initState();
-    _questions = getQuestionsByQuestionSetId(widget.questionSet.id);
+    _questionsFuture = _loadQuestions();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(title: const Text('Quiz')),
       body: SafeArea(
-        child: _questions.isEmpty
-            ? const _EmptyQuiz()
-            : ListView(
-                padding: const EdgeInsets.all(20),
-                children: [
-                  Text(
-                    widget.questionSet.title,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${_selectedAnswerIds.length} of ${_questions.length} answered',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  LinearProgressIndicator(
-                    value: _selectedAnswerIds.length / _questions.length,
-                  ),
-                  const SizedBox(height: 24),
-                  for (var index = 0; index < _questions.length; index++) ...[
-                    _QuestionCard(
-                      key: ValueKey(_questions[index].id),
-                      question: _questions[index],
-                      questionNumber: index + 1,
-                      totalQuestions: _questions.length,
-                      selectedAnswerId:
-                          _selectedAnswerIds[_questions[index].id],
-                      showError:
-                          _showValidation &&
-                          !_selectedAnswerIds.containsKey(_questions[index].id),
-                      onSelected: (answerOptionId) {
-                        _selectAnswer(_questions[index].id, answerOptionId);
-                      },
-                    ),
-                    const SizedBox(height: 14),
-                  ],
-                  const SizedBox(height: 6),
-                  FilledButton.icon(
-                    onPressed: _submitQuiz,
-                    icon: const Icon(Icons.check),
-                    label: const Text('Submit Quiz'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(52),
-                    ),
-                  ),
-                ],
-              ),
+        child: FutureBuilder<List<Question>>(
+          future: _questionsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return _QuizLoadError(onRetry: _retryLoadingQuestions);
+            }
+
+            final questions = snapshot.data ?? const <Question>[];
+            if (questions.isEmpty) {
+              return const _EmptyQuiz();
+            }
+
+            return _buildQuizContent(context, questions);
+          },
+        ),
       ),
     );
+  }
+
+  Widget _buildQuizContent(BuildContext context, List<Question> questions) {
+    final theme = Theme.of(context);
+
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Text(
+          widget.questionSet.title,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '${_selectedAnswerIds.length} of ${questions.length} answered',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 10),
+        LinearProgressIndicator(
+          value: _selectedAnswerIds.length / questions.length,
+        ),
+        const SizedBox(height: 24),
+        for (var index = 0; index < questions.length; index++) ...[
+          _QuestionCard(
+            key: ValueKey(questions[index].id),
+            question: questions[index],
+            questionNumber: index + 1,
+            totalQuestions: questions.length,
+            selectedAnswerId: _selectedAnswerIds[questions[index].id],
+            showError:
+                _showValidation &&
+                !_selectedAnswerIds.containsKey(questions[index].id),
+            onSelected: (answerOptionId) {
+              _selectAnswer(questions[index].id, answerOptionId);
+            },
+          ),
+          const SizedBox(height: 14),
+        ],
+        const SizedBox(height: 6),
+        FilledButton.icon(
+          onPressed: () => _submitQuiz(questions),
+          icon: const Icon(Icons.check),
+          label: const Text('Submit Quiz'),
+          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+        ),
+      ],
+    );
+  }
+
+  Future<List<Question>> _loadQuestions() {
+    return widget.learningRepository.getQuestionsByQuestionSetId(
+      widget.questionSet.id,
+    );
+  }
+
+  void _retryLoadingQuestions() {
+    setState(() {
+      _selectedAnswerIds.clear();
+      _showValidation = false;
+      _questionsFuture = _loadQuestions();
+    });
   }
 
   void _selectAnswer(String questionId, String answerOptionId) {
@@ -95,8 +131,8 @@ class _QuizScreenState extends State<QuizScreen> {
     });
   }
 
-  void _submitQuiz() {
-    if (_selectedAnswerIds.length != _questions.length) {
+  void _submitQuiz(List<Question> questions) {
+    if (_selectedAnswerIds.length != questions.length) {
       setState(() {
         _showValidation = true;
       });
@@ -113,7 +149,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
     var correctCount = 0;
 
-    for (final question in _questions) {
+    for (final question in questions) {
       final selectedAnswerId = _selectedAnswerIds[question.id];
 
       for (final answerOption in question.answerOptions) {
@@ -124,7 +160,7 @@ class _QuizScreenState extends State<QuizScreen> {
       }
     }
 
-    final totalCount = _questions.length;
+    final totalCount = questions.length;
     final result = QuizResult(
       questionSetId: widget.questionSet.id,
       correctCount: correctCount,
@@ -138,8 +174,38 @@ class _QuizScreenState extends State<QuizScreen> {
         builder: (context) => QuizResultScreen(
           questionSet: widget.questionSet,
           result: result,
-          questions: _questions,
+          questions: questions,
           selectedAnswerIds: Map.unmodifiable(_selectedAnswerIds),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuizLoadError extends StatelessWidget {
+  const _QuizLoadError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Questions could not be loaded.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try again'),
+            ),
+          ],
         ),
       ),
     );

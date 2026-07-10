@@ -119,6 +119,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
           subject: widget.subject,
           questionSet: questionSet,
           topic: topic,
+          learningRepository: widget.learningRepository,
         ),
       ),
     );

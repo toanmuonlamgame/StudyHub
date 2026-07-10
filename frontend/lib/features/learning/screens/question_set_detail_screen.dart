@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/question_set.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
+import '../repositories/learning_repository.dart';
 import 'quiz_screen.dart';
 
 class QuestionSetDetailScreen extends StatelessWidget {
@@ -10,12 +11,14 @@ class QuestionSetDetailScreen extends StatelessWidget {
     super.key,
     required this.subject,
     required this.questionSet,
+    required this.learningRepository,
     this.topic,
   });
 
   final Subject subject;
   final QuestionSet questionSet;
   final Topic? topic;
+  final LearningRepository learningRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +97,10 @@ class QuestionSetDetailScreen extends StatelessWidget {
   void _startQuiz(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => QuizScreen(questionSet: questionSet),
+        builder: (context) => QuizScreen(
+          questionSet: questionSet,
+          learningRepository: learningRepository,
+        ),
       ),
     );
   }
