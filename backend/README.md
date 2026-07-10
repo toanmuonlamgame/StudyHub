@@ -51,5 +51,11 @@ The seed uses stable fixture IDs and upserts records in dependency order, so it
 can be run again while the fixture structure is unchanged. It is opt-in and is
 not run by backend tests. The in-memory Learning API remains active.
 
+The backend also includes an unwired `PrismaLearningService` foundation for
+reading Learning data and calculating submitted quiz results through Prisma.
+It maps database rows to the existing API types and removes `isCorrect` from
+pre-submit question data. Current routes still use the in-memory data source,
+so tests and local API development do not require PostgreSQL yet.
+
 Never commit `.env` or real database credentials. `.env.example` contains
 placeholders only.

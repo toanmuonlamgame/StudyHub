@@ -183,8 +183,9 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Complete the mock/in-memory backend Learning API phase.
 - [x] Create the Prisma/PostgreSQL schema and tooling foundation.
 - [x] Add the Prisma seed foundation from the mock Learning data.
+- [x] Add the unwired Prisma-backed Learning service and mapping foundation.
 - [ ] Run the initial migration and seed against local PostgreSQL.
-- [ ] Migrate Learning routes from in-memory data to Prisma incrementally.
+- [ ] Switch Learning read routes from in-memory data to Prisma one by one.
 - [x] Implement the Flutter `ApiLearningRepository` against the mock Learning API.
 
 ## V1 API Checklist
