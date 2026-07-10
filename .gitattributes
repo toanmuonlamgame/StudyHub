@@ -1,0 +1,16 @@
+# Exclude AI/tooling files from GitHub language statistics
+.agents/** linguist-vendored
+.codex/** linguist-vendored
+
+# Exclude generated Flutter platform folders from GitHub language statistics
+frontend/android/** linguist-vendored
+frontend/ios/** linguist-vendored
+frontend/linux/** linguist-vendored
+frontend/macos/** linguist-vendored
+frontend/windows/** linguist-vendored
+
+# Exclude build/cache folders if any are accidentally tracked
+frontend/build/** linguist-vendored
+frontend/.dart_tool/** linguist-vendored
+backend/dist/** linguist-vendored
+backend/node_modules/** linguist-vendored
