@@ -176,7 +176,9 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Add dev, build, start, and typecheck scripts.
 - [x] Add the backend health endpoint.
 - [x] Add an automated Fastify injection test for the health endpoint.
+- [x] Complete the mock/in-memory backend Learning API phase.
 - [ ] Add Prisma and PostgreSQL only in a later approved milestone.
+- [ ] Implement the Flutter `ApiLearningRepository` against the mock Learning API.
 
 ## V1 API Checklist
 - [x] Implement `GET /health`.
