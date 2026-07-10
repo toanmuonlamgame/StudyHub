@@ -171,8 +171,14 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Add an unwired `ApiLearningRepository` skeleton.
 - [ ] Implement `ApiLearningRepository` with the Fastify endpoints when they exist.
 
+## Backend Foundation
+- [x] Create the minimal Node.js, TypeScript, and Fastify backend skeleton.
+- [x] Add dev, build, start, and typecheck scripts.
+- [x] Add the backend health endpoint.
+- [ ] Add Prisma and PostgreSQL only in a later approved milestone.
+
 ## V1 API Checklist
-- [ ] Implement `GET /health`.
+- [x] Implement `GET /health`.
 - [ ] Implement `GET /subjects`.
 - [ ] Implement `GET /topics?subjectId=...`.
 - [ ] Implement `GET /question-sets?subjectId=...&topicId=...`.
