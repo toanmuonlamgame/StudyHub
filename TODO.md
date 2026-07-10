@@ -175,6 +175,7 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Create the minimal Node.js, TypeScript, and Fastify backend skeleton.
 - [x] Add dev, build, start, and typecheck scripts.
 - [x] Add the backend health endpoint.
+- [x] Add an automated Fastify injection test for the health endpoint.
 - [ ] Add Prisma and PostgreSQL only in a later approved milestone.
 
 ## V1 API Checklist
