@@ -34,4 +34,35 @@ void main() {
       expect(await repository.getQuestionSetById('missing'), isNull);
     },
   );
+
+  test('calculates quiz results from selected answer option ids', () async {
+    const repository = MockLearningRepository();
+    final subjects = await repository.getSubjects();
+    final questionSets = await repository.getQuestionSetsBySubjectId(
+      subjects.first.id,
+    );
+    final questionSet = questionSets.first;
+    final questions = await repository.getQuestionsByQuestionSetId(
+      questionSet.id,
+    );
+
+    final selectedAnswerIds = <String, String>{};
+    for (var index = 0; index < questions.length; index++) {
+      final answerOptions = questions[index].answerOptions;
+      selectedAnswerIds[questions[index].id] = index < 2
+          ? answerOptions.firstWhere((option) => option.isCorrect).id
+          : answerOptions.firstWhere((option) => !option.isCorrect).id;
+    }
+
+    final result = await repository.submitQuiz(
+      questionSetId: questionSet.id,
+      selectedAnswerOptionIdsByQuestionId: selectedAnswerIds,
+    );
+
+    expect(result.questionSetId, questionSet.id);
+    expect(result.correctCount, 2);
+    expect(result.wrongCount, 1);
+    expect(result.totalCount, 3);
+    expect(result.percentageScore, closeTo(66.67, 0.01));
+  });
 }

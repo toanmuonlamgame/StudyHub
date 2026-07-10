@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/answer_option.dart';
 import '../models/question.dart';
 import '../models/question_set.dart';
-import '../models/quiz_result.dart';
 import '../repositories/learning_repository.dart';
 import 'quiz_result_screen.dart';
 
@@ -25,6 +24,7 @@ class _QuizScreenState extends State<QuizScreen> {
   final Map<String, String> _selectedAnswerIds = {};
   late Future<List<Question>> _questionsFuture;
   bool _showValidation = false;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -102,9 +102,14 @@ class _QuizScreenState extends State<QuizScreen> {
         ],
         const SizedBox(height: 6),
         FilledButton.icon(
-          onPressed: () => _submitQuiz(questions),
-          icon: const Icon(Icons.check),
-          label: const Text('Submit Quiz'),
+          onPressed: _isSubmitting ? null : () => _submitQuiz(questions),
+          icon: _isSubmitting
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.check),
+          label: Text(_isSubmitting ? 'Submitting...' : 'Submit Quiz'),
           style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
         ),
       ],
@@ -126,12 +131,16 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _selectAnswer(String questionId, String answerOptionId) {
+    if (_isSubmitting) {
+      return;
+    }
+
     setState(() {
       _selectedAnswerIds[questionId] = answerOptionId;
     });
   }
 
-  void _submitQuiz(List<Question> questions) {
+  Future<void> _submitQuiz(List<Question> questions) async {
     if (_selectedAnswerIds.length != questions.length) {
       setState(() {
         _showValidation = true;
@@ -147,38 +156,46 @@ class _QuizScreenState extends State<QuizScreen> {
       return;
     }
 
-    var correctCount = 0;
+    final selectedAnswerIds = Map<String, String>.unmodifiable(
+      _selectedAnswerIds,
+    );
 
-    for (final question in questions) {
-      final selectedAnswerId = _selectedAnswerIds[question.id];
+    setState(() {
+      _isSubmitting = true;
+    });
 
-      for (final answerOption in question.answerOptions) {
-        if (answerOption.id == selectedAnswerId && answerOption.isCorrect) {
-          correctCount++;
-          break;
-        }
+    try {
+      final result = await widget.learningRepository.submitQuiz(
+        questionSetId: widget.questionSet.id,
+        selectedAnswerOptionIdsByQuestionId: selectedAnswerIds,
+      );
+
+      if (!mounted) {
+        return;
       }
-    }
 
-    final totalCount = questions.length;
-    final result = QuizResult(
-      questionSetId: widget.questionSet.id,
-      correctCount: correctCount,
-      wrongCount: totalCount - correctCount,
-      totalCount: totalCount,
-      percentageScore: correctCount / totalCount * 100,
-    );
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (context) => QuizResultScreen(
-          questionSet: widget.questionSet,
-          result: result,
-          questions: questions,
-          selectedAnswerIds: Map.unmodifiable(_selectedAnswerIds),
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (context) => QuizResultScreen(
+            questionSet: widget.questionSet,
+            result: result,
+            questions: questions,
+            selectedAnswerIds: selectedAnswerIds,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Quiz could not be submitted.')),
+      );
+      setState(() {
+        _isSubmitting = false;
+      });
+    }
   }
 }
 

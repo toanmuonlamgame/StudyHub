@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/app/studyhub_app.dart';
 import 'package:frontend/features/learning/models/question.dart';
 import 'package:frontend/features/learning/models/question_set.dart';
+import 'package:frontend/features/learning/models/quiz_result.dart';
 import 'package:frontend/features/learning/repositories/learning_repository.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
 
@@ -33,7 +34,8 @@ void main() {
   testWidgets('submits a quiz and shows score with answer review', (
     WidgetTester tester,
   ) async {
-    await _openJavaScriptBasicsQuiz(tester);
+    final repository = _TrackingSubmitRepository();
+    await _openJavaScriptBasicsQuiz(tester, learningRepository: repository);
 
     await _selectAnswer(tester, 'const');
     await _selectAnswer(tester, '===');
@@ -44,6 +46,8 @@ void main() {
     await tester.tap(submitButton);
     await tester.pumpAndSettle();
 
+    expect(repository.submitCount, 1);
+    expect(repository.submittedAnswerIds, hasLength(3));
     expect(find.text('67%'), findsOneWidget);
     expect(find.text('Correct answers'), findsOneWidget);
 
@@ -157,5 +161,24 @@ class _RetryQuestionRepository extends MockLearningRepository {
     }
 
     return super.getQuestionsByQuestionSetId(id);
+  }
+}
+
+class _TrackingSubmitRepository extends MockLearningRepository {
+  int submitCount = 0;
+  Map<String, String> submittedAnswerIds = const {};
+
+  @override
+  Future<QuizResult> submitQuiz({
+    required String questionSetId,
+    required Map<String, String> selectedAnswerOptionIdsByQuestionId,
+  }) {
+    submitCount++;
+    submittedAnswerIds = selectedAnswerOptionIdsByQuestionId;
+
+    return super.submitQuiz(
+      questionSetId: questionSetId,
+      selectedAnswerOptionIdsByQuestionId: selectedAnswerOptionIdsByQuestionId,
+    );
   }
 }

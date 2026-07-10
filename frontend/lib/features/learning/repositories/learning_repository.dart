@@ -1,5 +1,6 @@
 import '../models/question.dart';
 import '../models/question_set.dart';
+import '../models/quiz_result.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
 
@@ -13,4 +14,9 @@ abstract class LearningRepository {
   Future<QuestionSet?> getQuestionSetById(String id);
 
   Future<List<Question>> getQuestionsByQuestionSetId(String id);
+
+  Future<QuizResult> submitQuiz({
+    required String questionSetId,
+    required Map<String, String> selectedAnswerOptionIdsByQuestionId,
+  });
 }

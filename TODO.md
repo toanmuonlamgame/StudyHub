@@ -156,7 +156,8 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Add `features/learning/repositories/learning_repository.dart`.
 - [x] Add `MockLearningRepository` backed by existing mock data.
 - [ ] Move mock filtering helpers behind `MockLearningRepository`.
-- [ ] Move local mock quiz scoring behind `MockLearningRepository`.
+- [x] Add the `submitQuiz` contract to `LearningRepository`.
+- [x] Move local mock quiz scoring behind `MockLearningRepository`.
 - [x] Make repository operations asynchronous to match future network behavior.
 - [x] Inject the repository from `StudyHubApp` as the composition root.
 - [x] Migrate `SubjectListScreen` to load data through `LearningRepository`.
