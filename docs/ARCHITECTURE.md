@@ -247,8 +247,13 @@ The backend now includes a Prisma schema for PostgreSQL with Subject, Topic,
 QuestionSet, Question, and AnswerOption relations. `AnswerOption.isCorrect`
 is database/internal data and must not appear in pre-submit API responses.
 
-The current Learning API remains in-memory. A later milestone will seed the
-database and migrate routes to Prisma without changing the public API contract.
+The Prisma seed foundation maps the existing mock Learning fixtures into the
+database in dependency order using stable IDs and upserts. Seeding is an opt-in
+local command and is not required by backend tests.
+
+The current Learning API remains in-memory. A later milestone will run the
+initial PostgreSQL migration and then migrate routes to Prisma without changing
+the public API contract.
 
 ## Content Model Notes
 Study Material and Question Set are separate content types.
