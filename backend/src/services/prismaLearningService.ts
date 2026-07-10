@@ -15,14 +15,14 @@ import {
   mapSubject,
   mapTopic,
 } from './learningMappers.js';
+import {
+  InvalidQuizSubmissionError,
+  LearningDataIntegrityError,
+  LearningResourceNotFoundError,
+  type LearningService,
+} from './learningService.js';
 
-export class LearningResourceNotFoundError extends Error {}
-
-export class InvalidQuizSubmissionError extends Error {}
-
-export class LearningDataIntegrityError extends Error {}
-
-export class PrismaLearningService {
+export class PrismaLearningService implements LearningService {
   constructor(private readonly prisma: PrismaClient) {}
 
   async getSubjects(): Promise<Subject[]> {

@@ -251,14 +251,16 @@ The Prisma seed foundation maps the existing mock Learning fixtures into the
 database in dependency order using stable IDs and upserts. Seeding is an opt-in
 local command and is not required by backend tests.
 
-An unwired `PrismaLearningService` provides the future database access boundary.
-It uses explicit mappers instead of returning raw Prisma rows, keeps correctness
-metadata internal before quiz submission, and accepts a Prisma client dependency
-so its behavior can be tested without PostgreSQL.
+Learning routes now depend on a `LearningService` interface. The default
+`InMemoryLearningService` preserves the current local API behavior, while
+`PrismaLearningService` provides the selectable database adapter. Prisma uses
+explicit mappers instead of returning raw rows, keeps correctness metadata
+internal before quiz submission, and accepts a client dependency for tests.
 
-The current Learning API remains in-memory. A later milestone will run the
-initial PostgreSQL migration and then migrate routes to Prisma without changing
-the public API contract.
+The data source defaults to memory and does not create a Prisma client unless
+Prisma is explicitly selected. The next milestone will run the initial local
+PostgreSQL migration and seed, then enable and integration-test the Prisma source
+without changing the public API contract.
 
 ## Content Model Notes
 Study Material and Question Set are separate content types.

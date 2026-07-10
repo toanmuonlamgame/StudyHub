@@ -1,0 +1,25 @@
+import type {
+  Question,
+  QuestionSet,
+  QuizResult,
+  Subject,
+  Topic,
+} from '../types/learning.js';
+
+export interface LearningService {
+  getSubjects(): Promise<Subject[]>;
+  getTopicsBySubjectId(subjectId: string): Promise<Topic[]>;
+  getQuestionSetsBySubjectId(subjectId: string): Promise<QuestionSet[]>;
+  getQuestionSetById(questionSetId: string): Promise<QuestionSet | null>;
+  getQuestionsByQuestionSetId(questionSetId: string): Promise<Question[]>;
+  submitQuiz(
+    questionSetId: string,
+    selectedAnswerOptionIdsByQuestionId: Record<string, string>,
+  ): Promise<QuizResult>;
+}
+
+export class LearningResourceNotFoundError extends Error {}
+
+export class InvalidQuizSubmissionError extends Error {}
+
+export class LearningDataIntegrityError extends Error {}

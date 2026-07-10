@@ -4,10 +4,73 @@ import test from 'node:test';
 import { buildApp } from '../dist/app.js';
 
 function createTestApp(t) {
-  const app = buildApp();
+  const app = buildApp({ learningDataSource: 'memory' });
   t.after(() => app.close());
   return app;
 }
+
+test('buildApp defaults to in-memory data without PostgreSQL', async (t) => {
+  const previousDataSource = process.env.STUDYHUB_LEARNING_DATA_SOURCE;
+  const previousDatabaseUrl = process.env.DATABASE_URL;
+  delete process.env.STUDYHUB_LEARNING_DATA_SOURCE;
+  delete process.env.DATABASE_URL;
+
+  try {
+    const app = buildApp();
+    t.after(() => app.close());
+    const response = await app.inject({
+      method: 'GET',
+      url: '/learning/subjects',
+    });
+
+    assert.equal(response.statusCode, 200);
+  } finally {
+    if (previousDataSource !== undefined) {
+      process.env.STUDYHUB_LEARNING_DATA_SOURCE = previousDataSource;
+    }
+    if (previousDatabaseUrl !== undefined) {
+      process.env.DATABASE_URL = previousDatabaseUrl;
+    }
+  }
+});
+
+test('buildApp accepts an injected LearningService', async (t) => {
+  const learningService = {
+    getSubjects: async () => [{ id: 'injected', name: 'Injected Subject' }],
+    getTopicsBySubjectId: async () => [],
+    getQuestionSetsBySubjectId: async () => [],
+    getQuestionSetById: async () => null,
+    getQuestionsByQuestionSetId: async () => [],
+    submitQuiz: async () => {
+      throw new Error('Not used by this test.');
+    },
+  };
+  const app = buildApp({ learningService });
+  t.after(() => app.close());
+  const response = await app.inject({
+    method: 'GET',
+    url: '/learning/subjects',
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.json().subjects[0].id, 'injected');
+});
+
+test('prisma data source requires DATABASE_URL', () => {
+  const previousDatabaseUrl = process.env.DATABASE_URL;
+  delete process.env.DATABASE_URL;
+
+  try {
+    assert.throws(
+      () => buildApp({ learningDataSource: 'prisma' }),
+      /requires DATABASE_URL/,
+    );
+  } finally {
+    if (previousDatabaseUrl !== undefined) {
+      process.env.DATABASE_URL = previousDatabaseUrl;
+    }
+  }
+});
 
 test('GET /learning/subjects returns subjects', async (t) => {
   const app = createTestApp(t);
