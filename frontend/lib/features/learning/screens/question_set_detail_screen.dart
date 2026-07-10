@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/question_set.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
+import 'quiz_screen.dart';
 
 class QuestionSetDetailScreen extends StatelessWidget {
   const QuestionSetDetailScreen({
@@ -77,7 +78,7 @@ class QuestionSetDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             FilledButton.icon(
-              onPressed: () => _showQuizPlaceholder(context),
+              onPressed: () => _startQuiz(context),
               icon: const Icon(Icons.play_arrow),
               label: const Text('Start Quiz'),
               style: FilledButton.styleFrom(
@@ -90,12 +91,10 @@ class QuestionSetDetailScreen extends StatelessWidget {
     );
   }
 
-  void _showQuizPlaceholder(BuildContext context) {
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(
-      const SnackBar(
-        content: Text('Quiz flow will be added in the next step.'),
+  void _startQuiz(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => QuizScreen(questionSet: questionSet),
       ),
     );
   }
