@@ -34,3 +34,15 @@ POST /learning/question-sets/:questionSetId/submit
 Question responses omit correctness metadata. Submit scoring uses a private in-memory answer key.
 
 Run all backend tests with `npm test`.
+
+## Prisma foundation
+
+The Prisma schema targets PostgreSQL, but the Learning API still uses in-memory
+data. Existing development and tests do not require a running database.
+
+1. Copy `.env.example` to a local `.env`.
+2. Replace the placeholder `DATABASE_URL` with local PostgreSQL credentials.
+3. Run `npm run prisma:generate`.
+4. When a database is available, run `npm run prisma:migrate -- --name init`.
+
+Never commit `.env` or real database credentials.

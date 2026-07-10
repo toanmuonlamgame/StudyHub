@@ -181,7 +181,9 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Add the backend health endpoint.
 - [x] Add an automated Fastify injection test for the health endpoint.
 - [x] Complete the mock/in-memory backend Learning API phase.
-- [ ] Next: create the Prisma/PostgreSQL foundation.
+- [x] Create the Prisma/PostgreSQL schema and tooling foundation.
+- [ ] Add seed data for the initial Learning domain.
+- [ ] Migrate Learning routes from in-memory data to Prisma incrementally.
 - [x] Implement the Flutter `ApiLearningRepository` against the mock Learning API.
 
 ## V1 API Checklist

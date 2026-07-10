@@ -242,6 +242,14 @@ GET /taxonomy
 - QuizAttemptAnswer
 - StudyMaterialUpload
 
+## Persistence Foundation
+The backend now includes a Prisma schema for PostgreSQL with Subject, Topic,
+QuestionSet, Question, and AnswerOption relations. `AnswerOption.isCorrect`
+is database/internal data and must not appear in pre-submit API responses.
+
+The current Learning API remains in-memory. A later milestone will seed the
+database and migrate routes to Prisma without changing the public API contract.
+
 ## Content Model Notes
 Study Material and Question Set are separate content types.
 
