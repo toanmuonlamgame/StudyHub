@@ -176,6 +176,38 @@ Reason:
 - The model stays small while leaving room for future Study Material, moderation, credits, unlocks, and AI-generated question workflows.
 - Keeping the model explicit helps implementation stay simple and portfolio-readable.
 
+## 2026-07-10 - V1 API Boundaries
+Decision: Use a small V1 backend API surface for taxonomy, Question Sets, quiz attempts, quiz results, and study material upload placeholders.
+
+V1 endpoints:
+```text
+GET  /health
+GET  /subjects
+GET  /topics?subjectId=sub_1
+GET  /question-sets?subjectId=sub_1&topicId=topic_1
+GET  /question-sets/:id
+POST /quiz-attempts
+POST /quiz-attempts/:attemptId/submit
+GET  /quiz-attempts/:attemptId/result
+POST /study-material-uploads
+```
+
+Reason:
+- This keeps the API focused on the confirmed V1 scope.
+- The two-step quiz attempt flow supports future in-progress attempts and quiz history.
+- `POST /study-material-uploads` is clearer than a generic `/uploads` endpoint because V1 upload is a Study Material metadata placeholder.
+- The API follows the security boundary: Flutter App -> Backend API -> Database.
+
+Rules:
+- `GET /question-sets/:id` returns questions and answer options only.
+- `GET /question-sets/:id` must not return `isCorrect` or `correctAnswerOptionId`.
+- Correct answers are only returned after quiz submission through the result endpoint.
+- Backend calculates score; Flutter does not send score.
+- Flutter does not send a trusted userId.
+- V1 uses local/demo auth, but the API shape should prepare for real backend auth later.
+- QuestionSet and StudyMaterialUpload should include simple status fields such as `draft`, `published`, `pending_review`, and `rejected`.
+- `GET /taxonomy` is optional for V1 if Flutter needs a combined subject/topic loading endpoint.
+
 ## 2026-07-09 - Frontend Stack
 Decision: Use Flutter / Dart for the frontend.
 

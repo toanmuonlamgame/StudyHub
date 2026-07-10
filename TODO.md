@@ -69,12 +69,26 @@ Foundation / planning.
 
 ## Near-Term Tasks
 - [ ] Decide deployment target.
-- [ ] Define V1 API boundaries using the security rules in ReadBeforeWork.md.
+- [x] Define V1 API boundaries using the security rules in ReadBeforeWork.md.
 - [ ] Create first milestone implementation checklist.
 - [ ] Learn JavaScript fundamentals needed for the StudyHub backend.
 - [ ] Learn TypeScript fundamentals needed for the StudyHub backend.
 - [ ] Learn Fastify basics for routing, validation, and plugins.
 - [ ] Learn Prisma basics for schema, migrations, and PostgreSQL queries.
+
+## V1 API Checklist
+- [ ] Implement `GET /health`.
+- [ ] Implement `GET /subjects`.
+- [ ] Implement `GET /topics?subjectId=...`.
+- [ ] Implement `GET /question-sets?subjectId=...&topicId=...`.
+- [ ] Implement `GET /question-sets/:id` without exposing `isCorrect` or `correctAnswerOptionId`.
+- [ ] Implement `POST /quiz-attempts`.
+- [ ] Implement `POST /quiz-attempts/:attemptId/submit`.
+- [ ] Implement `GET /quiz-attempts/:attemptId/result`.
+- [ ] Implement `POST /study-material-uploads` as metadata placeholder.
+- [ ] Ensure backend calculates quiz score.
+- [ ] Ensure Flutter does not send trusted `score` or `userId`.
+- [ ] Consider optional `GET /taxonomy` only if Flutter screen loading needs it.
 
 ## Roadmap
 ### V1 - Core Learning Flow

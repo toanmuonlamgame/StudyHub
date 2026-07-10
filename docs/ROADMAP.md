@@ -48,9 +48,18 @@ V1 is the first usable demo milestone.
 - Full admin dashboard.
 
 ### V1 Checklist
-- [ ] Choose Node.js API framework.
-- [ ] Choose PostgreSQL access layer / ORM.
-- [ ] Define V1 API boundaries using the security rules.
+- [x] Choose Node.js API framework: Fastify.
+- [x] Choose PostgreSQL access layer / ORM: Prisma.
+- [x] Define V1 API boundaries using the security rules.
+- [ ] Implement `GET /health`.
+- [ ] Implement `GET /subjects`.
+- [ ] Implement `GET /topics?subjectId=...`.
+- [ ] Implement `GET /question-sets?subjectId=...&topicId=...`.
+- [ ] Implement `GET /question-sets/:id` without exposing correct answers.
+- [ ] Implement `POST /quiz-attempts`.
+- [ ] Implement `POST /quiz-attempts/:attemptId/submit`.
+- [ ] Implement `GET /quiz-attempts/:attemptId/result`.
+- [ ] Implement `POST /study-material-uploads` as metadata placeholder.
 - [ ] Implement basic taxonomy with required Subject.
 - [ ] Support optional topic filtering.
 - [ ] Implement Question Set browsing.
