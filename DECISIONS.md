@@ -294,6 +294,39 @@ Secrets rule:
 - Secrets must not be embedded in the Flutter app.
 - Use environment variables or a proper secret management approach for backend/runtime secrets.
 
+## 2026-07-10 - Frontend Learning Repository Seam
+Decision: Add a `LearningRepository` seam between Flutter learning screens and concrete data sources before backend integration.
+
+Reason:
+- `SubjectListScreen`, `QuestionSetListScreen`, and `QuizScreen` currently depend directly on mock data.
+- Mock data and the future backend API are two real adapters with different loading, error, and scoring behavior.
+- A small repository interface lets the data source change without rewriting screen layout or navigation.
+- Constructor injection keeps the seam testable without adding state-management or dependency-injection packages.
+
+Target structure:
+```text
+features/learning/
+├── models/
+├── data/
+├── repositories/
+└── screens/
+```
+
+Rules:
+- Keep the current models, screens, and `mock_learning_data.dart`.
+- Screens should eventually depend on the `LearningRepository` interface, not import mock data directly.
+- `StudyHubApp` should act as the composition root and inject the selected repository adapter.
+- Start with `MockLearningRepository`; add `ApiLearningRepository` only when backend APIs exist.
+- Repository methods should be asynchronous so mock and API adapters use the same interface.
+- Do not add a state-management or dependency-injection package for this migration.
+- Keep mock filtering and local mock scoring inside `MockLearningRepository`.
+
+Quiz safety rule:
+- `AnswerOption.isCorrect` is local mock-only correctness metadata.
+- A real pre-submit API response must not expose `isCorrect` or a correct answer ID.
+- Before API integration, separate safe pre-submit answer options from post-submit answer review data.
+- The backend must calculate the authoritative score and return review data only after submission.
+
 ## Pending Decisions
 - Deployment target:
 - Moderation approach for uploaded content:

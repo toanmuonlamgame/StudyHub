@@ -58,6 +58,95 @@ V1 should support:
 
 Real authentication is deferred to the backend phase, but V1 should still avoid patterns that conflict with the security boundary.
 
+## Frontend Learning Repository Seam
+The current Flutter folder structure is suitable for V1 and does not need a broad rewrite.
+
+```text
+frontend/lib/
+├── app/                         # App composition and top-level wiring
+├── core/                        # Shared theme and future cross-feature utilities
+└── features/
+    ├── home_placeholder.dart    # Current Home screen; rename can wait
+    └── learning/
+        ├── models/              # Learning data used by the UI
+        ├── data/                # Mock constants now; remote data source later
+        ├── repositories/        # Repository interface and adapters
+        └── screens/             # Learning UI and navigation
+```
+
+Keep the existing models, screens, and `mock_learning_data.dart`. Add `repositories/` only when implementing the migration. Renaming or moving Home is optional cleanup and is not required for backend integration.
+
+### Current Dependency Risk
+The repository migration has started. `SubjectListScreen` now loads subjects through `LearningRepository`, while these screens still depend directly on `mock_learning_data.dart`:
+
+- `QuestionSetListScreen`
+- `QuizScreen`
+
+The remaining direct dependencies still spread lookup and local quiz submission behavior into the UI. They should move behind the same repository seam incrementally.
+
+Current migration status:
+
+- `LearningRepository` defines asynchronous read operations for Subjects, Topics, Question Sets, and Questions.
+- `MockLearningRepository` adapts the existing mock data to that interface.
+- `StudyHubApp` selects the mock adapter and passes it through Home.
+- `SubjectListScreen` supports repository loading, error, retry, and empty states.
+- Question Set and Quiz screens are intentionally not migrated yet.
+
+### Target Dependency Direction
+Use a repository seam so screens depend on one small interface instead of a concrete data source.
+
+```text
+StudyHubApp composition root
+            |
+            v
+Learning screens -> LearningRepository -> MockLearningRepository -> Mock data
+                                      \-> ApiLearningRepository  -> API service
+```
+
+Rules:
+
+- Learning models do not import screens, repositories, or data sources.
+- Screens import models, peer screens, and the `LearningRepository` interface only.
+- Screens must not import `mock_learning_data.dart` after the repository migration.
+- Mock and API repository adapters may import their own data sources.
+- `StudyHubApp` is the composition root that chooses and injects the active adapter.
+- Use constructor injection; do not add a state-management or dependency-injection package for this seam.
+
+### Repository Interface Direction
+The future repository interface should express user-facing learning operations, not expose raw lists or transport details. A conceptual shape is:
+
+```text
+LearningRepository
+- getSubjects()
+- getTopicsBySubjectId(subjectId)
+- getQuestionSetsBySubjectId(subjectId)
+- getQuestionsByQuestionSetId(questionSetId)
+- submitQuiz(questionSetId, selectedAnswerIds)
+```
+
+Repository operations should return `Future` values from the start so the mock adapter and API adapter share the same interface. The mock adapter can return local values immediately through `Future.value`. Screens can use simple Flutter loading/error state without a new package.
+
+### Quiz Answer Safety
+The current `AnswerOption.isCorrect` field is acceptable only inside the local mock implementation. It must not become part of the pre-submit API response model.
+
+Before API integration:
+
+- Pre-submit question options should expose only safe fields such as `id` and `text`.
+- Correctness metadata should stay private to `MockLearningRepository` for local scoring.
+- `ApiLearningRepository.submitQuiz(...)` should send selected option IDs to the backend.
+- The backend should calculate the authoritative score and return result/review data after submission.
+- Result review should use a dedicated post-submit result shape instead of reading hidden correctness data from pre-submit questions.
+
+### Incremental Migration
+1. Add the `LearningRepository` interface and `MockLearningRepository` adapter.
+2. Move mock filtering and local quiz scoring behind the mock adapter while keeping `mock_learning_data.dart` as raw fixture data.
+3. Inject the repository from `StudyHubApp` through existing screen constructors.
+4. Replace direct mock imports in one screen at a time, preserving current widget tests.
+5. Separate pre-submit answer options from post-submit answer review data.
+6. Add the API service and `ApiLearningRepository` only when the backend endpoints are available.
+
+This sequence changes the data source without rewriting screen layout or navigation.
+
 ## V1 API Boundaries
 API means backend code written for Flutter to call. It is not a programming language and not a third-party service.
 

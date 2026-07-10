@@ -149,6 +149,24 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Keep Flutter separate from the future database; later integration must use Backend APIs.
 - [ ] Keep the structure simple and avoid abstractions that the mock flow does not need.
 
+## Frontend Repository Migration Checklist
+- [x] Review current Flutter folder structure and learning dependencies.
+- [x] Decide on a `LearningRepository` seam with mock and API adapters.
+- [x] Decide to use constructor injection without a new package.
+- [x] Add `features/learning/repositories/learning_repository.dart`.
+- [x] Add `MockLearningRepository` backed by existing mock data.
+- [ ] Move mock filtering helpers behind `MockLearningRepository`.
+- [ ] Move local mock quiz scoring behind `MockLearningRepository`.
+- [x] Make repository operations asynchronous to match future network behavior.
+- [x] Inject the repository from `StudyHubApp` as the composition root.
+- [x] Migrate `SubjectListScreen` to load data through `LearningRepository`.
+- [ ] Remove direct mock-data imports from learning screens one screen at a time.
+- [ ] Add simple loading and error states using Flutter SDK tools only.
+- [ ] Separate safe pre-submit answer options from mock-only correctness metadata.
+- [ ] Define post-submit answer review data returned by `submitQuiz`.
+- [x] Add repository contract tests using the mock adapter.
+- [ ] Add an API service and `ApiLearningRepository` only when backend endpoints exist.
+
 ## V1 API Checklist
 - [ ] Implement `GET /health`.
 - [ ] Implement `GET /subjects`.
