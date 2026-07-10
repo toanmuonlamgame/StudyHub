@@ -171,6 +171,9 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Add an unwired `ApiLearningRepository` skeleton.
 - [x] Implement `ApiLearningRepository` against the mock Fastify Learning API.
 - [x] Keep mock as default and add non-secret `dart-define` API mode.
+- [x] Pass the Flutter API mode smoke test on a real device over LAN.
+- Tested real-device backend base URL: `http://192.168.1.12:3000`.
+- Android emulator backend base URL: `http://10.0.2.2:3000`.
 
 ## Backend Foundation
 - [x] Create the minimal Node.js, TypeScript, and Fastify backend skeleton.
@@ -178,7 +181,7 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Add the backend health endpoint.
 - [x] Add an automated Fastify injection test for the health endpoint.
 - [x] Complete the mock/in-memory backend Learning API phase.
-- [ ] Add Prisma and PostgreSQL only in a later approved milestone.
+- [ ] Next: create the Prisma/PostgreSQL foundation.
 - [x] Implement the Flutter `ApiLearningRepository` against the mock Learning API.
 
 ## V1 API Checklist
