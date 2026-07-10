@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/mock_learning_data.dart';
 import '../models/subject.dart';
+import 'question_set_list_screen.dart';
 
 class SubjectListScreen extends StatelessWidget {
   const SubjectListScreen({super.key, this.subjects = mockSubjects});
@@ -39,7 +40,7 @@ class SubjectListScreen extends StatelessWidget {
   void _openSubject(BuildContext context, Subject subject) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => _QuestionSetPlaceholderScreen(subject: subject),
+        builder: (context) => QuestionSetListScreen(subject: subject),
       ),
     );
   }
@@ -174,54 +175,6 @@ class _EmptySubjects extends StatelessWidget {
         child: Text(
           'No subjects are available yet.',
           textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-}
-
-class _QuestionSetPlaceholderScreen extends StatelessWidget {
-  const _QuestionSetPlaceholderScreen({required this.subject});
-
-  final Subject subject;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Question Sets')),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.quiz_outlined,
-                  color: theme.colorScheme.primary,
-                  size: 44,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  subject.name,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Question set browsing will be added in the next step.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
