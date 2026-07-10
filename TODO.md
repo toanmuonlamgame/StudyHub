@@ -70,11 +70,84 @@ Foundation / planning.
 ## Near-Term Tasks
 - [ ] Decide deployment target.
 - [x] Define V1 API boundaries using the security rules in ReadBeforeWork.md.
-- [ ] Create first milestone implementation checklist.
+- [x] Create first milestone implementation checklist.
 - [ ] Learn JavaScript fundamentals needed for the StudyHub backend.
 - [ ] Learn TypeScript fundamentals needed for the StudyHub backend.
 - [ ] Learn Fastify basics for routing, validation, and plugins.
 - [ ] Learn Prisma basics for schema, migrations, and PostgreSQL queries.
+
+## Frontend V1 Mock Learning Flow Checklist
+Build this frontend-only mock flow in small, reviewable commits. Keep data local so the UI flow can be proven before backend integration.
+
+### Commit 1 - Define Mock Models
+- [ ] Define a minimal immutable `Subject` model.
+- [ ] Define a minimal immutable `Topic` model with a Subject relationship.
+- [ ] Define a minimal immutable `QuestionSet` model with required Subject and optional Topic.
+- [ ] Define a minimal immutable `Question` model.
+- [ ] Define a minimal immutable `AnswerOption` model.
+- [ ] Define a minimal immutable `QuizResult` model with correct count, wrong count, percentage score, and answer review data.
+- [ ] Keep model fields limited to what the mock learning flow uses.
+- [ ] Run `flutter analyze` and relevant tests before commit.
+
+### Commit 2 - Add Mock Learning Data
+- [ ] Add 2-3 mock Subjects.
+- [ ] Add 1-2 mock Question Sets for each Subject.
+- [ ] Add a few multiple-choice Questions to each Question Set.
+- [ ] Give each Question several Answer Options with one correct option.
+- [ ] Include optional Topic data where useful without requiring it.
+- [ ] Add tests that verify mock data relationships and required fields.
+- [ ] Run `flutter analyze` and relevant tests before commit.
+
+### Commit 3 - Home And Subject List
+- [ ] Update Home to provide a clear entry into the mock learning flow.
+- [ ] Add a Subject list screen using mock Subjects.
+- [ ] Show simple empty-state handling even though initial mock data is present.
+- [ ] Add widget tests for Home and Subject list rendering.
+- [ ] Run `flutter analyze` and relevant tests before commit.
+
+### Commit 4 - Question Set Browsing
+- [ ] Add a Question Set list screen filtered by the selected Subject.
+- [ ] Show optional Topic metadata only when it exists.
+- [ ] Add a Question Set detail screen with title, subject/topic metadata, and question count.
+- [ ] Do not expose correct answers on the detail screen.
+- [ ] Add widget tests for Question Set list and detail rendering.
+- [ ] Run `flutter analyze` and relevant tests before commit.
+
+### Commit 5 - Simple Quiz Screen
+- [ ] Add a Quiz screen for one mock Question Set.
+- [ ] Display each question with multiple-choice Answer Options.
+- [ ] Store selected answers in local screen state only.
+- [ ] Require an answer for each question before submission, with simple user feedback.
+- [ ] Calculate the mock result locally only for this frontend phase.
+- [ ] Add widget tests for selecting answers and submitting a quiz.
+- [ ] Run `flutter analyze` and relevant tests before commit.
+
+### Commit 6 - Result Screen
+- [ ] Add a Result screen driven by `QuizResult`.
+- [ ] Show correct count, wrong count, and percentage score.
+- [ ] Show the correct answers and the user's selected answers.
+- [ ] Add a simple action to return to the learning flow.
+- [ ] Add widget tests for score summary and answer review.
+- [ ] Run `flutter analyze` and relevant tests before commit.
+
+### Commit 7 - Complete Mock Navigation
+- [ ] Connect Home -> Subjects.
+- [ ] Connect Subjects -> Question Sets.
+- [ ] Connect Question Sets -> Question Set Detail.
+- [ ] Connect Question Set Detail -> Quiz.
+- [ ] Connect Quiz -> Result.
+- [ ] Verify back navigation does not lose the selected Subject or Question Set unexpectedly.
+- [ ] Add a widget test covering the full mock learning path.
+- [ ] Run `flutter analyze` and `flutter test` before commit.
+
+### Frontend Mock Flow Constraints
+- [ ] Do not connect to a backend yet.
+- [ ] Do not implement real authentication.
+- [ ] Do not implement real file upload; keep upload as a placeholder only.
+- [ ] Do not implement Study Credits or any credit economy behavior.
+- [ ] Do not add packages unless explicitly approved.
+- [ ] Keep Flutter separate from the future database; later integration must use Backend APIs.
+- [ ] Keep the structure simple and avoid abstractions that the mock flow does not need.
 
 ## V1 API Checklist
 - [ ] Implement `GET /health`.
