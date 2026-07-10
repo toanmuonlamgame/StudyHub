@@ -168,7 +168,8 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Harden the Exam Mode foundation and result-review contract.
 - [ ] Design Practice Mode and a `checkAnswer` contract after Exam Mode is stable.
 - [x] Add repository contract tests using the mock adapter.
-- [ ] Add an API service and `ApiLearningRepository` only when backend endpoints exist.
+- [x] Add an unwired `ApiLearningRepository` skeleton.
+- [ ] Implement `ApiLearningRepository` with the Fastify endpoints when they exist.
 
 ## V1 API Checklist
 - [ ] Implement `GET /health`.

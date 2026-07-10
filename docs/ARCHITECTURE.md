@@ -145,7 +145,7 @@ This is the foundation for Exam Mode, where correctness is revealed only after t
 3. Inject the repository from `StudyHubApp` through existing screen constructors.
 4. Replace direct mock imports in one screen at a time, preserving current widget tests.
 5. Separate pre-submit answer options from post-submit answer review data.
-6. Add the API service and `ApiLearningRepository` only when the backend endpoints are available.
+6. Keep `ApiLearningRepository` as an unwired skeleton until the backend endpoints are available, then add the API service and implement the adapter.
 
 This sequence changes the data source without rewriting screen layout or navigation.
 
