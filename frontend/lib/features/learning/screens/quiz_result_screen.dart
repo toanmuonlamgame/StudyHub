@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../models/answer_option.dart';
+import '../models/question.dart';
 import '../models/question_set.dart';
 import '../models/quiz_result.dart';
 
@@ -8,10 +10,14 @@ class QuizResultScreen extends StatelessWidget {
     super.key,
     required this.questionSet,
     required this.result,
+    required this.questions,
+    required this.selectedAnswerIds,
   });
 
   final QuestionSet questionSet;
   final QuizResult result;
+  final List<Question> questions;
+  final Map<String, String> selectedAnswerIds;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +76,23 @@ class QuizResultScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
+            Text(
+              'Answer review',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (var index = 0; index < questions.length; index++) ...[
+              _AnswerReviewCard(
+                key: ValueKey(questions[index].id),
+                question: questions[index],
+                questionNumber: index + 1,
+                selectedAnswerId: selectedAnswerIds[questions[index].id],
+              ),
+              const SizedBox(height: 12),
+            ],
+            const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: () => Navigator.of(context).pop(),
               icon: const Icon(Icons.arrow_back),
@@ -82,6 +105,104 @@ class QuizResultScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _AnswerReviewCard extends StatelessWidget {
+  const _AnswerReviewCard({
+    super.key,
+    required this.question,
+    required this.questionNumber,
+    required this.selectedAnswerId,
+  });
+
+  final Question question;
+  final int questionNumber;
+  final String? selectedAnswerId;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final selectedAnswer = _findAnswerById(selectedAnswerId);
+    final correctAnswer = _findCorrectAnswer();
+    final isCorrect = selectedAnswer?.isCorrect ?? false;
+    final statusColor = isCorrect
+        ? theme.colorScheme.primary
+        : theme.colorScheme.error;
+
+    return Card(
+      color: theme.colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  isCorrect
+                      ? Icons.check_circle_outline
+                      : Icons.cancel_outlined,
+                  color: statusColor,
+                  size: 22,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Question $questionNumber',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Text(
+                  isCorrect ? 'Correct' : 'Incorrect',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              question.text,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text('Your answer: ${selectedAnswer?.text ?? 'Not answered'}'),
+            const SizedBox(height: 6),
+            Text('Correct answer: ${correctAnswer?.text ?? 'Unavailable'}'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  AnswerOption? _findAnswerById(String? answerOptionId) {
+    if (answerOptionId == null) {
+      return null;
+    }
+
+    for (final answerOption in question.answerOptions) {
+      if (answerOption.id == answerOptionId) {
+        return answerOption;
+      }
+    }
+
+    return null;
+  }
+
+  AnswerOption? _findCorrectAnswer() {
+    for (final answerOption in question.answerOptions) {
+      if (answerOption.isCorrect) {
+        return answerOption;
+      }
+    }
+
+    return null;
   }
 }
 

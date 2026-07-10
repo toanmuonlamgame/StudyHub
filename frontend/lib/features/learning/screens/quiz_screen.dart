@@ -135,8 +135,12 @@ class _QuizScreenState extends State<QuizScreen> {
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (context) =>
-            QuizResultScreen(questionSet: widget.questionSet, result: result),
+        builder: (context) => QuizResultScreen(
+          questionSet: widget.questionSet,
+          result: result,
+          questions: _questions,
+          selectedAnswerIds: Map.unmodifiable(_selectedAnswerIds),
+        ),
       ),
     );
   }
