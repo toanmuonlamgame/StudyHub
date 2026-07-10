@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:frontend/features/learning/models/answer_option.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
 
 void main() {
@@ -35,6 +36,30 @@ void main() {
     },
   );
 
+  test('returns quiz-safe answer options before submission', () async {
+    const repository = MockLearningRepository();
+    const publicAnswerOption = AnswerOption(id: 'option_1', text: 'Option 1');
+    final subjects = await repository.getSubjects();
+    final questionSets = await repository.getQuestionSetsBySubjectId(
+      subjects.first.id,
+    );
+    final questions = await repository.getQuestionsByQuestionSetId(
+      questionSets.first.id,
+    );
+
+    expect(publicAnswerOption.id, 'option_1');
+    expect(publicAnswerOption.text, 'Option 1');
+    expect(questions, isNotEmpty);
+    expect(
+      questions.expand((question) => question.answerOptions),
+      everyElement(
+        isA<AnswerOption>()
+            .having((option) => option.id, 'id', isNotEmpty)
+            .having((option) => option.text, 'text', isNotEmpty),
+      ),
+    );
+  });
+
   test('calculates quiz results from selected answer option ids', () async {
     const repository = MockLearningRepository();
     final subjects = await repository.getSubjects();
@@ -46,13 +71,11 @@ void main() {
       questionSet.id,
     );
 
-    final selectedAnswerIds = <String, String>{};
-    for (var index = 0; index < questions.length; index++) {
-      final answerOptions = questions[index].answerOptions;
-      selectedAnswerIds[questions[index].id] = index < 2
-          ? answerOptions.firstWhere((option) => option.isCorrect).id
-          : answerOptions.firstWhere((option) => !option.isCorrect).id;
-    }
+    final selectedAnswerIds = <String, String>{
+      questions[0].id: 'js_b1_b',
+      questions[1].id: 'js_b2_b',
+      questions[2].id: 'js_b3_c',
+    };
 
     final result = await repository.submitQuiz(
       questionSetId: questionSet.id,
@@ -60,9 +83,16 @@ void main() {
     );
 
     expect(result.questionSetId, questionSet.id);
+    expect(result.questionSetTitle, questionSet.title);
     expect(result.correctCount, 2);
     expect(result.wrongCount, 1);
     expect(result.totalCount, 3);
     expect(result.percentageScore, closeTo(66.67, 0.01));
+    expect(result.answerReviews, hasLength(3));
+    expect(result.answerReviews.first.questionId, questions.first.id);
+    expect(result.answerReviews.first.selectedAnswerText, 'const');
+    expect(result.answerReviews.first.correctAnswerText, 'let');
+    expect(result.answerReviews.first.isCorrect, isFalse);
+    expect(result.answerReviews[1].isCorrect, isTrue);
   });
 }

@@ -1,11 +1,6 @@
 class AnswerOption {
-  const AnswerOption({
-    required this.id,
-    required this.text,
-    required this.isCorrect,
-  });
+  const AnswerOption({required this.id, required this.text});
 
   final String id;
   final String text;
-  final bool isCorrect;
 }

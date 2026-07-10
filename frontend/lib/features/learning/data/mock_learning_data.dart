@@ -96,10 +96,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_js_basics',
     text: 'Which keyword declares a block-scoped variable that can change?',
     answerOptions: [
-      AnswerOption(id: 'js_b1_a', text: 'var', isCorrect: false),
-      AnswerOption(id: 'js_b1_b', text: 'const', isCorrect: false),
-      AnswerOption(id: 'js_b1_c', text: 'let', isCorrect: true),
-      AnswerOption(id: 'js_b1_d', text: 'static', isCorrect: false),
+      AnswerOption(id: 'js_b1_a', text: 'var'),
+      AnswerOption(id: 'js_b1_b', text: 'const'),
+      AnswerOption(id: 'js_b1_c', text: 'let'),
+      AnswerOption(id: 'js_b1_d', text: 'static'),
     ],
   ),
   Question(
@@ -107,10 +107,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_js_basics',
     text: 'Which operator checks value and type equality?',
     answerOptions: [
-      AnswerOption(id: 'js_b2_a', text: '==', isCorrect: false),
-      AnswerOption(id: 'js_b2_b', text: '===', isCorrect: true),
-      AnswerOption(id: 'js_b2_c', text: '=', isCorrect: false),
-      AnswerOption(id: 'js_b2_d', text: '!=', isCorrect: false),
+      AnswerOption(id: 'js_b2_a', text: '=='),
+      AnswerOption(id: 'js_b2_b', text: '==='),
+      AnswerOption(id: 'js_b2_c', text: '='),
+      AnswerOption(id: 'js_b2_d', text: '!='),
     ],
   ),
   Question(
@@ -118,10 +118,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_js_basics',
     text: 'Which array method adds an item to the end?',
     answerOptions: [
-      AnswerOption(id: 'js_b3_a', text: 'pop', isCorrect: false),
-      AnswerOption(id: 'js_b3_b', text: 'shift', isCorrect: false),
-      AnswerOption(id: 'js_b3_c', text: 'push', isCorrect: true),
-      AnswerOption(id: 'js_b3_d', text: 'slice', isCorrect: false),
+      AnswerOption(id: 'js_b3_a', text: 'pop'),
+      AnswerOption(id: 'js_b3_b', text: 'shift'),
+      AnswerOption(id: 'js_b3_c', text: 'push'),
+      AnswerOption(id: 'js_b3_d', text: 'slice'),
     ],
   ),
   Question(
@@ -129,10 +129,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_js_functions',
     text: 'Which example is a valid arrow function?',
     answerOptions: [
-      AnswerOption(id: 'js_f1_a', text: '(a, b) => a + b', isCorrect: true),
-      AnswerOption(id: 'js_f1_b', text: '(a, b) -> a + b', isCorrect: false),
-      AnswerOption(id: 'js_f1_c', text: 'function => (a, b)', isCorrect: false),
-      AnswerOption(id: 'js_f1_d', text: 'arrow(a, b): a + b', isCorrect: false),
+      AnswerOption(id: 'js_f1_a', text: '(a, b) => a + b'),
+      AnswerOption(id: 'js_f1_b', text: '(a, b) -> a + b'),
+      AnswerOption(id: 'js_f1_c', text: 'function => (a, b)'),
+      AnswerOption(id: 'js_f1_d', text: 'arrow(a, b): a + b'),
     ],
   ),
   Question(
@@ -140,10 +140,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_js_functions',
     text: 'What does a function return when no value is returned?',
     answerOptions: [
-      AnswerOption(id: 'js_f2_a', text: 'null', isCorrect: false),
-      AnswerOption(id: 'js_f2_b', text: 'false', isCorrect: false),
-      AnswerOption(id: 'js_f2_c', text: '0', isCorrect: false),
-      AnswerOption(id: 'js_f2_d', text: 'undefined', isCorrect: true),
+      AnswerOption(id: 'js_f2_a', text: 'null'),
+      AnswerOption(id: 'js_f2_b', text: 'false'),
+      AnswerOption(id: 'js_f2_c', text: '0'),
+      AnswerOption(id: 'js_f2_d', text: 'undefined'),
     ],
   ),
   Question(
@@ -151,18 +151,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_js_functions',
     text: 'What are function parameters used for?',
     answerOptions: [
-      AnswerOption(
-        id: 'js_f3_a',
-        text: 'Receiving input values',
-        isCorrect: true,
-      ),
-      AnswerOption(id: 'js_f3_b', text: 'Naming files', isCorrect: false),
-      AnswerOption(
-        id: 'js_f3_c',
-        text: 'Installing packages',
-        isCorrect: false,
-      ),
-      AnswerOption(id: 'js_f3_d', text: 'Creating databases', isCorrect: false),
+      AnswerOption(id: 'js_f3_a', text: 'Receiving input values'),
+      AnswerOption(id: 'js_f3_b', text: 'Naming files'),
+      AnswerOption(id: 'js_f3_c', text: 'Installing packages'),
+      AnswerOption(id: 'js_f3_d', text: 'Creating databases'),
     ],
   ),
   Question(
@@ -170,10 +162,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_java_oop',
     text: 'What is the blueprint used to create Java objects?',
     answerOptions: [
-      AnswerOption(id: 'java_1_a', text: 'Package', isCorrect: false),
-      AnswerOption(id: 'java_1_b', text: 'Class', isCorrect: true),
-      AnswerOption(id: 'java_1_c', text: 'Loop', isCorrect: false),
-      AnswerOption(id: 'java_1_d', text: 'Array', isCorrect: false),
+      AnswerOption(id: 'java_1_a', text: 'Package'),
+      AnswerOption(id: 'java_1_b', text: 'Class'),
+      AnswerOption(id: 'java_1_c', text: 'Loop'),
+      AnswerOption(id: 'java_1_d', text: 'Array'),
     ],
   ),
   Question(
@@ -181,10 +173,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_java_oop',
     text: 'Which keyword lets a Java class inherit another class?',
     answerOptions: [
-      AnswerOption(id: 'java_2_a', text: 'extends', isCorrect: true),
-      AnswerOption(id: 'java_2_b', text: 'imports', isCorrect: false),
-      AnswerOption(id: 'java_2_c', text: 'inherits', isCorrect: false),
-      AnswerOption(id: 'java_2_d', text: 'includes', isCorrect: false),
+      AnswerOption(id: 'java_2_a', text: 'extends'),
+      AnswerOption(id: 'java_2_b', text: 'imports'),
+      AnswerOption(id: 'java_2_c', text: 'inherits'),
+      AnswerOption(id: 'java_2_d', text: 'includes'),
     ],
   ),
   Question(
@@ -192,22 +184,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_java_oop',
     text: 'Where can a private field be accessed directly?',
     answerOptions: [
-      AnswerOption(id: 'java_3_a', text: 'From any package', isCorrect: false),
-      AnswerOption(
-        id: 'java_3_b',
-        text: 'From every subclass',
-        isCorrect: false,
-      ),
-      AnswerOption(
-        id: 'java_3_c',
-        text: 'Inside its own class',
-        isCorrect: true,
-      ),
-      AnswerOption(
-        id: 'java_3_d',
-        text: 'From any application',
-        isCorrect: false,
-      ),
+      AnswerOption(id: 'java_3_a', text: 'From any package'),
+      AnswerOption(id: 'java_3_b', text: 'From every subclass'),
+      AnswerOption(id: 'java_3_c', text: 'Inside its own class'),
+      AnswerOption(id: 'java_3_d', text: 'From any application'),
     ],
   ),
   Question(
@@ -215,10 +195,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_database',
     text: 'Which SQL command reads rows from a table?',
     answerOptions: [
-      AnswerOption(id: 'db_1_a', text: 'SELECT', isCorrect: true),
-      AnswerOption(id: 'db_1_b', text: 'UPDATE', isCorrect: false),
-      AnswerOption(id: 'db_1_c', text: 'DELETE', isCorrect: false),
-      AnswerOption(id: 'db_1_d', text: 'INSERT', isCorrect: false),
+      AnswerOption(id: 'db_1_a', text: 'SELECT'),
+      AnswerOption(id: 'db_1_b', text: 'UPDATE'),
+      AnswerOption(id: 'db_1_c', text: 'DELETE'),
+      AnswerOption(id: 'db_1_d', text: 'INSERT'),
     ],
   ),
   Question(
@@ -226,14 +206,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_database',
     text: 'What is the main purpose of a primary key?',
     answerOptions: [
-      AnswerOption(id: 'db_2_a', text: 'Sort every query', isCorrect: false),
-      AnswerOption(id: 'db_2_b', text: 'Identify each row', isCorrect: true),
-      AnswerOption(id: 'db_2_c', text: 'Hide a table', isCorrect: false),
-      AnswerOption(
-        id: 'db_2_d',
-        text: 'Delete duplicates automatically',
-        isCorrect: false,
-      ),
+      AnswerOption(id: 'db_2_a', text: 'Sort every query'),
+      AnswerOption(id: 'db_2_b', text: 'Identify each row'),
+      AnswerOption(id: 'db_2_c', text: 'Hide a table'),
+      AnswerOption(id: 'db_2_d', text: 'Delete duplicates automatically'),
     ],
   ),
   Question(
@@ -241,10 +217,10 @@ const List<Question> mockQuestions = [
     questionSetId: 'question_set_database',
     text: 'What links a child table row to a parent table row?',
     answerOptions: [
-      AnswerOption(id: 'db_3_a', text: 'View', isCorrect: false),
-      AnswerOption(id: 'db_3_b', text: 'Index name', isCorrect: false),
-      AnswerOption(id: 'db_3_c', text: 'Foreign key', isCorrect: true),
-      AnswerOption(id: 'db_3_d', text: 'Column alias', isCorrect: false),
+      AnswerOption(id: 'db_3_a', text: 'View'),
+      AnswerOption(id: 'db_3_b', text: 'Index name'),
+      AnswerOption(id: 'db_3_c', text: 'Foreign key'),
+      AnswerOption(id: 'db_3_d', text: 'Column alias'),
     ],
   ),
 ];

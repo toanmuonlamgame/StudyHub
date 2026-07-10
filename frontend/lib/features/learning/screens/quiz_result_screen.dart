@@ -1,23 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../models/answer_option.dart';
-import '../models/question.dart';
-import '../models/question_set.dart';
+import '../models/answer_review.dart';
 import '../models/quiz_result.dart';
 
 class QuizResultScreen extends StatelessWidget {
-  const QuizResultScreen({
-    super.key,
-    required this.questionSet,
-    required this.result,
-    required this.questions,
-    required this.selectedAnswerIds,
-  });
+  const QuizResultScreen({super.key, required this.result});
 
-  final QuestionSet questionSet;
   final QuizResult result;
-  final List<Question> questions;
-  final Map<String, String> selectedAnswerIds;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +20,7 @@ class QuizResultScreen extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           children: [
             Text(
-              questionSet.title,
+              result.questionSetTitle,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -83,12 +72,15 @@ class QuizResultScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            for (var index = 0; index < questions.length; index++) ...[
+            for (
+              var index = 0;
+              index < result.answerReviews.length;
+              index++
+            ) ...[
               _AnswerReviewCard(
-                key: ValueKey(questions[index].id),
-                question: questions[index],
+                key: ValueKey(result.answerReviews[index].questionId),
+                answerReview: result.answerReviews[index],
                 questionNumber: index + 1,
-                selectedAnswerId: selectedAnswerIds[questions[index].id],
               ),
               const SizedBox(height: 12),
             ],
@@ -111,22 +103,17 @@ class QuizResultScreen extends StatelessWidget {
 class _AnswerReviewCard extends StatelessWidget {
   const _AnswerReviewCard({
     super.key,
-    required this.question,
+    required this.answerReview,
     required this.questionNumber,
-    required this.selectedAnswerId,
   });
 
-  final Question question;
+  final AnswerReview answerReview;
   final int questionNumber;
-  final String? selectedAnswerId;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final selectedAnswer = _findAnswerById(selectedAnswerId);
-    final correctAnswer = _findCorrectAnswer();
-    final isCorrect = selectedAnswer?.isCorrect ?? false;
-    final statusColor = isCorrect
+    final statusColor = answerReview.isCorrect
         ? theme.colorScheme.primary
         : theme.colorScheme.error;
 
@@ -140,7 +127,7 @@ class _AnswerReviewCard extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                  isCorrect
+                  answerReview.isCorrect
                       ? Icons.check_circle_outline
                       : Icons.cancel_outlined,
                   color: statusColor,
@@ -156,7 +143,7 @@ class _AnswerReviewCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  isCorrect ? 'Correct' : 'Incorrect',
+                  answerReview.isCorrect ? 'Correct' : 'Incorrect',
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: statusColor,
                     fontWeight: FontWeight.w700,
@@ -166,43 +153,22 @@ class _AnswerReviewCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              question.text,
+              answerReview.questionText,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 12),
-            Text('Your answer: ${selectedAnswer?.text ?? 'Not answered'}'),
+            Text(
+              'Your answer: '
+              '${answerReview.selectedAnswerText ?? 'Not answered'}',
+            ),
             const SizedBox(height: 6),
-            Text('Correct answer: ${correctAnswer?.text ?? 'Unavailable'}'),
+            Text('Correct answer: ${answerReview.correctAnswerText}'),
           ],
         ),
       ),
     );
-  }
-
-  AnswerOption? _findAnswerById(String? answerOptionId) {
-    if (answerOptionId == null) {
-      return null;
-    }
-
-    for (final answerOption in question.answerOptions) {
-      if (answerOption.id == answerOptionId) {
-        return answerOption;
-      }
-    }
-
-    return null;
-  }
-
-  AnswerOption? _findCorrectAnswer() {
-    for (final answerOption in question.answerOptions) {
-      if (answerOption.isCorrect) {
-        return answerOption;
-      }
-    }
-
-    return null;
   }
 }
 

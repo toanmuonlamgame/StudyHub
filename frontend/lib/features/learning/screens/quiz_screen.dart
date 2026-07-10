@@ -176,12 +176,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
-          builder: (context) => QuizResultScreen(
-            questionSet: widget.questionSet,
-            result: result,
-            questions: questions,
-            selectedAnswerIds: selectedAnswerIds,
-          ),
+          builder: (context) => QuizResultScreen(result: result),
         ),
       );
     } catch (_) {

@@ -127,15 +127,17 @@ LearningRepository
 Repository operations should return `Future` values from the start so the mock adapter and API adapter share the same interface. The mock adapter can return local values immediately through `Future.value`. Screens can use simple Flutter loading/error state without a new package.
 
 ### Quiz Answer Safety
-The current `AnswerOption.isCorrect` field is acceptable only inside the local mock implementation. It must not become part of the pre-submit API response model.
+Pre-submit and post-submit quiz data use separate public models.
 
-Before API integration:
-
-- Pre-submit question options should expose only safe fields such as `id` and `text`.
-- Correctness metadata should stay private to `MockLearningRepository` for local scoring.
-- `ApiLearningRepository.submitQuiz(...)` should send selected option IDs to the backend.
+- Pre-submit `AnswerOption` exposes only `id` and `text`.
+- `Question` contains only quiz-safe answer options and does not expose correctness metadata.
+- `MockLearningRepository` keeps its answer key private and uses it for local demo scoring.
+- `submitQuiz(...)` returns a `QuizResult` containing score totals and post-submit `AnswerReview` records.
+- `QuizResultScreen` renders `AnswerReview` data and does not infer correctness from pre-submit questions.
+- A future `ApiLearningRepository.submitQuiz(...)` should send selected option IDs to the backend.
 - The backend should calculate the authoritative score and return result/review data after submission.
-- Result review should use a dedicated post-submit result shape instead of reading hidden correctness data from pre-submit questions.
+
+This is the foundation for Exam Mode, where correctness is revealed only after the whole quiz is submitted. Practice Mode may later add a separate `checkAnswer` operation for per-question feedback, but it is not part of the current V1 flow.
 
 ### Incremental Migration
 1. Add the `LearningRepository` interface and `MockLearningRepository` adapter.
