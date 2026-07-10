@@ -1,46 +1,110 @@
 import 'package:flutter/material.dart';
 
-import '../data/mock_learning_data.dart';
 import '../models/subject.dart';
+import '../repositories/learning_repository.dart';
 import 'question_set_list_screen.dart';
 
-class SubjectListScreen extends StatelessWidget {
-  const SubjectListScreen({super.key, this.subjects = mockSubjects});
+class SubjectListScreen extends StatefulWidget {
+  const SubjectListScreen({super.key, required this.learningRepository});
 
-  final List<Subject> subjects;
+  final LearningRepository learningRepository;
+
+  @override
+  State<SubjectListScreen> createState() => _SubjectListScreenState();
+}
+
+class _SubjectListScreenState extends State<SubjectListScreen> {
+  late Future<List<Subject>> _subjectsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _subjectsFuture = widget.learningRepository.getSubjects();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Subjects')),
       body: SafeArea(
-        child: subjects.isEmpty
-            ? const _EmptySubjects()
-            : ListView.separated(
-                padding: const EdgeInsets.all(20),
-                itemCount: subjects.length + 1,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return const _SubjectListHeader();
-                  }
+        child: FutureBuilder<List<Subject>>(
+          future: _subjectsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-                  final subject = subjects[index - 1];
-                  return _SubjectCard(
-                    subject: subject,
-                    onTap: () => _openSubject(context, subject),
-                  );
-                },
-              ),
+            if (snapshot.hasError) {
+              return _SubjectLoadError(onRetry: _retryLoadingSubjects);
+            }
+
+            final subjects = snapshot.data ?? const <Subject>[];
+            if (subjects.isEmpty) {
+              return const _EmptySubjects();
+            }
+
+            return ListView.separated(
+              padding: const EdgeInsets.all(20),
+              itemCount: subjects.length + 1,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return const _SubjectListHeader();
+                }
+
+                final subject = subjects[index - 1];
+                return _SubjectCard(
+                  subject: subject,
+                  onTap: () => _openSubject(context, subject),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
+  }
+
+  void _retryLoadingSubjects() {
+    setState(() {
+      _subjectsFuture = widget.learningRepository.getSubjects();
+    });
   }
 
   void _openSubject(BuildContext context, Subject subject) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => QuestionSetListScreen(subject: subject),
+      ),
+    );
+  }
+}
+
+class _SubjectLoadError extends StatelessWidget {
+  const _SubjectLoadError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Subjects could not be loaded.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try again'),
+            ),
+          ],
+        ),
       ),
     );
   }

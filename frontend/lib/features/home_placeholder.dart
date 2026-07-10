@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'learning/repositories/learning_repository.dart';
 import 'learning/screens/subject_list_screen.dart';
 
 class HomePlaceholder extends StatelessWidget {
-  const HomePlaceholder({super.key});
+  const HomePlaceholder({super.key, required this.learningRepository});
+
+  final LearningRepository learningRepository;
 
   static const _flowSteps = [
     'Subject',
@@ -75,7 +78,10 @@ class HomePlaceholder extends StatelessWidget {
 
   void _openSubjects(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (context) => const SubjectListScreen()),
+      MaterialPageRoute<void>(
+        builder: (context) =>
+            SubjectListScreen(learningRepository: learningRepository),
+      ),
     );
   }
 }
