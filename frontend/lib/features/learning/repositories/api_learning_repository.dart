@@ -1,3 +1,9 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../models/answer_option.dart';
+import '../models/answer_review.dart';
 import '../models/question.dart';
 import '../models/question_set.dart';
 import '../models/quiz_result.dart';
@@ -5,56 +11,276 @@ import '../models/subject.dart';
 import '../models/topic.dart';
 import 'learning_repository.dart';
 
-/// Future adapter for the StudyHub Fastify API.
-///
-/// The V1 local prototype still uses `MockLearningRepository`. Pre-submit API
-/// data must not expose correct answers, and [submitQuiz] will use backend
-/// scoring when the Fastify endpoints are available.
 class ApiLearningRepository implements LearningRepository {
-  const ApiLearningRepository();
+  ApiLearningRepository({required String baseUrl, http.Client? client})
+    : _baseUri = _parseBaseUrl(baseUrl),
+      _client = client ?? http.Client();
+
+  final Uri _baseUri;
+  final http.Client _client;
 
   @override
-  Future<List<Subject>> getSubjects() {
-    throw UnimplementedError(
-      'ApiLearningRepository.getSubjects is not implemented yet.',
-    );
+  Future<List<Subject>> getSubjects() async {
+    final body = await _get('learning/subjects');
+    return _readObjectList(
+      body,
+      'subjects',
+    ).map(_subjectFromJson).toList(growable: false);
   }
 
   @override
-  Future<List<Topic>> getTopicsBySubjectId(String subjectId) {
-    throw UnimplementedError(
-      'ApiLearningRepository.getTopicsBySubjectId is not implemented yet.',
+  Future<List<Topic>> getTopicsBySubjectId(String subjectId) async {
+    final body = await _get(
+      'learning/subjects/${Uri.encodeComponent(subjectId)}/topics',
     );
+    return _readObjectList(
+      body,
+      'topics',
+    ).map(_topicFromJson).toList(growable: false);
   }
 
   @override
-  Future<List<QuestionSet>> getQuestionSetsBySubjectId(String subjectId) {
-    throw UnimplementedError(
-      'ApiLearningRepository.getQuestionSetsBySubjectId is not implemented yet.',
+  Future<List<QuestionSet>> getQuestionSetsBySubjectId(String subjectId) async {
+    final body = await _get(
+      'learning/subjects/${Uri.encodeComponent(subjectId)}/question-sets',
     );
+    return _readObjectList(
+      body,
+      'questionSets',
+    ).map(_questionSetFromJson).toList(growable: false);
   }
 
   @override
-  Future<QuestionSet?> getQuestionSetById(String id) {
-    throw UnimplementedError(
-      'ApiLearningRepository.getQuestionSetById is not implemented yet.',
+  Future<QuestionSet?> getQuestionSetById(String id) async {
+    final body = await _get(
+      'learning/question-sets/${Uri.encodeComponent(id)}',
     );
+    return _questionSetFromJson(_readObject(body, 'questionSet'));
   }
 
   @override
-  Future<List<Question>> getQuestionsByQuestionSetId(String id) {
-    throw UnimplementedError(
-      'ApiLearningRepository.getQuestionsByQuestionSetId is not implemented yet.',
+  Future<List<Question>> getQuestionsByQuestionSetId(String id) async {
+    final body = await _get(
+      'learning/question-sets/${Uri.encodeComponent(id)}/questions',
     );
+    return _readObjectList(
+      body,
+      'questions',
+    ).map(_questionFromJson).toList(growable: false);
   }
 
   @override
   Future<QuizResult> submitQuiz({
     required String questionSetId,
     required Map<String, String> selectedAnswerOptionIdsByQuestionId,
-  }) {
-    throw UnimplementedError(
-      'ApiLearningRepository.submitQuiz is not implemented yet.',
+  }) async {
+    final response = await _client.post(
+      _endpoint(
+        'learning/question-sets/${Uri.encodeComponent(questionSetId)}/submit',
+      ),
+      headers: const {'content-type': 'application/json'},
+      body: jsonEncode({
+        'selectedAnswerOptionIdsByQuestionId':
+            selectedAnswerOptionIdsByQuestionId,
+      }),
     );
+    final body = _decodeResponse(response, 'submitQuiz');
+    return _quizResultFromJson(_readObject(body, 'result'));
   }
+
+  Future<Map<String, dynamic>> _get(String path) async {
+    final response = await _client.get(_endpoint(path));
+    return _decodeResponse(response, 'GET /$path');
+  }
+
+  Uri _endpoint(String path) => _baseUri.resolve(path);
+
+  Map<String, dynamic> _decodeResponse(
+    http.Response response,
+    String operation,
+  ) {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw LearningApiException(
+        '$operation failed with status ${response.statusCode}.',
+        statusCode: response.statusCode,
+      );
+    }
+
+    try {
+      final decoded = jsonDecode(response.body);
+      return _asObject(decoded, 'response body');
+    } on FormatException catch (error) {
+      throw LearningApiException(
+        '$operation returned malformed JSON: ${error.message}',
+        statusCode: response.statusCode,
+      );
+    }
+  }
+
+  static Uri _parseBaseUrl(String baseUrl) {
+    final normalized = baseUrl.trim();
+    final uri = Uri.tryParse(normalized);
+    if (normalized.isEmpty ||
+        uri == null ||
+        !uri.hasScheme ||
+        uri.host.isEmpty) {
+      throw ArgumentError.value(baseUrl, 'baseUrl', 'Must be an absolute URL.');
+    }
+
+    return Uri.parse(normalized.endsWith('/') ? normalized : '$normalized/');
+  }
+}
+
+class LearningApiException implements Exception {
+  const LearningApiException(this.message, {this.statusCode});
+
+  final String message;
+  final int? statusCode;
+
+  @override
+  String toString() => 'LearningApiException: $message';
+}
+
+Subject _subjectFromJson(Map<String, dynamic> json) {
+  return Subject(
+    id: _readString(json, 'id'),
+    name: _readString(json, 'name'),
+    school: _readNullableString(json, 'school'),
+    program: _readNullableString(json, 'program'),
+    major: _readNullableString(json, 'major'),
+    description: _readNullableString(json, 'description'),
+  );
+}
+
+Topic _topicFromJson(Map<String, dynamic> json) {
+  return Topic(
+    id: _readString(json, 'id'),
+    subjectId: _readString(json, 'subjectId'),
+    name: _readString(json, 'name'),
+  );
+}
+
+QuestionSet _questionSetFromJson(Map<String, dynamic> json) {
+  return QuestionSet(
+    id: _readString(json, 'id'),
+    subjectId: _readString(json, 'subjectId'),
+    topicId: _readNullableString(json, 'topicId'),
+    title: _readString(json, 'title'),
+    description: _readString(json, 'description'),
+    questionCount: _readInt(json, 'questionCount'),
+  );
+}
+
+Question _questionFromJson(Map<String, dynamic> json) {
+  return Question(
+    id: _readString(json, 'id'),
+    questionSetId: _readString(json, 'questionSetId'),
+    text: _readString(json, 'text'),
+    answerOptions: _readObjectList(
+      json,
+      'answerOptions',
+    ).map(_answerOptionFromJson).toList(growable: false),
+  );
+}
+
+AnswerOption _answerOptionFromJson(Map<String, dynamic> json) {
+  return AnswerOption(
+    id: _readString(json, 'id'),
+    text: _readString(json, 'text'),
+  );
+}
+
+QuizResult _quizResultFromJson(Map<String, dynamic> json) {
+  return QuizResult(
+    questionSetId: _readString(json, 'questionSetId'),
+    questionSetTitle: _readString(json, 'questionSetTitle'),
+    totalCount: _readInt(json, 'totalQuestions'),
+    correctCount: _readInt(json, 'correctAnswers'),
+    wrongCount: _readInt(json, 'wrongAnswers'),
+    percentageScore: _readDouble(json, 'percentageScore'),
+    answerReviews: _readObjectList(
+      json,
+      'answerReviews',
+    ).map(_answerReviewFromJson).toList(growable: false),
+  );
+}
+
+AnswerReview _answerReviewFromJson(Map<String, dynamic> json) {
+  return AnswerReview(
+    questionId: _readString(json, 'questionId'),
+    questionText: _readString(json, 'questionText'),
+    selectedAnswerOptionId: _readNullableString(json, 'selectedAnswerOptionId'),
+    selectedAnswerText: _readNullableString(json, 'selectedAnswerText'),
+    correctAnswerOptionId: _readString(json, 'correctAnswerOptionId'),
+    correctAnswerText: _readString(json, 'correctAnswerText'),
+    isCorrect: _readBool(json, 'isCorrect'),
+  );
+}
+
+List<Map<String, dynamic>> _readObjectList(
+  Map<String, dynamic> json,
+  String key,
+) {
+  final value = json[key];
+  if (value is! List) {
+    throw FormatException('Expected "$key" to be a list.');
+  }
+
+  return value
+      .map((item) => _asObject(item, 'item in "$key"'))
+      .toList(growable: false);
+}
+
+Map<String, dynamic> _readObject(Map<String, dynamic> json, String key) {
+  return _asObject(json[key], '"$key"');
+}
+
+Map<String, dynamic> _asObject(Object? value, String field) {
+  if (value is! Map<String, dynamic>) {
+    throw FormatException('Expected $field to be an object.');
+  }
+  return value;
+}
+
+String _readString(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value is! String) {
+    throw FormatException('Expected "$key" to be a string.');
+  }
+  return value;
+}
+
+String? _readNullableString(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is! String) {
+    throw FormatException('Expected "$key" to be a string or null.');
+  }
+  return value;
+}
+
+int _readInt(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value is! int) {
+    throw FormatException('Expected "$key" to be an integer.');
+  }
+  return value;
+}
+
+double _readDouble(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value is! num) {
+    throw FormatException('Expected "$key" to be a number.');
+  }
+  return value.toDouble();
+}
+
+bool _readBool(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value is! bool) {
+    throw FormatException('Expected "$key" to be a boolean.');
+  }
+  return value;
 }

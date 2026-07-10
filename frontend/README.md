@@ -1,17 +1,20 @@
-# frontend
+# StudyHub Frontend
 
-A new Flutter project.
+The Flutter app uses `MockLearningRepository` by default.
 
-## Getting Started
+Run with local mock data:
 
-This project is a starting point for a Flutter application.
+```bash
+flutter run
+```
 
-A few resources to get you started if this is your first Flutter project:
+Run against the backend mock Learning API from an Android emulator:
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```bash
+flutter run \
+  --dart-define=STUDYHUB_LEARNING_SOURCE=api \
+  --dart-define=STUDYHUB_API_BASE_URL=http://10.0.2.2:3000
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+These values select a development data source and URL only. Do not place API
+keys, tokens, passwords, or other secrets in `dart-define` values.

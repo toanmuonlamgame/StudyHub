@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'app/learning_repository_config.dart';
 import 'app/studyhub_app.dart';
 
 void main() {
-  runApp(const StudyHubApp());
+  runApp(
+    StudyHubApp(learningRepository: createLearningRepositoryFromEnvironment()),
+  );
 }
 
 class MyApp extends StudyHubApp {

@@ -134,7 +134,7 @@ Pre-submit and post-submit quiz data use separate public models.
 - `MockLearningRepository` keeps its answer key private and uses it for local demo scoring.
 - `submitQuiz(...)` returns a `QuizResult` containing score totals and post-submit `AnswerReview` records.
 - `QuizResultScreen` renders `AnswerReview` data and does not infer correctness from pre-submit questions.
-- A future `ApiLearningRepository.submitQuiz(...)` should send selected option IDs to the backend.
+- `ApiLearningRepository.submitQuiz(...)` sends selected option IDs to the backend and maps the returned review data.
 - The backend should calculate the authoritative score and return result/review data after submission.
 
 This is the foundation for Exam Mode, where correctness is revealed only after the whole quiz is submitted. Practice Mode may later add a separate `checkAnswer` operation for per-question feedback, but it is not part of the current V1 flow.
@@ -145,7 +145,7 @@ This is the foundation for Exam Mode, where correctness is revealed only after t
 3. Inject the repository from `StudyHubApp` through existing screen constructors.
 4. Replace direct mock imports in one screen at a time, preserving current widget tests.
 5. Separate pre-submit answer options from post-submit answer review data.
-6. Keep `ApiLearningRepository` as an unwired skeleton until the backend endpoints are available, then add the API service and implement the adapter.
+6. Use `ApiLearningRepository` to map the mock Learning API into frontend models. Keep mock as the default source and enable API mode only through non-secret `dart-define` configuration.
 
 This sequence changes the data source without rewriting screen layout or navigation.
 

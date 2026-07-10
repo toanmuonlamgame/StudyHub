@@ -169,7 +169,8 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Design Practice Mode and a `checkAnswer` contract after Exam Mode is stable.
 - [x] Add repository contract tests using the mock adapter.
 - [x] Add an unwired `ApiLearningRepository` skeleton.
-- [ ] Implement `ApiLearningRepository` with the Fastify endpoints when they exist.
+- [x] Implement `ApiLearningRepository` against the mock Fastify Learning API.
+- [x] Keep mock as default and add non-secret `dart-define` API mode.
 
 ## Backend Foundation
 - [x] Create the minimal Node.js, TypeScript, and Fastify backend skeleton.
@@ -178,7 +179,7 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Add an automated Fastify injection test for the health endpoint.
 - [x] Complete the mock/in-memory backend Learning API phase.
 - [ ] Add Prisma and PostgreSQL only in a later approved milestone.
-- [ ] Implement the Flutter `ApiLearningRepository` against the mock Learning API.
+- [x] Implement the Flutter `ApiLearningRepository` against the mock Learning API.
 
 ## V1 API Checklist
 - [x] Implement `GET /health`.
