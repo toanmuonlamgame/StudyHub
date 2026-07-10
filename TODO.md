@@ -186,7 +186,9 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Add the unwired Prisma-backed Learning service and mapping foundation.
 - [x] Make Learning routes depend on a selectable `LearningService` adapter.
 - [x] Document the Prisma local mode checklist and safe configuration steps.
-- [ ] Run local PostgreSQL migration + seed and smoke test Prisma data source.
+- [x] Run local PostgreSQL migration, seed, and Prisma read-endpoint smoke tests.
+- [x] Smoke-test quiz submit in Prisma mode and verify score/answer reviews.
+- [ ] Consider backend integration tests using a dedicated PostgreSQL test database.
 - [x] Implement the Flutter `ApiLearningRepository` against the mock Learning API.
 
 ## V1 API Checklist

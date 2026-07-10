@@ -258,9 +258,12 @@ explicit mappers instead of returning raw rows, keeps correctness metadata
 internal before quiz submission, and accepts a client dependency for tests.
 
 The data source defaults to memory and does not create a Prisma client unless
-Prisma is explicitly selected. The next milestone will run the initial local
-PostgreSQL migration and seed, then enable and integration-test the Prisma source
-without changing the public API contract.
+Prisma is explicitly selected. The initial local PostgreSQL migration and seed
+have run successfully, and Prisma-mode read endpoints have passed a manual smoke
+test without exposing correctness metadata. Prisma-mode quiz submission has also
+been verified with seeded answers, including backend-calculated scoring and
+post-submit answer reviews. A future automated integration suite should use a
+separate PostgreSQL test database.
 
 ## Content Model Notes
 Study Material and Question Set are separate content types.

@@ -44,8 +44,9 @@ Run all backend tests with `npm test`.
 
 ## Prisma foundation
 
-The Prisma schema targets PostgreSQL, but the Learning API still uses in-memory
-data. Existing development and tests do not require a running database.
+The Prisma schema targets PostgreSQL. Learning routes can use either the default
+in-memory service or the Prisma service without changing their JSON contract.
+Existing automated tests continue to use memory and do not require a database.
 
 1. Copy `.env.example` to a local `.env`.
 2. Replace the placeholder `DATABASE_URL` with local PostgreSQL credentials.
@@ -84,9 +85,10 @@ development and test flow continues to use the in-memory data source.
    This is required by the direct `prisma:seed` script; keep the real value only
    in your local environment and `.env` file.
 
-4. Generate the Prisma client:
+4. Validate the schema and generate the Prisma client:
 
    ```text
+   npm run prisma:validate
    npm run prisma:generate
    ```
 
@@ -122,3 +124,60 @@ development and test flow continues to use the in-memory data source.
 
 `backend/.env` is ignored by Git and must remain local. Never commit the file,
 its connection string, or any database password.
+
+## Run and smoke-test data sources
+
+The seeded IDs in these commands come from `prisma/seed.ts`. Update the commands
+if those fixtures change.
+
+### Memory mode
+
+Memory remains the safe default and does not require `DATABASE_URL`:
+
+```powershell
+$env:STUDYHUB_LEARNING_DATA_SOURCE = "memory"
+npm run dev
+```
+
+### Prisma mode
+
+Use the same local connection string used for migration and seed:
+
+```powershell
+$env:DATABASE_URL = "<your local DATABASE_URL>"
+$env:STUDYHUB_LEARNING_DATA_SOURCE = "prisma"
+npm run dev
+```
+
+With the backend running, check the health endpoint and seeded Learning reads:
+
+```powershell
+curl.exe "http://localhost:3000/health"
+curl.exe "http://localhost:3000/learning/subjects"
+curl.exe "http://localhost:3000/learning/subjects/subject_database/question-sets"
+curl.exe "http://localhost:3000/learning/question-sets/question_set_database/questions"
+```
+
+Pre-submit question responses must not contain `isCorrect`, `correctAnswer`, or
+`correctAnswerOptionId`.
+
+Submit the seeded Database Fundamentals quiz:
+
+```powershell
+$body = @{
+  selectedAnswerOptionIdsByQuestionId = @{
+    question_database_1 = "db_1_a"
+    question_database_2 = "db_2_b"
+    question_database_3 = "db_3_c"
+  }
+} | ConvertTo-Json -Compress
+
+$body | curl.exe --request POST `
+  "http://localhost:3000/learning/question-sets/question_set_database/submit" `
+  --header "Content-Type: application/json" `
+  --data-binary "@-"
+```
+
+The response should contain a backend-calculated score and post-submit
+`answerReviews`. Correctness metadata is allowed there because submission has
+completed.
