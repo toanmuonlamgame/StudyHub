@@ -181,3 +181,21 @@ $body | curl.exe --request POST `
 The response should contain a backend-calculated score and post-submit
 `answerReviews`. Correctness metadata is allowed there because submission has
 completed.
+
+### Automated Prisma smoke test
+
+The automated smoke test performs the same seeded Learning checks in-process,
+so a separate backend server is not required. It requires a migrated and seeded
+local PostgreSQL database plus `DATABASE_URL` in the current environment or the
+ignored local `backend/.env` file.
+
+```text
+npm run build
+npm run test:prisma-smoke
+```
+
+The script forces Prisma mode, verifies that pre-submit questions do not expose
+correctness metadata, and checks a 100% seeded quiz submission. Normal
+`npm test` remains memory-only and does not require PostgreSQL.
+
+Never commit `backend/.env` or its database credentials.
