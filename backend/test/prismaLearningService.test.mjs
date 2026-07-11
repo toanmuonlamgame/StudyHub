@@ -97,3 +97,50 @@ test('PrismaLearningService submitQuiz returns score and answer reviews', async 
     },
   ]);
 });
+
+test('PrismaLearningService checkAnswer uses internal correctness data', async () => {
+  const fakePrisma = {
+    question: {
+      findUnique: async () => ({
+        id: 'question_1',
+        questionSetId: 'question_set_1',
+        text: 'First question?',
+        position: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        answerOptions: [
+          {
+            id: 'answer_1',
+            questionId: 'question_1',
+            text: 'Wrong answer',
+            position: 1,
+            isCorrect: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            id: 'answer_2',
+            questionId: 'question_1',
+            text: 'Correct answer',
+            position: 2,
+            isCorrect: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+      }),
+    },
+  };
+  const service = createPrismaLearningService(fakePrisma);
+
+  const result = await service.checkAnswer('question_1', 'answer_1');
+
+  assert.deepEqual(result, {
+    questionId: 'question_1',
+    selectedAnswerOptionId: 'answer_1',
+    selectedAnswerText: 'Wrong answer',
+    correctAnswerOptionId: 'answer_2',
+    correctAnswerText: 'Correct answer',
+    isCorrect: false,
+  });
+});

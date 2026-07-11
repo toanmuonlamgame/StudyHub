@@ -44,6 +44,15 @@ export interface AnswerReview {
   isCorrect: boolean;
 }
 
+export interface AnswerCheckResult {
+  questionId: string;
+  selectedAnswerOptionId: string;
+  selectedAnswerText: string;
+  correctAnswerOptionId: string;
+  correctAnswerText: string;
+  isCorrect: boolean;
+}
+
 export interface QuizResult {
   questionSetId: string;
   questionSetTitle: string;
@@ -56,4 +65,8 @@ export interface QuizResult {
 
 export interface SubmitQuizBody {
   selectedAnswerOptionIdsByQuestionId: Record<string, string>;
+}
+
+export interface CheckAnswerBody {
+  selectedAnswerOptionId: string;
 }

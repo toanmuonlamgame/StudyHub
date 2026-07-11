@@ -1,4 +1,5 @@
 import '../data/mock_learning_data.dart' as mock_data;
+import '../models/answer_check_result.dart';
 import '../models/answer_review.dart';
 import '../models/question.dart';
 import '../models/question_set.dart';
@@ -48,6 +49,53 @@ class MockLearningRepository implements LearningRepository {
   @override
   Future<List<Question>> getQuestionsByQuestionSetId(String id) async {
     return mock_data.getQuestionsByQuestionSetId(id);
+  }
+
+  @override
+  Future<AnswerCheckResult> checkAnswer({
+    required String questionId,
+    required String selectedAnswerOptionId,
+  }) async {
+    Question? question;
+    for (final candidate in mock_data.mockQuestions) {
+      if (candidate.id == questionId) {
+        question = candidate;
+        break;
+      }
+    }
+    if (question == null) {
+      throw StateError('Question $questionId was not found.');
+    }
+
+    final selectedAnswerText = _findAnswerText(
+      question,
+      selectedAnswerOptionId,
+    );
+    if (selectedAnswerText == null) {
+      throw StateError(
+        'Answer option $selectedAnswerOptionId does not belong to $questionId.',
+      );
+    }
+
+    final correctAnswerOptionId =
+        _correctAnswerOptionIdsByQuestionId[questionId];
+    if (correctAnswerOptionId == null) {
+      throw StateError('Missing answer key for question $questionId.');
+    }
+
+    final correctAnswerText = _findAnswerText(question, correctAnswerOptionId);
+    if (correctAnswerText == null) {
+      throw StateError('Invalid answer key for question $questionId.');
+    }
+
+    return AnswerCheckResult(
+      questionId: questionId,
+      selectedAnswerOptionId: selectedAnswerOptionId,
+      selectedAnswerText: selectedAnswerText,
+      correctAnswerOptionId: correctAnswerOptionId,
+      correctAnswerText: correctAnswerText,
+      isCorrect: selectedAnswerOptionId == correctAnswerOptionId,
+    );
   }
 
   @override

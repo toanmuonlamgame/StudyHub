@@ -41,6 +41,9 @@ test('buildApp accepts an injected LearningService', async (t) => {
     getQuestionSetsBySubjectId: async () => [],
     getQuestionSetById: async () => null,
     getQuestionsByQuestionSetId: async () => [],
+    checkAnswer: async () => {
+      throw new Error('Not used by this test.');
+    },
     submitQuiz: async () => {
       throw new Error('Not used by this test.');
     },
@@ -144,6 +147,61 @@ test('POST submit calculates score and answer reviews', async (t) => {
   assert.equal(result.answerReviews[0].selectedAnswerText, 'const');
   assert.equal(result.answerReviews[0].correctAnswerText, 'let');
   assert.equal(result.answerReviews[0].isCorrect, false);
+});
+
+test('POST check-answer returns correct feedback', async (t) => {
+  const app = createTestApp(t);
+  const response = await app.inject({
+    method: 'POST',
+    url: '/learning/questions/question_js_basics_1/check-answer',
+    payload: { selectedAnswerOptionId: 'js_b1_c' },
+  });
+  const { result } = response.json();
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(result.questionId, 'question_js_basics_1');
+  assert.equal(result.selectedAnswerOptionId, 'js_b1_c');
+  assert.equal(result.selectedAnswerText, 'let');
+  assert.equal(result.correctAnswerOptionId, 'js_b1_c');
+  assert.equal(result.correctAnswerText, 'let');
+  assert.equal(result.isCorrect, true);
+});
+
+test('POST check-answer returns incorrect feedback', async (t) => {
+  const app = createTestApp(t);
+  const response = await app.inject({
+    method: 'POST',
+    url: '/learning/questions/question_js_basics_1/check-answer',
+    payload: { selectedAnswerOptionId: 'js_b1_b' },
+  });
+  const { result } = response.json();
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(result.selectedAnswerText, 'const');
+  assert.equal(result.correctAnswerText, 'let');
+  assert.equal(result.isCorrect, false);
+});
+
+test('POST check-answer rejects an unknown question', async (t) => {
+  const app = createTestApp(t);
+  const response = await app.inject({
+    method: 'POST',
+    url: '/learning/questions/missing-question/check-answer',
+    payload: { selectedAnswerOptionId: 'missing-option' },
+  });
+
+  assert.equal(response.statusCode, 404);
+});
+
+test('POST check-answer rejects an option from another question', async (t) => {
+  const app = createTestApp(t);
+  const response = await app.inject({
+    method: 'POST',
+    url: '/learning/questions/question_js_basics_1/check-answer',
+    payload: { selectedAnswerOptionId: 'js_b2_b' },
+  });
+
+  assert.equal(response.statusCode, 400);
 });
 
 test('GET unknown question set returns 404', async (t) => {

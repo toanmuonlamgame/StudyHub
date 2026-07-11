@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/question_set.dart';
+import '../models/quiz_mode.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
 import '../repositories/learning_repository.dart';
@@ -81,10 +82,19 @@ class QuestionSetDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             FilledButton.icon(
-              onPressed: () => _startQuiz(context),
+              onPressed: () => _startQuiz(context, QuizMode.exam),
               icon: const Icon(Icons.play_arrow),
-              label: const Text('Start Quiz'),
+              label: const Text('Start Exam Mode'),
               style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+              ),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () => _startQuiz(context, QuizMode.practice),
+              icon: const Icon(Icons.school_outlined),
+              label: const Text('Start Practice Mode'),
+              style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(52),
               ),
             ),
@@ -94,12 +104,13 @@ class QuestionSetDetailScreen extends StatelessWidget {
     );
   }
 
-  void _startQuiz(BuildContext context) {
+  void _startQuiz(BuildContext context, QuizMode quizMode) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => QuizScreen(
           questionSet: questionSet,
           learningRepository: learningRepository,
+          quizMode: quizMode,
         ),
       ),
     );

@@ -6,6 +6,7 @@ import {
   topics,
 } from '../data/mockLearningData.js';
 import type {
+  AnswerCheckResult,
   AnswerReview,
   Question,
   QuestionSet,
@@ -48,6 +49,50 @@ export class InMemoryLearningService implements LearningService {
     return questions.filter(
       (question) => question.questionSetId === questionSetId,
     );
+  }
+
+  async checkAnswer(
+    questionId: string,
+    selectedAnswerOptionId: string,
+  ): Promise<AnswerCheckResult> {
+    const question = questions.find(({ id }) => id === questionId);
+    if (question === undefined) {
+      throw new LearningResourceNotFoundError('Question not found.');
+    }
+
+    const selectedAnswer = question.answerOptions.find(
+      ({ id }) => id === selectedAnswerOptionId,
+    );
+    if (selectedAnswer === undefined) {
+      throw new InvalidQuizSubmissionError(
+        `Answer option ${selectedAnswerOptionId} does not belong to question ${questionId}.`,
+      );
+    }
+
+    const correctAnswerOptionId = getCorrectAnswerOptionId(questionId);
+    if (correctAnswerOptionId === undefined) {
+      throw new LearningDataIntegrityError(
+        `Answer key is missing for question ${questionId}.`,
+      );
+    }
+
+    const correctAnswer = question.answerOptions.find(
+      ({ id }) => id === correctAnswerOptionId,
+    );
+    if (correctAnswer === undefined) {
+      throw new LearningDataIntegrityError(
+        `Answer key is invalid for question ${questionId}.`,
+      );
+    }
+
+    return {
+      questionId,
+      selectedAnswerOptionId: selectedAnswer.id,
+      selectedAnswerText: selectedAnswer.text,
+      correctAnswerOptionId: correctAnswer.id,
+      correctAnswerText: correctAnswer.text,
+      isCorrect: selectedAnswer.id === correctAnswer.id,
+    };
   }
 
   async submitQuiz(

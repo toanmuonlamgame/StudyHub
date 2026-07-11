@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:frontend/app/studyhub_app.dart';
+import 'package:frontend/features/learning/models/answer_check_result.dart';
 import 'package:frontend/features/learning/models/answer_review.dart';
 import 'package:frontend/features/learning/models/question.dart';
 import 'package:frontend/features/learning/models/question_set.dart';
@@ -68,6 +69,32 @@ void main() {
     await tester.scrollUntilVisible(secondQuestion, 250);
 
     expect(find.text('Correct'), findsWidgets);
+  });
+
+  testWidgets('practice mode checks an answer before showing feedback', (
+    WidgetTester tester,
+  ) async {
+    final repository = _TrackingCheckAnswerRepository();
+    await _openJavaScriptBasicsQuiz(
+      tester,
+      learningRepository: repository,
+      startButtonText: 'Start Practice Mode',
+    );
+
+    expect(find.text('Practice Mode'), findsOneWidget);
+    expect(find.text('Incorrect'), findsNothing);
+
+    await _selectAnswer(tester, 'const');
+    await tester.pumpAndSettle();
+
+    expect(repository.checkCount, 1);
+    expect(find.text('Incorrect'), findsOneWidget);
+    expect(find.text('Your answer: const'), findsOneWidget);
+    expect(find.text('Correct answer: let'), findsOneWidget);
+
+    final nextQuestionButton = find.text('Next Question');
+    await tester.scrollUntilVisible(nextQuestionButton, 200);
+    expect(nextQuestionButton, findsOneWidget);
   });
 
   testWidgets('renders answer review directly from QuizResult', (
@@ -143,6 +170,7 @@ void main() {
 Future<void> _openJavaScriptBasicsQuiz(
   WidgetTester tester, {
   LearningRepository learningRepository = const MockLearningRepository(),
+  String startButtonText = 'Start Exam Mode',
 }) async {
   await tester.pumpWidget(StudyHubApp(learningRepository: learningRepository));
 
@@ -158,7 +186,7 @@ Future<void> _openJavaScriptBasicsQuiz(
   await tester.pumpAndSettle();
   expect(find.text('About this question set'), findsOneWidget);
 
-  final startQuizButton = find.text('Start Quiz');
+  final startQuizButton = find.text(startButtonText);
   await tester.ensureVisible(startQuizButton);
   await tester.tap(startQuizButton);
   await tester.pumpAndSettle();
@@ -216,6 +244,23 @@ class _TrackingSubmitRepository extends MockLearningRepository {
     return super.submitQuiz(
       questionSetId: questionSetId,
       selectedAnswerOptionIdsByQuestionId: selectedAnswerOptionIdsByQuestionId,
+    );
+  }
+}
+
+class _TrackingCheckAnswerRepository extends MockLearningRepository {
+  int checkCount = 0;
+
+  @override
+  Future<AnswerCheckResult> checkAnswer({
+    required String questionId,
+    required String selectedAnswerOptionId,
+  }) {
+    checkCount++;
+
+    return super.checkAnswer(
+      questionId: questionId,
+      selectedAnswerOptionId: selectedAnswerOptionId,
     );
   }
 }

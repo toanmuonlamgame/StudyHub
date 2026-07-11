@@ -122,6 +122,7 @@ LearningRepository
 - getQuestionSetsBySubjectId(subjectId)
 - getQuestionsByQuestionSetId(questionSetId)
 - submitQuiz(questionSetId, selectedAnswerIds)
+- checkAnswer(questionId, selectedAnswerOptionId)
 ```
 
 Repository operations should return `Future` values from the start so the mock adapter and API adapter share the same interface. The mock adapter can return local values immediately through `Future.value`. Screens can use simple Flutter loading/error state without a new package.
@@ -137,7 +138,15 @@ Pre-submit and post-submit quiz data use separate public models.
 - `ApiLearningRepository.submitQuiz(...)` sends selected option IDs to the backend and maps the returned review data.
 - The backend should calculate the authoritative score and return result/review data after submission.
 
-This is the foundation for Exam Mode, where correctness is revealed only after the whole quiz is submitted. Practice Mode may later add a separate `checkAnswer` operation for per-question feedback, but it is not part of the current V1 flow.
+Exam Mode reveals correctness only after the whole quiz is submitted. Practice Mode uses a separate `checkAnswer` operation and reveals correctness only for the question the learner has explicitly checked. Both modes consume the same correctness-free question payload.
+
+The backend Learning API exposes:
+
+```text
+POST /learning/questions/:questionId/check-answer
+```
+
+The request contains only `selectedAnswerOptionId`. The response may contain the selected and correct option details for that question. Unknown questions return `404`, options outside the question return `400`, and answer-key integrity failures return `500`.
 
 ### Incremental Migration
 1. Add the `LearningRepository` interface and `MockLearningRepository` adapter.
@@ -180,7 +189,7 @@ POST /study-material-uploads
 ### Response Safety
 - `GET /question-sets/:id` returns questions and answer options only.
 - `GET /question-sets/:id` must not return `isCorrect` or `correctAnswerOptionId`.
-- Correct answers are only exposed after quiz submission through the result endpoint.
+- Correct answers are exposed only after whole-quiz submission in Exam Mode or a per-question `check-answer` response in Practice Mode.
 - Backend calculates score. Flutter does not send score.
 
 ### Quiz API Shape

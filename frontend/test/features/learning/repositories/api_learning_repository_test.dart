@@ -133,6 +133,42 @@ void main() {
     expect(result.answerReviews.single.isCorrect, isFalse);
   });
 
+  test('maps a practice answer check result', () async {
+    final client = MockClient((request) async {
+      expect(request.method, 'POST');
+      expect(
+        request.url.path,
+        '/learning/questions/question_js_basics_1/check-answer',
+      );
+      expect(jsonDecode(request.body), {'selectedAnswerOptionId': 'js_b1_b'});
+
+      return _jsonResponse({
+        'result': {
+          'questionId': 'question_js_basics_1',
+          'selectedAnswerOptionId': 'js_b1_b',
+          'selectedAnswerText': 'const',
+          'correctAnswerOptionId': 'js_b1_c',
+          'correctAnswerText': 'let',
+          'isCorrect': false,
+        },
+      });
+    });
+    final repository = ApiLearningRepository(
+      baseUrl: 'http://studyhub.test',
+      client: client,
+    );
+
+    final result = await repository.checkAnswer(
+      questionId: 'question_js_basics_1',
+      selectedAnswerOptionId: 'js_b1_b',
+    );
+
+    expect(result.questionId, 'question_js_basics_1');
+    expect(result.selectedAnswerText, 'const');
+    expect(result.correctAnswerText, 'let');
+    expect(result.isCorrect, isFalse);
+  });
+
   test('throws a clear exception for non-success responses', () async {
     final repository = ApiLearningRepository(
       baseUrl: 'http://studyhub.test',

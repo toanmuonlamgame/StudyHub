@@ -23,6 +23,7 @@ grows from a small learning loop into trusted community content.
 ### Learning Experience
 
 - Browse Subjects and their Question Sets.
+- Use Practice Mode for immediate per-question feedback without exposing answer keys in question payloads.
 - View Question Set details and question counts.
 - Complete a multiple-choice quiz in Exam Mode.
 - View score, correct/wrong counts, and post-submit answer review.
@@ -54,7 +55,7 @@ the backend calculates the score and answer review.
 
 ## Planned Features
 
-- Practice Mode with a backend `checkAnswer` contract.
+- Practice Mode progress history and measured feedback polish.
 - User-uploaded Study Materials with validation, ownership, and moderation.
 - AI-assisted question extraction with source provenance, citations, and human
   review before publication.

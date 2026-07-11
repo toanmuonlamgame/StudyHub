@@ -166,7 +166,7 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Separate safe pre-submit answer options from mock-only correctness metadata.
 - [x] Define post-submit answer review data returned by `submitQuiz`.
 - [x] Harden the Exam Mode foundation and result-review contract.
-- [ ] Design Practice Mode and a `checkAnswer` contract after Exam Mode is stable.
+- [x] Implement Practice Mode and a `checkAnswer` contract after Exam Mode stabilization.
 - [x] Add repository contract tests using the mock adapter.
 - [x] Add an unwired `ApiLearningRepository` skeleton.
 - [x] Implement `ApiLearningRepository` against the mock Fastify Learning API.
@@ -193,7 +193,7 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Implement the Flutter `ApiLearningRepository` against the mock Learning API.
 
 ## Research-Informed Roadmap
-- [ ] Define a Practice Mode `checkAnswer` backend contract while preserving Exam Mode behavior.
+- [x] Define and implement a Practice Mode `checkAnswer` backend contract while preserving Exam Mode behavior.
 - [ ] Implement secure user-upload Study Materials with metadata, validation, and ownership.
 - [ ] Add moderation/reporting before uploaded materials become broadly discoverable.
 - [ ] Add AI-assisted question extraction from user sources in V3 with citations, provenance, and human review.
@@ -207,7 +207,9 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Reassess microservices only when scale, ownership, or independent deployment provides clear evidence.
 
 ## Quality System Applied Tasks
-- [ ] Apply the quality and security checklist when designing Practice Mode.
+- [x] Apply the quality and security checklist to the Practice Mode foundation.
+- [ ] Polish Practice Mode progress, accessibility, and feedback after user testing.
+- [ ] Decide whether Practice Mode history belongs in V2 user progress.
 - [ ] Apply the frontend performance checklist before major UI feature commits.
 - [ ] Add API pagination when list data grows beyond small V1 fixtures.
 - [ ] Add measured caching later for read-heavy public learning content.

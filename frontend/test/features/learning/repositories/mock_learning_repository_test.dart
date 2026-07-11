@@ -106,4 +106,24 @@ void main() {
       expect(answerReview.correctAnswerText, isNotEmpty);
     }
   });
+
+  test('checks a practice answer and returns correctness afterward', () async {
+    const repository = MockLearningRepository();
+
+    final correctResult = await repository.checkAnswer(
+      questionId: 'question_js_basics_1',
+      selectedAnswerOptionId: 'js_b1_c',
+    );
+    final wrongResult = await repository.checkAnswer(
+      questionId: 'question_js_basics_1',
+      selectedAnswerOptionId: 'js_b1_b',
+    );
+
+    expect(correctResult.isCorrect, isTrue);
+    expect(correctResult.selectedAnswerText, 'let');
+    expect(correctResult.correctAnswerOptionId, 'js_b1_c');
+    expect(wrongResult.isCorrect, isFalse);
+    expect(wrongResult.selectedAnswerText, 'const');
+    expect(wrongResult.correctAnswerText, 'let');
+  });
 }

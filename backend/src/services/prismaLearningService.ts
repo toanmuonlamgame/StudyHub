@@ -2,6 +2,7 @@ import type { PrismaClient } from '@prisma/client';
 
 import { getPrismaClient } from '../db/prisma.js';
 import type {
+  AnswerCheckResult,
   AnswerReview,
   Question,
   QuestionSet,
@@ -77,6 +78,48 @@ export class PrismaLearningService implements LearningService {
     });
 
     return questions.map(mapQuestion);
+  }
+
+  async checkAnswer(
+    questionId: string,
+    selectedAnswerOptionId: string,
+  ): Promise<AnswerCheckResult> {
+    const question = await this.prisma.question.findUnique({
+      where: { id: questionId },
+      include: { answerOptions: { orderBy: { position: 'asc' } } },
+    });
+
+    if (question === null) {
+      throw new LearningResourceNotFoundError('Question not found.');
+    }
+
+    const selectedAnswer = question.answerOptions.find(
+      ({ id }) => id === selectedAnswerOptionId,
+    );
+    if (selectedAnswer === undefined) {
+      throw new InvalidQuizSubmissionError(
+        `Answer option ${selectedAnswerOptionId} does not belong to question ${questionId}.`,
+      );
+    }
+
+    const correctAnswers = question.answerOptions.filter(
+      ({ isCorrect }) => isCorrect,
+    );
+    if (correctAnswers.length !== 1) {
+      throw new LearningDataIntegrityError(
+        `Question ${questionId} must have exactly one correct answer.`,
+      );
+    }
+
+    const correctAnswer = correctAnswers[0];
+    return {
+      questionId,
+      selectedAnswerOptionId: selectedAnswer.id,
+      selectedAnswerText: selectedAnswer.text,
+      correctAnswerOptionId: correctAnswer.id,
+      correctAnswerText: correctAnswer.text,
+      isCorrect: selectedAnswer.id === correctAnswer.id,
+    };
   }
 
   async submitQuiz(

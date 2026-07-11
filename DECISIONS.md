@@ -376,20 +376,21 @@ Quiz safety rule:
 - The backend must calculate the authoritative score and return review data only after submission.
 
 ## 2026-07-10 - Quiz Modes And Answer Review Boundary
-Decision: StudyHub may support Exam Mode and Practice Mode, but the current V1 foundation implements Exam Mode only.
+Decision: StudyHub supports separate Exam Mode and Practice Mode correctness flows.
 
 Exam Mode:
 - Users answer the quiz without seeing correctness metadata.
 - Correct, wrong, score, and answer review data become available only after submitting the whole quiz.
 
 Practice Mode direction:
-- Practice Mode may later use a separate `checkAnswer` operation to reveal feedback after each question.
-- Practice Mode and `checkAnswer` are deferred and are not part of the current implementation.
+- Practice Mode uses a separate backend/repository `checkAnswer` operation after the learner selects an option.
+- The response reveals correctness and the correct answer only for that checked question.
+- The pre-check question payload remains free of correctness metadata.
 
 Reason:
 - Separating safe pre-submit data from post-submit review data matches the backend security boundary.
 - A dedicated `AnswerReview` result shape lets the UI render feedback without knowing or deriving the answer key.
-- Keeping Practice Mode deferred avoids expanding the V1 repository and UI contracts before Exam Mode is stable.
+- A separate contract preserves the stable Exam Mode submission behavior while allowing immediate Practice Mode feedback.
 
 ## Pending Decisions
 - Deployment target:

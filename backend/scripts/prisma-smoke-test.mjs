@@ -86,6 +86,14 @@ try {
   assert.equal(serializedQuestions.includes('correctAnswer'), false);
   assert.equal(serializedQuestions.includes('correctAnswerOptionId'), false);
 
+  const answerCheck = await expectOk({
+    method: 'POST',
+    url: '/learning/questions/question_database_1/check-answer',
+    payload: { selectedAnswerOptionId: 'db_1_a' },
+  });
+  assert.equal(answerCheck.result.isCorrect, true);
+  assert.equal(answerCheck.result.correctAnswerOptionId, 'db_1_a');
+
   const submission = await expectOk({
     method: 'POST',
     url: '/learning/question-sets/question_set_database/submit',

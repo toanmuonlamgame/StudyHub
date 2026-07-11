@@ -9,7 +9,10 @@ import {
   LearningResourceNotFoundError,
   type LearningService,
 } from '../services/learningService.js';
-import type { SubmitQuizBody } from '../types/learning.js';
+import type {
+  CheckAnswerBody,
+  SubmitQuizBody,
+} from '../types/learning.js';
 
 interface SubjectParams {
   subjectId: string;
@@ -17,6 +20,10 @@ interface SubjectParams {
 
 interface QuestionSetParams {
   questionSetId: string;
+}
+
+interface QuestionParams {
+  questionId: string;
 }
 
 const submitQuizBodySchema = {
@@ -28,6 +35,15 @@ const submitQuizBodySchema = {
       type: 'object',
       additionalProperties: { type: 'string' },
     },
+  },
+} as const;
+
+const checkAnswerBodySchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['selectedAnswerOptionId'],
+  properties: {
+    selectedAnswerOptionId: { type: 'string', minLength: 1 },
   },
 } as const;
 
@@ -112,6 +128,22 @@ export function createLearningRoutes(
               request.params.questionSetId,
             ),
           };
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
+    app.post<{ Params: QuestionParams; Body: CheckAnswerBody }>(
+      '/questions/:questionId/check-answer',
+      { schema: { body: checkAnswerBodySchema } },
+      async (request, reply) => {
+        try {
+          const result = await service.checkAnswer(
+            request.params.questionId,
+            request.body.selectedAnswerOptionId,
+          );
+          return { result };
         } catch (error) {
           return sendLearningError(error, reply);
         }

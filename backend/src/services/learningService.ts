@@ -1,4 +1,5 @@
 import type {
+  AnswerCheckResult,
   Question,
   QuestionSet,
   QuizResult,
@@ -12,6 +13,10 @@ export interface LearningService {
   getQuestionSetsBySubjectId(subjectId: string): Promise<QuestionSet[]>;
   getQuestionSetById(questionSetId: string): Promise<QuestionSet | null>;
   getQuestionsByQuestionSetId(questionSetId: string): Promise<Question[]>;
+  checkAnswer(
+    questionId: string,
+    selectedAnswerOptionId: string,
+  ): Promise<AnswerCheckResult>;
   submitQuiz(
     questionSetId: string,
     selectedAnswerOptionIdsByQuestionId: Record<string, string>,

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../models/answer_check_result.dart';
 import '../models/answer_option.dart';
 import '../models/answer_review.dart';
 import '../models/question.dart';
@@ -67,6 +68,22 @@ class ApiLearningRepository implements LearningRepository {
       body,
       'questions',
     ).map(_questionFromJson).toList(growable: false);
+  }
+
+  @override
+  Future<AnswerCheckResult> checkAnswer({
+    required String questionId,
+    required String selectedAnswerOptionId,
+  }) async {
+    final response = await _client.post(
+      _endpoint(
+        'learning/questions/${Uri.encodeComponent(questionId)}/check-answer',
+      ),
+      headers: const {'content-type': 'application/json'},
+      body: jsonEncode({'selectedAnswerOptionId': selectedAnswerOptionId}),
+    );
+    final body = _decodeResponse(response, 'checkAnswer');
+    return _answerCheckResultFromJson(_readObject(body, 'result'));
   }
 
   @override
@@ -211,6 +228,17 @@ AnswerReview _answerReviewFromJson(Map<String, dynamic> json) {
     questionText: _readString(json, 'questionText'),
     selectedAnswerOptionId: _readNullableString(json, 'selectedAnswerOptionId'),
     selectedAnswerText: _readNullableString(json, 'selectedAnswerText'),
+    correctAnswerOptionId: _readString(json, 'correctAnswerOptionId'),
+    correctAnswerText: _readString(json, 'correctAnswerText'),
+    isCorrect: _readBool(json, 'isCorrect'),
+  );
+}
+
+AnswerCheckResult _answerCheckResultFromJson(Map<String, dynamic> json) {
+  return AnswerCheckResult(
+    questionId: _readString(json, 'questionId'),
+    selectedAnswerOptionId: _readString(json, 'selectedAnswerOptionId'),
+    selectedAnswerText: _readString(json, 'selectedAnswerText'),
     correctAnswerOptionId: _readString(json, 'correctAnswerOptionId'),
     correctAnswerText: _readString(json, 'correctAnswerText'),
     isCorrect: _readBool(json, 'isCorrect'),
