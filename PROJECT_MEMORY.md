@@ -121,6 +121,13 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - Do not implement the full credit economy in V1.
 - Record meaningful architecture, product, and workflow decisions in DECISIONS.md.
 
+## Research-Informed Long-Term Guardrails
+- Keep Flutter as the main learner app; React is reserved for a future Admin Dashboard.
+- Add Kotlin only when a concrete native Android requirement justifies it.
+- Keep the backend a modular monolith with clear service contracts until scale or ownership requires extraction.
+- Treat mobile performance, small API payloads, pagination, and later read caching as product requirements.
+- Future AI study aids must come from user-provided sources, retain citations/provenance, and pass review before publication.
+
 ## AI Workflow
 - Codex app: main coding assistant.
 - Antigravity: planner, reviewer, and helper.

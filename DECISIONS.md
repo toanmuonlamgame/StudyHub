@@ -2,6 +2,26 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-11 - Research-Informed Architecture Guardrails
+Decision:
+- Keep Flutter as the learner-facing mobile app.
+- Reserve React for a future Admin Dashboard when moderation operations justify it.
+- Do not add Kotlin unless a specific native Android feature cannot reasonably be delivered through Flutter.
+- Keep the backend as a modular monolith with clear service boundaries; do not adopt microservices yet.
+- Treat performance as a core non-functional requirement.
+
+Reason:
+- Consistent feature boundaries reduce implementation and review friction.
+- A second learner-app stack would add maintenance cost without V1 product value.
+- Distributed services add network, deployment, observability, and data-ownership complexity that StudyHub does not currently need.
+- Mobile startup, responsiveness, payload size, and weak-network behavior directly affect whether learners can complete the core flow.
+
+Rule:
+- Measure app size, startup, smoothness, API latency, and payload growth as the product evolves.
+- Keep API and repository boundaries extraction-friendly without deploying separate services prematurely.
+- Record future AI-generated learning content with source provenance, citations, and review status.
+- See `docs/PRODUCT_RESEARCH.md` and `docs/ARCHITECTURE_LESSONS.md` for supporting research.
+
 ## 2026-07-09 - Collaboration Workflow
 Decision: Use Git plus project memory files as the shared context between Codex, Antigravity, ChatGPT, and the user.
 

@@ -192,6 +192,17 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Consider backend integration tests using a dedicated PostgreSQL test database.
 - [x] Implement the Flutter `ApiLearningRepository` against the mock Learning API.
 
+## Research-Informed Roadmap
+- [ ] Define a Practice Mode `checkAnswer` backend contract while preserving Exam Mode behavior.
+- [ ] Implement secure user-upload Study Materials with metadata, validation, and ownership.
+- [ ] Add moderation/reporting before uploaded materials become broadly discoverable.
+- [ ] Add AI-assisted question extraction from user sources in V3 with citations, provenance, and human review.
+- [ ] Build a React Admin Dashboard later for real moderation and content operations, not as the learner app.
+- [ ] Create and enforce a mobile performance budget/checklist covering app size, startup, smoothness, and API latency.
+- [ ] Add API pagination before community content lists grow large.
+- [ ] Add measured caching later for stable, read-heavy taxonomy and published content.
+- [ ] Reassess microservices only when scale, ownership, or independent deployment provides clear evidence.
+
 ## V1 API Checklist
 - [x] Implement `GET /health`.
 - [ ] Implement `GET /subjects`.
