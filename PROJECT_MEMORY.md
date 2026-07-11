@@ -127,6 +127,7 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - Keep the backend a modular monolith with clear service contracts until scale or ownership requires extraction.
 - Treat mobile performance, small API payloads, pagination, and later read caching as product requirements.
 - Aim for a polished, feature-rich learning experience while keeping the app lightweight, smooth, and API-efficient.
+- Use `docs/QUALITY_SYSTEM.md` as the balanced UX, performance, security, and Definition of Done guardrail for future features.
 - Future AI study aids must come from user-provided sources, retain citations/provenance, and pass review before publication.
 
 ## AI Workflow

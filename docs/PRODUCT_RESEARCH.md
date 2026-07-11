@@ -8,6 +8,9 @@ This note extracts product and engineering lessons from established learning pla
 
 Learning apps succeed not only by being fast, but by feeling useful, engaging, polished, and motivating. StudyHub should balance learning value and modern UX with performance guardrails: preserve purposeful visual polish and valuable features, then implement them with measured startup work, smooth interaction, small payloads, lazy loading, and appropriate caching.
 
+StudyHub applies these research lessons through the reusable feature-review and
+Definition of Done in [`QUALITY_SYSTEM.md`](QUALITY_SYSTEM.md).
+
 ## Platform lessons
 
 ### Quizlet

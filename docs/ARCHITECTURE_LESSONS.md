@@ -83,6 +83,9 @@ including slower devices and networks.
 - When a valuable feature creates a performance problem, prefer a
   performance-aware implementation before removing the feature.
 
+The operational review checklists and Definition of Done are maintained in
+[`QUALITY_SYSTEM.md`](QUALITY_SYSTEM.md).
+
 ## Security And Data Safety
 - Pre-submit question responses must never expose `isCorrect`, answer keys, or
   equivalent correctness metadata.

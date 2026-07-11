@@ -2,6 +2,19 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-11 - StudyHub Quality System
+Decision: Future StudyHub features use the balanced UX, performance, security, and feature-quality review system in `docs/QUALITY_SYSTEM.md`.
+
+Reason:
+- Product quality includes usefulness, visual polish, responsiveness, safety, and maintainability together.
+- Shared frontend/backend checklists make expectations reviewable without forcing every feature into the same implementation.
+- A Definition of Done helps prevent loading states, errors, payload scope, security boundaries, and performance risks from being discovered late.
+
+Rule:
+- Apply only the checklist items relevant to the feature, but skip them intentionally and document meaningful deferrals.
+- Prefer performance-aware implementation over removing valuable UX or roadmap features.
+- Update the quality system when measured product experience shows a standard is missing or counterproductive.
+
 ## 2026-07-11 - Balanced Performance And UX
 Decision: Performance must not be used as an excuse to make StudyHub visually poor, unfinished, or feature-poor. StudyHub will prefer a polished, modern learning experience implemented within explicit performance guardrails.
 

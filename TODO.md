@@ -206,6 +206,13 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Add measured caching later for stable, read-heavy taxonomy and published content.
 - [ ] Reassess microservices only when scale, ownership, or independent deployment provides clear evidence.
 
+## Quality System Applied Tasks
+- [ ] Apply the quality and security checklist when designing Practice Mode.
+- [ ] Apply the frontend performance checklist before major UI feature commits.
+- [ ] Add API pagination when list data grows beyond small V1 fixtures.
+- [ ] Add measured caching later for read-heavy public learning content.
+- [ ] Measure release app size, startup, and perceived loading on representative devices later.
+
 ## V1 API Checklist
 - [x] Implement `GET /health`.
 - [ ] Implement `GET /subjects`.
