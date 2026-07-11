@@ -18,6 +18,13 @@ void main() {
 
     expect(find.text('StudyHub'), findsWidgets);
     expect(find.text('Start learning'), findsOneWidget);
+    expect(find.text('Exam Mode'), findsOneWidget);
+
+    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Practice Mode'), findsOneWidget);
+    expect(find.text('Safe Review'), findsOneWidget);
   });
 
   testWidgets('browses subjects and question sets to open a quiz', (
