@@ -144,3 +144,57 @@ test('PrismaLearningService checkAnswer uses internal correctness data', async (
     isCorrect: false,
   });
 });
+
+test('PrismaLearningService lists compact paginated question sets', async () => {
+  const calls = [];
+  const fakePrisma = {
+    questionSet: {
+      findMany: async (args) => {
+        calls.push(args);
+        return [
+          {
+            id: 'question_set_2',
+            subjectId: 'subject_1',
+            topicId: 'topic_1',
+            title: 'Second set',
+            description: 'Second description',
+            createdAt: new Date('2026-02-02T00:00:00.000Z'),
+            updatedAt: new Date('2026-02-02T00:00:00.000Z'),
+            _count: { questions: 7 },
+          },
+          {
+            id: 'question_set_1',
+            subjectId: 'subject_1',
+            topicId: 'topic_1',
+            title: 'First set',
+            description: 'First description',
+            createdAt: new Date('2026-02-01T00:00:00.000Z'),
+            updatedAt: new Date('2026-02-01T00:00:00.000Z'),
+            _count: { questions: 3 },
+          },
+        ];
+      },
+    },
+  };
+  const service = createPrismaLearningService(fakePrisma);
+
+  const page = await service.listQuestionSets({
+    subjectId: 'subject_1',
+    topicId: 'topic_1',
+    q: 'set',
+    limit: 1,
+  });
+
+  assert.equal(calls[0].take, 2);
+  assert.deepEqual(calls[0].orderBy, [
+    { createdAt: 'desc' },
+    { id: 'desc' },
+  ]);
+  assert.equal(page.items.length, 1);
+  assert.equal(page.items[0].id, 'question_set_2');
+  assert.equal(page.items[0].questionCount, 7);
+  assert.equal(page.items[0].difficulty, 'medium');
+  assert.equal(page.hasMore, true);
+  assert.equal(typeof page.nextCursor, 'string');
+  assert.equal(JSON.stringify(page).includes('questions'), false);
+});

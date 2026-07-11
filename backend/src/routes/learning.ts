@@ -5,6 +5,7 @@ import type {
 
 import {
   InvalidQuizSubmissionError,
+  InvalidLearningListQueryError,
   LearningDataIntegrityError,
   LearningResourceNotFoundError,
   type LearningService,
@@ -25,6 +26,17 @@ interface QuestionSetParams {
 interface QuestionParams {
   questionId: string;
 }
+
+interface QuestionSetListQuery {
+  subjectId?: string;
+  topicId?: string;
+  q?: string;
+  limit?: string;
+  cursor?: string;
+}
+
+const DEFAULT_LIST_LIMIT = 20;
+const MAX_LIST_LIMIT = 50;
 
 const submitQuizBodySchema = {
   type: 'object',
@@ -54,6 +66,9 @@ function sendLearningError(error: unknown, reply: FastifyReply): FastifyReply {
   if (error instanceof InvalidQuizSubmissionError) {
     return reply.code(400).send({ error: error.message });
   }
+  if (error instanceof InvalidLearningListQueryError) {
+    return reply.code(400).send({ error: error.message });
+  }
   if (error instanceof LearningDataIntegrityError) {
     return reply.code(500).send({ error: error.message });
   }
@@ -64,6 +79,36 @@ export function createLearningRoutes(
   service: LearningService,
 ): FastifyPluginAsync {
   return async function learningRoutes(app): Promise<void> {
+    app.get<{ Querystring: QuestionSetListQuery }>(
+      '/question-sets',
+      async (request, reply) => {
+        const limit = parseListLimit(request.query.limit);
+        if (limit === null) {
+          return reply.code(400).send({
+            error: `limit must be an integer between 1 and ${MAX_LIST_LIMIT}.`,
+          });
+        }
+
+        try {
+          return await service.listQuestionSets({
+            limit,
+            ...(request.query.subjectId === undefined
+              ? {}
+              : { subjectId: request.query.subjectId }),
+            ...(request.query.topicId === undefined
+              ? {}
+              : { topicId: request.query.topicId }),
+            ...(request.query.q === undefined ? {} : { q: request.query.q }),
+            ...(request.query.cursor === undefined
+              ? {}
+              : { cursor: request.query.cursor }),
+          });
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
     app.get('/subjects', async (_request, reply) => {
       try {
         return { subjects: await service.getSubjects() };
@@ -166,4 +211,17 @@ export function createLearningRoutes(
       },
     );
   };
+}
+
+function parseListLimit(value: string | undefined): number | null {
+  if (value === undefined) {
+    return DEFAULT_LIST_LIMIT;
+  }
+  if (!/^\d+$/.test(value)) {
+    return null;
+  }
+  const limit = Number(value);
+  return Number.isSafeInteger(limit) && limit >= 1 && limit <= MAX_LIST_LIMIT
+    ? limit
+    : null;
 }

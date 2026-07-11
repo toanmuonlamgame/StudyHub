@@ -39,6 +39,11 @@ test('buildApp accepts an injected LearningService', async (t) => {
     getSubjects: async () => [{ id: 'injected', name: 'Injected Subject' }],
     getTopicsBySubjectId: async () => [],
     getQuestionSetsBySubjectId: async () => [],
+    listQuestionSets: async () => ({
+      items: [],
+      nextCursor: null,
+      hasMore: false,
+    }),
     getQuestionSetById: async () => null,
     getQuestionsByQuestionSetId: async () => [],
     checkAnswer: async () => {
@@ -102,6 +107,122 @@ test('GET question sets filters by subject', async (t) => {
     body.questionSets.every(
       (questionSet) => questionSet.subjectId === 'subject_javascript',
     ),
+  );
+});
+
+test('GET paginated question sets returns the default page shape', async (t) => {
+  const app = createTestApp(t);
+  const response = await app.inject({
+    method: 'GET',
+    url: '/learning/question-sets',
+  });
+  const body = response.json();
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(body.items.length, 4);
+  assert.equal(body.hasMore, false);
+  assert.equal(body.nextCursor, null);
+  assert.equal(typeof body.items[0].createdAt, 'string');
+  assert.equal(typeof body.items[0].estimatedMinutes, 'number');
+  assert.ok(['easy', 'medium', 'hard'].includes(body.items[0].difficulty));
+
+  const serializedBody = JSON.stringify(body);
+  assert.equal(serializedBody.includes('questions'), false);
+  assert.equal(serializedBody.includes('answerOptions'), false);
+  assert.equal(serializedBody.includes('isCorrect'), false);
+  assert.equal(serializedBody.includes('correctAnswer'), false);
+});
+
+test('GET paginated question sets respects limit and cursor', async (t) => {
+  const app = createTestApp(t);
+  const firstResponse = await app.inject({
+    method: 'GET',
+    url: '/learning/question-sets?limit=2',
+  });
+  const firstPage = firstResponse.json();
+
+  assert.equal(firstResponse.statusCode, 200);
+  assert.equal(firstPage.items.length, 2);
+  assert.equal(firstPage.hasMore, true);
+  assert.equal(typeof firstPage.nextCursor, 'string');
+  assert.deepEqual(
+    Object.keys(
+      JSON.parse(Buffer.from(firstPage.nextCursor, 'base64url').toString()),
+    ).sort(),
+    ['createdAt', 'id'],
+  );
+
+  const secondResponse = await app.inject({
+    method: 'GET',
+    url: `/learning/question-sets?limit=2&cursor=${encodeURIComponent(firstPage.nextCursor)}`,
+  });
+  const secondPage = secondResponse.json();
+
+  assert.equal(secondResponse.statusCode, 200);
+  assert.equal(secondPage.items.length, 2);
+  assert.equal(secondPage.hasMore, false);
+  assert.equal(secondPage.nextCursor, null);
+  assert.deepEqual(
+    new Set([
+      ...firstPage.items.map(({ id }) => id),
+      ...secondPage.items.map(({ id }) => id),
+    ]).size,
+    4,
+  );
+});
+
+test('GET paginated question sets validates limit and cursor', async (t) => {
+  const app = createTestApp(t);
+  const invalidLimits = ['0', '51', '1.5', 'abc'];
+
+  for (const limit of invalidLimits) {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/learning/question-sets?limit=${limit}`,
+    });
+    assert.equal(response.statusCode, 400);
+  }
+
+  const invalidCursorResponse = await app.inject({
+    method: 'GET',
+    url: '/learning/question-sets?cursor=not-a-cursor',
+  });
+  assert.equal(invalidCursorResponse.statusCode, 400);
+});
+
+test('GET paginated question sets supports subject, topic, and title filters', async (t) => {
+  const app = createTestApp(t);
+
+  const subjectResponse = await app.inject({
+    method: 'GET',
+    url: '/learning/question-sets?subjectId=subject_javascript',
+  });
+  assert.equal(subjectResponse.statusCode, 200);
+  assert.equal(subjectResponse.json().items.length, 2);
+  assert.ok(
+    subjectResponse
+      .json()
+      .items.every(({ subjectId }) => subjectId === 'subject_javascript'),
+  );
+
+  const topicResponse = await app.inject({
+    method: 'GET',
+    url: '/learning/question-sets?topicId=topic_js_functions',
+  });
+  assert.equal(topicResponse.statusCode, 200);
+  assert.deepEqual(
+    topicResponse.json().items.map(({ id }) => id),
+    ['question_set_js_functions'],
+  );
+
+  const searchResponse = await app.inject({
+    method: 'GET',
+    url: '/learning/question-sets?q=oop',
+  });
+  assert.equal(searchResponse.statusCode, 200);
+  assert.deepEqual(
+    searchResponse.json().items.map(({ id }) => id),
+    ['question_set_java_oop'],
   );
 });
 

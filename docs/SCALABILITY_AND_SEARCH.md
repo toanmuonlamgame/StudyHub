@@ -15,7 +15,9 @@ PostgreSQL should return small, indexed slices that match the current screen.
 - Cache measured read-heavy public data later, with an invalidation plan.
 - Separate future analytics workloads from the transactional learning API.
 
-## 3. Future API List Contract
+## 3. API List Contract
+
+The first paginated endpoint is implemented for Question Sets:
 
 ```text
 GET /learning/question-sets?subjectId=...&topicId=...&q=...&difficulty=...&limit=20&cursor=...
@@ -37,6 +39,12 @@ Contract rules:
 - Prefer cursor pagination over large offsets as data grows.
 - List endpoints return metadata only, never full questions or correct answers.
 - Existing endpoints remain working while paginated variants are introduced.
+
+Current implementation supports `subjectId`, `topicId`, title search through
+`q`, `limit`, and an opaque `createdAt + id` cursor. The default limit is 20 and
+the maximum is 50. `difficulty` filtering and the Study Material endpoint remain
+future work. Difficulty and estimated minutes are currently derived from
+question count until explicit fields are added to the content model.
 
 ## 4. Filtering Strategy
 Add filters only when the model and user workflow support them:
@@ -136,3 +144,6 @@ Every growing list/search endpoint should:
 5. Add measured caching for stable, read-heavy public metadata.
 6. Introduce an external search engine only if PostgreSQL is demonstrably insufficient.
 7. Add an analytics/event pipeline only when product questions and volume justify it.
+
+Progress: the paginated Question Set endpoint is complete in memory and Prisma
+modes while the existing subject-specific endpoint remains compatible.

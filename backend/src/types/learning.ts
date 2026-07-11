@@ -22,6 +22,28 @@ export interface QuestionSet {
   questionCount: number;
 }
 
+export type QuestionSetDifficulty = 'easy' | 'medium' | 'hard';
+
+export interface QuestionSetListItem extends QuestionSet {
+  estimatedMinutes: number;
+  difficulty: QuestionSetDifficulty;
+  createdAt: string;
+}
+
+export interface ListQuestionSetsParams {
+  subjectId?: string;
+  topicId?: string;
+  q?: string;
+  limit: number;
+  cursor?: string;
+}
+
+export interface PaginatedQuestionSets {
+  items: QuestionSetListItem[];
+  nextCursor: string | null;
+  hasMore: boolean;
+}
+
 export interface AnswerOption {
   id: string;
   text: string;

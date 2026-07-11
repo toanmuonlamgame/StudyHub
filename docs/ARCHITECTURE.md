@@ -293,9 +293,18 @@ V1 should not implement:
 ## Data Growth Standard
 Growing list and search workflows must use backend-side filtering, stable cursor
 pagination, compact DTOs, and indexed PostgreSQL queries. Flutter should request
-only the slice required by the current screen and fetch detail on demand. The
-current API remains unchanged until paginated endpoints are introduced
-incrementally.
+only the slice required by the current screen and fetch detail on demand.
+
+The first paginated endpoint is now available without replacing the existing
+subject-specific endpoint:
+
+```text
+GET /learning/question-sets?subjectId=...&topicId=...&q=...&limit=20&cursor=...
+```
+
+It returns `{ items, nextCursor, hasMore }`, uses stable `createdAt + id`
+ordering, enforces a maximum limit of 50, and returns metadata without questions
+or answers. Memory and Prisma services implement the same contract.
 
 See [SCALABILITY_AND_SEARCH.md](SCALABILITY_AND_SEARCH.md) for the list contract,
 indexing plan, search progression, caching boundaries, and analytics strategy.

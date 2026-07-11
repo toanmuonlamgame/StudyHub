@@ -8,6 +8,8 @@ import {
 import type {
   AnswerCheckResult,
   AnswerReview,
+  ListQuestionSetsParams,
+  PaginatedQuestionSets,
   Question,
   QuestionSet,
   QuizResult,
@@ -20,6 +22,18 @@ import {
   LearningResourceNotFoundError,
   type LearningService,
 } from './learningService.js';
+import {
+  createQuestionSetListItem,
+  decodeQuestionSetCursor,
+  encodeQuestionSetCursor,
+} from './questionSetPagination.js';
+
+const questionSetCreatedAtById = new Map(
+  questionSets.map((questionSet, index) => [
+    questionSet.id,
+    new Date(Date.UTC(2026, 0, index + 1)),
+  ]),
+);
 
 export class InMemoryLearningService implements LearningService {
   async getSubjects(): Promise<Subject[]> {
@@ -36,6 +50,59 @@ export class InMemoryLearningService implements LearningService {
     return questionSets.filter(
       (questionSet) => questionSet.subjectId === subjectId,
     );
+  }
+
+  async listQuestionSets(
+    params: ListQuestionSetsParams,
+  ): Promise<PaginatedQuestionSets> {
+    const search = params.q?.trim().toLocaleLowerCase();
+    const cursor =
+      params.cursor === undefined
+        ? undefined
+        : decodeQuestionSetCursor(params.cursor);
+
+    const filteredItems = questionSets
+      .map((questionSet) =>
+        createQuestionSetListItem(
+          questionSet,
+          questionSetCreatedAtById.get(questionSet.id)!,
+        ),
+      )
+      .filter(
+        (questionSet) =>
+          (params.subjectId === undefined ||
+            questionSet.subjectId === params.subjectId) &&
+          (params.topicId === undefined ||
+            questionSet.topicId === params.topicId) &&
+          (search === undefined ||
+            search.length === 0 ||
+            questionSet.title.toLocaleLowerCase().includes(search)),
+      )
+      .sort(
+        (left, right) =>
+          right.createdAt.localeCompare(left.createdAt) ||
+          right.id.localeCompare(left.id),
+      )
+      .filter(
+        (questionSet) =>
+          cursor === undefined ||
+          questionSet.createdAt < cursor.createdAt ||
+          (questionSet.createdAt === cursor.createdAt &&
+            questionSet.id < cursor.id),
+      );
+
+    const items = filteredItems.slice(0, params.limit);
+    const hasMore = filteredItems.length > params.limit;
+    const lastItem = items.at(-1);
+
+    return {
+      items,
+      nextCursor:
+        hasMore && lastItem !== undefined
+          ? encodeQuestionSetCursor(lastItem)
+          : null,
+      hasMore,
+    };
   }
 
   async getQuestionSetById(questionSetId: string): Promise<QuestionSet | null> {

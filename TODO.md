@@ -211,11 +211,12 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Polish Practice Mode progress, accessibility, and feedback after user testing.
 - [ ] Decide whether Practice Mode history belongs in V2 user progress.
 - [ ] Apply the frontend performance checklist before major UI feature commits.
-- [ ] Add API pagination when list data grows beyond small V1 fixtures.
+- [x] Add the first backend API pagination contract for Question Sets.
 - [ ] Add measured caching later for read-heavy public learning content.
 
 ## Scalability And Search
-- [ ] Add a paginated Question Set list endpoint with stable cursor ordering.
+- [x] Add a paginated Question Set list endpoint with stable cursor ordering.
+- [ ] Migrate Flutter Question Set browsing to consume the paginated endpoint.
 - [ ] Add a paginated Study Material list endpoint when the content model is implemented.
 - [ ] Add query-driven Prisma indexes for list and search filters.
 - [ ] Add validated PostgreSQL-first search query support.

@@ -4,6 +4,8 @@ import { getPrismaClient } from '../db/prisma.js';
 import type {
   AnswerCheckResult,
   AnswerReview,
+  ListQuestionSetsParams,
+  PaginatedQuestionSets,
   Question,
   QuestionSet,
   QuizResult,
@@ -22,6 +24,11 @@ import {
   LearningResourceNotFoundError,
   type LearningService,
 } from './learningService.js';
+import {
+  createQuestionSetListItem,
+  decodeQuestionSetCursor,
+  encodeQuestionSetCursor,
+} from './questionSetPagination.js';
 
 export class PrismaLearningService implements LearningService {
   constructor(private readonly prisma: PrismaClient) {}
@@ -55,6 +62,60 @@ export class PrismaLearningService implements LearningService {
     });
 
     return questionSets.map(mapQuestionSet);
+  }
+
+  async listQuestionSets(
+    params: ListQuestionSetsParams,
+  ): Promise<PaginatedQuestionSets> {
+    const cursor =
+      params.cursor === undefined
+        ? undefined
+        : decodeQuestionSetCursor(params.cursor);
+    const search = params.q?.trim();
+    const questionSets = await this.prisma.questionSet.findMany({
+      where: {
+        ...(params.subjectId === undefined
+          ? {}
+          : { subjectId: params.subjectId }),
+        ...(params.topicId === undefined ? {} : { topicId: params.topicId }),
+        ...(search === undefined || search.length === 0
+          ? {}
+          : { title: { contains: search, mode: 'insensitive' } }),
+        ...(cursor === undefined
+          ? {}
+          : {
+              OR: [
+                { createdAt: { lt: new Date(cursor.createdAt) } },
+                {
+                  createdAt: new Date(cursor.createdAt),
+                  id: { lt: cursor.id },
+                },
+              ],
+            }),
+      },
+      include: { _count: { select: { questions: true } } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: params.limit + 1,
+    });
+
+    const hasMore = questionSets.length > params.limit;
+    const pageRows = questionSets.slice(0, params.limit);
+    const items = pageRows.map((questionSet) =>
+      createQuestionSetListItem(
+        mapQuestionSet(questionSet),
+        questionSet.createdAt,
+      ),
+    );
+    const lastItem = items.at(-1);
+
+    return {
+      items,
+      nextCursor:
+        hasMore && lastItem !== undefined
+          ? encodeQuestionSetCursor(lastItem)
+          : null,
+      hasMore,
+    };
   }
 
   async getQuestionSetById(questionSetId: string): Promise<QuestionSet | null> {

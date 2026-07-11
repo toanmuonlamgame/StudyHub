@@ -74,6 +74,15 @@ try {
     'Seeded question_set_database was not found.',
   );
 
+  const paginatedQuestionSets = await expectOk({
+    method: 'GET',
+    url: '/learning/question-sets?subjectId=subject_database&limit=1',
+  });
+  assert.equal(paginatedQuestionSets.items.length, 1);
+  assert.equal(paginatedQuestionSets.items[0].id, 'question_set_database');
+  assert.equal(JSON.stringify(paginatedQuestionSets).includes('questions'), false);
+  assert.equal(JSON.stringify(paginatedQuestionSets).includes('isCorrect'), false);
+
   const questions = await expectOk({
     method: 'GET',
     url: '/learning/question-sets/question_set_database/questions',
