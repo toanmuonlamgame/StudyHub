@@ -107,6 +107,10 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
   Prisma/PostgreSQL, mock/API modes, pagination, safety boundaries, and tests.
 - Phase 2 should focus on professional learner UI/UX, responsive behavior,
   lightweight interactions, accessibility, and then Vietnamese localization.
+- The mobile app uses a four-tab top-level shell: Home, Learn, Progress, and
+  Settings. Focused learning routes open above the shell without bottom navigation.
+- Practice Mode ends with a summary assembled only from trusted per-question
+  `checkAnswer` responses; Exam Mode continues to use backend `submitQuiz`.
 
 ## Roadmap Summary
 - V1: basic taxonomy, browse question sets, take quiz, view results, upload documents/exams.

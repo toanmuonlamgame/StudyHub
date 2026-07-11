@@ -12,10 +12,11 @@ Phase 1 foundation complete. Preparing Phase 2 UI/UX polish.
 
 ## Phase 2 UI/UX Milestones
 - [ ] CM37: Polish the visual design system and responsive learner surfaces.
-- [ ] CM38: Add lightweight learner animations and micro-interactions.
+- [x] CM38: Add the mobile app shell, Practice summary, and lightweight learner micro-interactions.
 - [ ] CM39: Add the Vietnamese localization foundation.
 - [ ] CM40: Add search/filter UI and cursor load-more foundations.
 - [ ] Verify text scaling, accessibility semantics, and touch targets on representative devices.
+- [ ] Persist real learning progress/history before replacing the honest Progress placeholder.
 
 ## Active
 - [x] Confirm product type: mobile learning platform.

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../models/answer_check_result.dart';
 import '../models/answer_option.dart';
+import '../models/answer_review.dart';
 import '../models/question.dart';
 import '../models/question_set.dart';
 import '../models/quiz_mode.dart';
+import '../models/quiz_result.dart';
 import '../repositories/learning_repository.dart';
 import '../widgets/answer_option_card.dart';
 import 'quiz_result_screen.dart';
@@ -37,6 +39,7 @@ class _QuizScreenState extends State<QuizScreen> {
   AnswerCheckResult? _practiceAnswerCheckResult;
   bool _isCheckingPracticeAnswer = false;
   bool _practiceAnswerCheckFailed = false;
+  final List<AnswerReview> _practiceAnswerReviews = [];
 
   bool get _isPracticeMode => widget.quizMode == QuizMode.practice;
 
@@ -106,9 +109,8 @@ class _QuizScreenState extends State<QuizScreen> {
           ],
         ),
         const SizedBox(height: 10),
-        LinearProgressIndicator(
+        _AnimatedQuizProgress(
           value: (_examQuestionIndex + 1) / questions.length,
-          borderRadius: BorderRadius.circular(4),
         ),
         const SizedBox(height: 24),
         _QuestionCard(
@@ -202,9 +204,8 @@ class _QuizScreenState extends State<QuizScreen> {
           ],
         ),
         const SizedBox(height: 10),
-        LinearProgressIndicator(
+        _AnimatedQuizProgress(
           value: (_practiceQuestionIndex + 1) / questions.length,
-          borderRadius: BorderRadius.circular(4),
         ),
         const SizedBox(height: 24),
         _QuestionCard(
@@ -217,13 +218,23 @@ class _QuizScreenState extends State<QuizScreen> {
           onSelected: (answerOptionId) {
             _checkPracticeAnswer(question, answerOptionId);
           },
-          feedback: _buildPracticeFeedback(context, question),
+          feedback: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 180),
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.98, end: 1).animate(animation),
+                child: child,
+              ),
+            ),
+            child: _buildPracticeFeedback(context, question),
+          ),
         ),
         const SizedBox(height: 18),
         FilledButton.icon(
           onPressed: _practiceAnswerCheckResult == null
               ? null
-              : () => _continuePractice(questions.length),
+              : () => _continuePractice(questions),
           icon: Icon(isLastQuestion ? Icons.done : Icons.arrow_forward),
           label: Text(isLastQuestion ? 'Finish Practice' : 'Next Question'),
           style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
@@ -237,6 +248,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
     if (_isCheckingPracticeAnswer) {
       return const Padding(
+        key: ValueKey('checking-practice-answer'),
         padding: EdgeInsets.only(top: 12),
         child: Row(
           children: [
@@ -253,6 +265,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
     if (_practiceAnswerCheckFailed) {
       return Padding(
+        key: const ValueKey('practice-answer-error'),
         padding: const EdgeInsets.only(top: 12),
         child: Row(
           children: [
@@ -287,6 +300,7 @@ class _QuizScreenState extends State<QuizScreen> {
         : theme.colorScheme.error;
 
     return Container(
+      key: ValueKey('practice-feedback-${result.questionId}'),
       margin: const EdgeInsets.only(top: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -338,6 +352,7 @@ class _QuizScreenState extends State<QuizScreen> {
       _practiceSelectedAnswerId = null;
       _practiceAnswerCheckResult = null;
       _practiceAnswerCheckFailed = false;
+      _practiceAnswerReviews.clear();
       _examQuestionIndex = 0;
       _questionsFuture = _loadQuestions();
     });
@@ -399,6 +414,17 @@ class _QuizScreenState extends State<QuizScreen> {
 
       setState(() {
         _practiceAnswerCheckResult = result;
+        _practiceAnswerReviews.add(
+          AnswerReview(
+            questionId: question.id,
+            questionText: question.text,
+            selectedAnswerOptionId: result.selectedAnswerOptionId,
+            selectedAnswerText: result.selectedAnswerText,
+            correctAnswerOptionId: result.correctAnswerOptionId,
+            correctAnswerText: result.correctAnswerText,
+            isCorrect: result.isCorrect,
+          ),
+        );
         _isCheckingPracticeAnswer = false;
       });
     } catch (_) {
@@ -413,9 +439,9 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
-  void _continuePractice(int totalQuestions) {
-    if (_practiceQuestionIndex == totalQuestions - 1) {
-      Navigator.of(context).pop();
+  void _continuePractice(List<Question> questions) {
+    if (_practiceQuestionIndex == questions.length - 1) {
+      _showPracticeResult(questions.length);
       return;
     }
 
@@ -425,6 +451,29 @@ class _QuizScreenState extends State<QuizScreen> {
       _practiceAnswerCheckResult = null;
       _practiceAnswerCheckFailed = false;
     });
+  }
+
+  void _showPracticeResult(int totalQuestions) {
+    final reviews = List<AnswerReview>.unmodifiable(_practiceAnswerReviews);
+    final correctCount = reviews.where((review) => review.isCorrect).length;
+    final result = QuizResult(
+      questionSetId: widget.questionSet.id,
+      questionSetTitle: widget.questionSet.title,
+      correctCount: correctCount,
+      wrongCount: totalQuestions - correctCount,
+      totalCount: totalQuestions,
+      percentageScore: totalQuestions == 0
+          ? 0
+          : correctCount / totalQuestions * 100,
+      answerReviews: reviews,
+      quizMode: QuizMode.practice,
+    );
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (context) => QuizResultScreen(result: result),
+      ),
+    );
   }
 
   Future<void> _submitExamModeQuiz(List<Question> questions) async {
@@ -506,6 +555,25 @@ class _QuizLoadError extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AnimatedQuizProgress extends StatelessWidget {
+  const _AnimatedQuizProgress({required this.value});
+
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: value),
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      builder: (context, animatedValue, child) => LinearProgressIndicator(
+        value: animatedValue,
+        borderRadius: BorderRadius.circular(4),
       ),
     );
   }

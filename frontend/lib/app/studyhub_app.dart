@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
-import '../features/home_placeholder.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/repositories/mock_learning_repository.dart';
+import 'main_navigation_screen.dart';
 
 class StudyHubApp extends StatelessWidget {
   const StudyHubApp({
@@ -19,7 +19,7 @@ class StudyHubApp extends StatelessWidget {
       title: 'StudyHub',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: HomePlaceholder(learningRepository: learningRepository),
+      home: MainNavigationScreen(learningRepository: learningRepository),
     );
   }
 }

@@ -2,6 +2,29 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-12 - Mobile App Shell And Practice Summary
+Decision: StudyHub uses a Material 3 four-tab mobile shell for Home, Learn,
+Progress, and Settings. Focused browse-detail-quiz-result routes are pushed above
+the shell and do not show bottom navigation.
+
+Practice Mode now ends with a result/review summary assembled from successful
+`checkAnswer` responses. It does not call Exam Mode submission and does not infer
+correctness from pre-submit models.
+
+Reason:
+- Persistent top-level navigation makes the mobile app predictable without
+  distracting learners during focused sessions.
+- Honest Progress and Settings placeholders establish information architecture
+  without inventing user data or non-functional preferences.
+- Reusing `QuizResult` and `AnswerReview` keeps result presentation consistent
+  while preserving separate Exam and Practice backend contracts.
+
+Rule:
+- Keep bottom navigation visible only on top-level shell sections.
+- Keep Exam Mode scoring backend-owned through `submitQuiz`.
+- Build Practice summaries only from trusted `checkAnswer` result fields.
+- Keep motion lightweight, non-blocking, and understandable when motion is absent.
+
 ## 2026-07-11 - Phase 1 Learning Foundation Closed
 Decision: Phase 1 is closed with the core StudyHub learning foundation working
 across Flutter mock/API modes, Fastify memory/Prisma modes, PostgreSQL, quiz

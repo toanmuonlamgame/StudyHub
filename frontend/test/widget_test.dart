@@ -27,11 +27,35 @@ void main() {
     expect(find.text('Safe Review'), findsOneWidget);
   });
 
+  testWidgets('switches between honest top-level app sections', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const StudyHubApp());
+
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Learn'), findsOneWidget);
+    expect(find.text('Progress'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
+
+    await tester.tap(find.text('Learn'));
+    await tester.pumpAndSettle();
+    expect(find.text('Choose a subject'), findsOneWidget);
+
+    await tester.tap(find.text('Progress'));
+    await tester.pumpAndSettle();
+    expect(find.text('Progress tracking is planned'), findsOneWidget);
+
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    expect(find.text('StudyHub settings'), findsOneWidget);
+  });
+
   testWidgets('browses subjects and question sets to open a quiz', (
     WidgetTester tester,
   ) async {
     await _openJavaScriptBasicsQuiz(tester);
 
+    expect(find.byType(NavigationBar), findsNothing);
     expect(find.text('Exam Mode'), findsOneWidget);
     expect(find.text('JavaScript Basics Check'), findsOneWidget);
     expect(find.text('Question 1 of 3'), findsOneWidget);
@@ -107,6 +131,47 @@ void main() {
     final nextQuestionButton = find.text('Next Question');
     await tester.scrollUntilVisible(nextQuestionButton, 200);
     expect(nextQuestionButton, findsOneWidget);
+  });
+
+  testWidgets('practice mode finishes with trusted result and review', (
+    WidgetTester tester,
+  ) async {
+    final repository = _TrackingCheckAnswerRepository();
+    await _openJavaScriptBasicsQuiz(
+      tester,
+      learningRepository: repository,
+      startButtonText: 'Start Practice Mode',
+    );
+
+    await _selectAnswer(tester, 'const');
+    await tester.pumpAndSettle();
+    final firstNextButton = find.text('Next Question');
+    await tester.scrollUntilVisible(firstNextButton, 200);
+    await tester.tap(firstNextButton);
+    await tester.pumpAndSettle();
+
+    await _selectAnswer(tester, '===');
+    await tester.pumpAndSettle();
+    final secondNextButton = find.text('Next Question');
+    await tester.scrollUntilVisible(secondNextButton, 200);
+    await tester.tap(secondNextButton);
+    await tester.pumpAndSettle();
+
+    await _selectAnswer(tester, 'push');
+    await tester.pumpAndSettle();
+    final finishButton = find.text('Finish Practice');
+    await tester.scrollUntilVisible(finishButton, 200);
+    await tester.tap(finishButton);
+    await tester.pumpAndSettle();
+
+    expect(repository.checkCount, 3);
+    expect(find.text('Practice Result'), findsOneWidget);
+    expect(find.text('Practice Mode'), findsOneWidget);
+    expect(find.text('67%'), findsOneWidget);
+    expect(find.text('Correct answers'), findsOneWidget);
+    expect(find.text('Answer review'), findsOneWidget);
+    expect(find.text('Your answer: const'), findsOneWidget);
+    expect(find.text('Correct answer: let'), findsOneWidget);
   });
 
   testWidgets('renders answer review directly from QuizResult', (

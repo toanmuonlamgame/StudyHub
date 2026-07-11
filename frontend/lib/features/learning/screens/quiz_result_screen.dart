@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/answer_review.dart';
+import '../models/quiz_mode.dart';
 import '../models/quiz_result.dart';
 
 class QuizResultScreen extends StatelessWidget {
@@ -11,7 +12,9 @@ class QuizResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final score = result.percentageScore.toStringAsFixed(0);
+    final modeLabel = result.quizMode == QuizMode.practice
+        ? 'Practice Mode'
+        : 'Exam Mode';
     final message = result.percentageScore >= 80
         ? 'Strong result. Keep the momentum going.'
         : result.percentageScore >= 50
@@ -19,11 +22,38 @@ class QuizResultScreen extends StatelessWidget {
         : 'Every review builds understanding. Try the set again when ready.';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Your result')),
+      appBar: AppBar(
+        title: Text(
+          result.quizMode == QuizMode.practice
+              ? 'Practice Result'
+              : 'Exam Result',
+        ),
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  modeLabel,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
             Text(result.questionSetTitle, style: theme.textTheme.headlineSmall),
             const SizedBox(height: 18),
             Card(
@@ -39,10 +69,15 @@ class QuizResultScreen extends StatelessWidget {
                         color: theme.colorScheme.primaryContainer,
                         shape: BoxShape.circle,
                       ),
-                      child: Text(
-                        '$score%',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          color: theme.colorScheme.primary,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(end: result.percentageScore),
+                        duration: const Duration(milliseconds: 280),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, value, child) => Text(
+                          '${value.toStringAsFixed(0)}%',
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
                       ),
                     ),
@@ -85,25 +120,37 @@ class QuizResultScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-            Text(
-              'Answer review',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
+            TweenAnimationBuilder<double>(
+              tween: Tween(end: 1),
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOutCubic,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Answer review', style: theme.textTheme.titleLarge),
+                  const SizedBox(height: 12),
+                  for (
+                    var index = 0;
+                    index < result.answerReviews.length;
+                    index++
+                  ) ...[
+                    _AnswerReviewCard(
+                      key: ValueKey(result.answerReviews[index].questionId),
+                      answerReview: result.answerReviews[index],
+                      questionNumber: index + 1,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ],
+              ),
+              builder: (context, value, child) => Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(0, 10 * (1 - value)),
+                  child: child,
+                ),
               ),
             ),
-            const SizedBox(height: 12),
-            for (
-              var index = 0;
-              index < result.answerReviews.length;
-              index++
-            ) ...[
-              _AnswerReviewCard(
-                key: ValueKey(result.answerReviews[index].questionId),
-                answerReview: result.answerReviews[index],
-                questionNumber: index + 1,
-              ),
-              const SizedBox(height: 12),
-            ],
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: () => Navigator.of(context).pop(),

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'learning/repositories/learning_repository.dart';
-import 'learning/screens/subject_list_screen.dart';
-
 class HomePlaceholder extends StatelessWidget {
-  const HomePlaceholder({super.key, required this.learningRepository});
+  const HomePlaceholder({super.key, required this.onStartLearning});
 
-  final LearningRepository learningRepository;
+  final VoidCallback onStartLearning;
 
   static const _learningModes = [
     _ModePreviewData(
@@ -62,7 +59,7 @@ class HomePlaceholder extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 FilledButton.icon(
-                  onPressed: () => _openSubjects(context),
+                  onPressed: onStartLearning,
                   icon: const Icon(Icons.arrow_forward),
                   label: const Text('Start learning'),
                 ),
@@ -94,15 +91,6 @@ class HomePlaceholder extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  void _openSubjects(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) =>
-            SubjectListScreen(learningRepository: learningRepository),
       ),
     );
   }
