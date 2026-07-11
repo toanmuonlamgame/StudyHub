@@ -56,6 +56,12 @@ The Prisma schema targets PostgreSQL. Learning routes can use either the default
 in-memory service or the Prisma service without changing their JSON contract.
 Existing automated tests continue to use memory and do not require a database.
 
+The `learning_query_indexes` migration adds composite indexes for paginated
+Question Set filtering/order and ordered Topic reads. Existing unique
+`(questionSetId, position)` and `(questionId, position)` constraints already
+support ordered Question and Answer Option lookups, so redundant single-column
+indexes are intentionally omitted.
+
 1. Copy `.env.example` to a local `.env`.
 2. Replace the placeholder `DATABASE_URL` with local PostgreSQL credentials.
 3. Run `npm run prisma:generate`.

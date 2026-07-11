@@ -221,7 +221,8 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Add load-more/infinite-scroll UI using `nextCursor` when Question Set data grows.
 - [ ] Add search/filter UI with debouncing after the paginated browse flow is stable.
 - [ ] Add a paginated Study Material list endpoint when the content model is implemented.
-- [ ] Add query-driven Prisma indexes for list and search filters.
+- [x] Add initial query-driven Prisma indexes for learning filters and ordering.
+- [ ] Evaluate PostgreSQL full-text or trigram indexes after search usage is measurable.
 - [ ] Add validated PostgreSQL-first search query support.
 - [ ] Add debounced search and stale-response handling in Flutter.
 - [ ] Add measured caching later for read-heavy public taxonomy/content metadata.

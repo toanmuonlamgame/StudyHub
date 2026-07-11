@@ -75,6 +75,18 @@ Candidate indexes should be added through reviewed Prisma migrations:
 Avoid speculative indexes: each index increases write and storage cost. Confirm
 important queries with `EXPLAIN ANALYZE` before and after index changes.
 
+Initial learning query indexes are implemented through the
+`learning_query_indexes` migration:
+
+- `QuestionSet(subjectId, createdAt, id)` for subject-filtered cursor pages.
+- `QuestionSet(topicId, createdAt, id)` for topic-filtered cursor pages.
+- `Topic(subjectId, name)` for subject filtering with name ordering.
+- Existing unique `(questionSetId, position)` and `(questionId, position)`
+  indexes serve ordered Question and Answer Option reads.
+
+Title search remains a small-data PostgreSQL query for now. Full-text/trigram
+indexes must wait for measured search requirements and representative data.
+
 ## 6. Search Strategy
 ### V1
 - Use PostgreSQL `ILIKE` or basic full-text search for small, simple datasets.
@@ -146,4 +158,5 @@ Every growing list/search endpoint should:
 7. Add an analytics/event pipeline only when product questions and volume justify it.
 
 Progress: the paginated Question Set endpoint is complete in memory and Prisma
-modes while the existing subject-specific endpoint remains compatible.
+modes while the existing subject-specific endpoint remains compatible. Initial
+Prisma indexes for current learning filters and ordering are also complete.

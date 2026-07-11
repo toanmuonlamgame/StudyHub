@@ -29,7 +29,7 @@ model Topic {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  @@index([subjectId])
+  @@index([subjectId, name])
 }
 
 model QuestionSet {
@@ -44,8 +44,8 @@ model QuestionSet {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  @@index([subjectId])
-  @@index([topicId])
+  @@index([subjectId, createdAt, id])
+  @@index([topicId, createdAt, id])
 }
 
 model Question {
@@ -59,7 +59,6 @@ model Question {
   updatedAt     DateTime       @updatedAt
 
   @@unique([questionSetId, position])
-  @@index([questionSetId])
 }
 
 model AnswerOption {
@@ -73,5 +72,4 @@ model AnswerOption {
   updatedAt  DateTime @updatedAt
 
   @@unique([questionId, position])
-  @@index([questionId])
 }
