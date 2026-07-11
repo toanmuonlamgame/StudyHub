@@ -12,56 +12,76 @@ class QuizResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final score = result.percentageScore.toStringAsFixed(0);
+    final message = result.percentageScore >= 80
+        ? 'Strong result. Keep the momentum going.'
+        : result.percentageScore >= 50
+        ? 'Good progress. Review the missed answers below.'
+        : 'Every review builds understanding. Try the set again when ready.';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Quiz Result')),
+      appBar: AppBar(title: const Text('Your result')),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           children: [
-            Text(
-              result.questionSetTitle,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              '$score%',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.displayMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Your score',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 28),
+            Text(result.questionSetTitle, style: theme.textTheme.headlineSmall),
+            const SizedBox(height: 18),
             Card(
-              color: theme.colorScheme.surface,
-              child: Column(
-                children: [
-                  _ResultRow(
-                    label: 'Correct answers',
-                    value: result.correctCount.toString(),
-                  ),
-                  const Divider(height: 1),
-                  _ResultRow(
-                    label: 'Wrong answers',
-                    value: result.wrongCount.toString(),
-                  ),
-                  const Divider(height: 1),
-                  _ResultRow(
-                    label: 'Total questions',
-                    value: result.totalCount.toString(),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 104,
+                      height: 104,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '$score%',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _ResultStat(
+                            label: 'Correct answers',
+                            value: result.correctCount.toString(),
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ),
+                        Expanded(
+                          child: _ResultStat(
+                            label: 'Wrong answers',
+                            value: result.wrongCount.toString(),
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                        Expanded(
+                          child: _ResultStat(
+                            label: 'Total questions',
+                            value: result.totalCount.toString(),
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 28),
@@ -85,13 +105,10 @@ class QuizResultScreen extends StatelessWidget {
               const SizedBox(height: 12),
             ],
             const SizedBox(height: 16),
-            FilledButton.icon(
+            OutlinedButton.icon(
               onPressed: () => Navigator.of(context).pop(),
               icon: const Icon(Icons.arrow_back),
               label: const Text('Back to Question Set'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-              ),
             ),
           ],
         ),
@@ -114,83 +131,95 @@ class _AnswerReviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final statusColor = answerReview.isCorrect
-        ? theme.colorScheme.primary
+        ? theme.colorScheme.secondary
         : theme.colorScheme.error;
 
-    return Card(
-      color: theme.colorScheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  answerReview.isCorrect
-                      ? Icons.check_circle_outline
-                      : Icons.cancel_outlined,
-                  color: statusColor,
-                  size: 22,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Question $questionNumber',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Text(
-                  answerReview.isCorrect ? 'Correct' : 'Incorrect',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: statusColor,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              answerReview.questionText,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                answerReview.isCorrect
+                    ? Icons.check_circle_outline
+                    : Icons.cancel_outlined,
+                color: statusColor,
+                size: 22,
               ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Question $questionNumber',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              Text(
+                answerReview.isCorrect ? 'Correct' : 'Incorrect',
+                style: theme.textTheme.labelLarge?.copyWith(color: statusColor),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(answerReview.questionText, style: theme.textTheme.titleMedium),
+          const SizedBox(height: 12),
+          Text(
+            'Your answer: '
+            '${answerReview.selectedAnswerText ?? 'Not answered'}',
+            style: TextStyle(
+              color: answerReview.isCorrect
+                  ? theme.colorScheme.onSurface
+                  : theme.colorScheme.error,
             ),
-            const SizedBox(height: 12),
-            Text(
-              'Your answer: '
-              '${answerReview.selectedAnswerText ?? 'Not answered'}',
-            ),
-            const SizedBox(height: 6),
-            Text('Correct answer: ${answerReview.correctAnswerText}'),
-          ],
-        ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Correct answer: ${answerReview.correctAnswerText}',
+            style: TextStyle(color: theme.colorScheme.secondary),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _ResultRow extends StatelessWidget {
-  const _ResultRow({required this.label, required this.value});
+class _ResultStat extends StatelessWidget {
+  const _ResultStat({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   final String label;
   final String value;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
+    return Semantics(
+      label: '$label: $value',
+      child: Column(
         children: [
-          Expanded(child: Text(label)),
           Text(
             value,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
+            style: theme.textTheme.titleLarge?.copyWith(color: color),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],

@@ -24,7 +24,7 @@ void main() {
   ) async {
     await _openJavaScriptBasicsQuiz(tester);
 
-    expect(find.text('Quiz'), findsOneWidget);
+    expect(find.text('Exam Mode'), findsOneWidget);
     expect(find.text('JavaScript Basics Check'), findsOneWidget);
     expect(find.text('Question 1 of 3'), findsOneWidget);
     expect(
@@ -42,7 +42,11 @@ void main() {
     await _openJavaScriptBasicsQuiz(tester, learningRepository: repository);
 
     await _selectAnswer(tester, 'const');
+    await tester.tap(find.text('Next Question'));
+    await tester.pumpAndSettle();
     await _selectAnswer(tester, '===');
+    await tester.tap(find.text('Next Question'));
+    await tester.pumpAndSettle();
     await _selectAnswer(tester, 'push');
 
     final submitButton = find.text('Submit Quiz');
@@ -185,6 +189,12 @@ Future<void> _openJavaScriptBasicsQuiz(
   await tester.tap(find.text('JavaScript Basics Check'));
   await tester.pumpAndSettle();
   expect(find.text('About this question set'), findsOneWidget);
+
+  final chooseModeButton = find.text('Choose learning mode');
+  await tester.ensureVisible(chooseModeButton);
+  await tester.tap(chooseModeButton);
+  await tester.pumpAndSettle();
+  expect(find.text('How do you want to learn?'), findsOneWidget);
 
   final startQuizButton = find.text(startButtonText);
   await tester.ensureVisible(startQuizButton);

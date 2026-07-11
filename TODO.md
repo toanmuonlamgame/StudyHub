@@ -198,7 +198,7 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Add moderation/reporting before uploaded materials become broadly discoverable.
 - [ ] Add AI-assisted question extraction from user sources in V3 with citations, provenance, and human review.
 - [ ] Build a React Admin Dashboard later for real moderation and content operations, not as the learner app.
-- [ ] Define UI polish guidelines for clarity, motivation, accessibility, and visual consistency.
+- [x] Define and apply initial UI polish guidelines for clarity, motivation, accessibility, and visual consistency.
 - [ ] Define an animation budget covering purpose, duration, smoothness, and reduced-motion behavior.
 - [ ] Add a performance checklist before major feature commits.
 - [ ] Later measure release app size, startup time, perceived loading, smoothness, and API latency on representative devices.
@@ -207,6 +207,7 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Reassess microservices only when scale, ownership, or independent deployment provides clear evidence.
 
 ## Quality System Applied Tasks
+- [x] Restructure the Flutter learner flow into focused Home, browse, detail, mode, quiz, and result screens.
 - [x] Apply the quality and security checklist to the Practice Mode foundation.
 - [ ] Polish Practice Mode progress, accessibility, and feedback after user testing.
 - [ ] Decide whether Practice Mode history belongs in V2 user progress.

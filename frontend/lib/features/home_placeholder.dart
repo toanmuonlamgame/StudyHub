@@ -8,69 +8,71 @@ class HomePlaceholder extends StatelessWidget {
 
   final LearningRepository learningRepository;
 
-  static const _flowSteps = [
-    'Subject',
-    'Question Sets',
-    'Quiz',
-    'Result',
-    'Upload Placeholder',
-  ];
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('StudyHub')),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Text(
-              'StudyHub',
-              style: theme.textTheme.displaySmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Choose a subject, explore question sets, and build a steady study habit.',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 28),
-            FilledButton.icon(
-              onPressed: () => _openSubjects(context),
-              icon: const Icon(Icons.school_outlined),
-              label: const Text('Start learning'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'V1 learning path',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final step in _flowSteps)
-                  Chip(
-                    label: Text(step),
-                    backgroundColor: theme.colorScheme.primaryContainer,
-                    side: BorderSide.none,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.auto_stories_outlined,
+                      color: Colors.white,
+                    ),
                   ),
-              ],
-            ),
-          ],
+                  const SizedBox(width: 12),
+                  Text('StudyHub', style: theme.textTheme.titleLarge),
+                ],
+              ),
+              const Spacer(flex: 2),
+              Text('Learn with focus.', style: theme.textTheme.headlineMedium),
+              const SizedBox(height: 12),
+              Text(
+                'Choose a subject, practise with trusted question sets, and understand every result.',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 28),
+              FilledButton.icon(
+                onPressed: () => _openSubjects(context),
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('Start learning'),
+              ),
+              const Spacer(flex: 3),
+              Row(
+                children: [
+                  Icon(
+                    Icons.shield_outlined,
+                    size: 18,
+                    color: theme.colorScheme.secondary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Answers stay hidden until you submit or check.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

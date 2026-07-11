@@ -6,6 +6,7 @@ import '../models/question.dart';
 import '../models/question_set.dart';
 import '../models/quiz_mode.dart';
 import '../repositories/learning_repository.dart';
+import '../widgets/answer_option_card.dart';
 import 'quiz_result_screen.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -29,6 +30,7 @@ class _QuizScreenState extends State<QuizScreen> {
   late Future<List<Question>> _questionsFuture;
   bool _showValidation = false;
   bool _isSubmittingExamModeQuiz = false;
+  int _examQuestionIndex = 0;
 
   int _practiceQuestionIndex = 0;
   String? _practiceSelectedAnswerId;
@@ -47,7 +49,9 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_isPracticeMode ? 'Practice Mode' : 'Quiz')),
+      appBar: AppBar(
+        title: Text(_isPracticeMode ? 'Practice Mode' : 'Exam Mode'),
+      ),
       body: SafeArea(
         child: FutureBuilder<List<Question>>(
           future: _questionsFuture,
@@ -76,60 +80,96 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Widget _buildExamContent(BuildContext context, List<Question> questions) {
     final theme = Theme.of(context);
+    final question = questions[_examQuestionIndex];
+    final isFirstQuestion = _examQuestionIndex == 0;
+    final isLastQuestion = _examQuestionIndex == questions.length - 1;
 
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
       children: [
-        Text(
-          widget.questionSet.title,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          '${_examSelectedAnswerIds.length} of ${questions.length} answered',
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Question ${_examQuestionIndex + 1} of ${questions.length}',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+            Text(
+              '${_examSelectedAnswerIds.length} answered',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
         LinearProgressIndicator(
-          value: _examSelectedAnswerIds.length / questions.length,
+          value: (_examQuestionIndex + 1) / questions.length,
+          borderRadius: BorderRadius.circular(4),
         ),
         const SizedBox(height: 24),
-        for (var index = 0; index < questions.length; index++) ...[
-          _QuestionCard(
-            key: ValueKey(questions[index].id),
-            question: questions[index],
-            questionNumber: index + 1,
-            totalQuestions: questions.length,
-            selectedAnswerId: _examSelectedAnswerIds[questions[index].id],
-            showError:
-                _showValidation &&
-                !_examSelectedAnswerIds.containsKey(questions[index].id),
-            enabled: !_isSubmittingExamModeQuiz,
-            onSelected: (answerOptionId) {
-              _selectExamAnswer(questions[index].id, answerOptionId);
-            },
+        _QuestionCard(
+          key: ValueKey(question.id),
+          question: question,
+          selectedAnswerId: _examSelectedAnswerIds[question.id],
+          showError:
+              _showValidation &&
+              !_examSelectedAnswerIds.containsKey(question.id),
+          enabled: !_isSubmittingExamModeQuiz,
+          onSelected: (answerOptionId) {
+            _selectExamAnswer(question.id, answerOptionId);
+          },
+        ),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            if (!isFirstQuestion) ...[
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _isSubmittingExamModeQuiz
+                      ? null
+                      : _previousExamQuestion,
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Previous'),
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              flex: isFirstQuestion ? 1 : 1,
+              child: FilledButton.icon(
+                onPressed: _isSubmittingExamModeQuiz
+                    ? null
+                    : () => isLastQuestion
+                          ? _submitExamModeQuiz(questions)
+                          : _nextExamQuestion(question),
+                icon: _isSubmittingExamModeQuiz
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(isLastQuestion ? Icons.check : Icons.arrow_forward),
+                label: Text(
+                  _isSubmittingExamModeQuiz
+                      ? 'Submitting...'
+                      : isLastQuestion
+                      ? 'Submit Quiz'
+                      : 'Next Question',
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          widget.questionSet.title,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: 14),
-        ],
-        const SizedBox(height: 6),
-        FilledButton.icon(
-          onPressed: _isSubmittingExamModeQuiz
-              ? null
-              : () => _submitExamModeQuiz(questions),
-          icon: _isSubmittingExamModeQuiz
-              ? const SizedBox.square(
-                  dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.check),
-          label: Text(
-            _isSubmittingExamModeQuiz ? 'Submitting...' : 'Submit Quiz',
-          ),
-          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
         ),
       ],
     );
@@ -141,31 +181,35 @@ class _QuizScreenState extends State<QuizScreen> {
     final isLastQuestion = _practiceQuestionIndex == questions.length - 1;
 
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
       children: [
-        Text(
-          widget.questionSet.title,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Check each answer as you learn.',
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Question ${_practiceQuestionIndex + 1} of ${questions.length}',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+            Text(
+              'Instant feedback',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.secondary,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
         LinearProgressIndicator(
           value: (_practiceQuestionIndex + 1) / questions.length,
+          borderRadius: BorderRadius.circular(4),
         ),
         const SizedBox(height: 24),
         _QuestionCard(
           key: ValueKey(question.id),
           question: question,
-          questionNumber: _practiceQuestionIndex + 1,
-          totalQuestions: questions.length,
           selectedAnswerId: _practiceSelectedAnswerId,
           showError: false,
           enabled:
@@ -294,6 +338,7 @@ class _QuizScreenState extends State<QuizScreen> {
       _practiceSelectedAnswerId = null;
       _practiceAnswerCheckResult = null;
       _practiceAnswerCheckFailed = false;
+      _examQuestionIndex = 0;
       _questionsFuture = _loadQuestions();
     });
   }
@@ -305,6 +350,26 @@ class _QuizScreenState extends State<QuizScreen> {
 
     setState(() {
       _examSelectedAnswerIds[questionId] = answerOptionId;
+      _showValidation = false;
+    });
+  }
+
+  void _nextExamQuestion(Question question) {
+    if (!_examSelectedAnswerIds.containsKey(question.id)) {
+      setState(() => _showValidation = true);
+      return;
+    }
+
+    setState(() {
+      _examQuestionIndex++;
+      _showValidation = false;
+    });
+  }
+
+  void _previousExamQuestion() {
+    setState(() {
+      _examQuestionIndex--;
+      _showValidation = false;
     });
   }
 
@@ -450,8 +515,6 @@ class _QuestionCard extends StatelessWidget {
   const _QuestionCard({
     super.key,
     required this.question,
-    required this.questionNumber,
-    required this.totalQuestions,
     required this.selectedAnswerId,
     required this.showError,
     required this.enabled,
@@ -460,8 +523,6 @@ class _QuestionCard extends StatelessWidget {
   });
 
   final Question question;
-  final int questionNumber;
-  final int totalQuestions;
   final String? selectedAnswerId;
   final bool showError;
   final bool enabled;
@@ -473,27 +534,13 @@ class _QuestionCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      color: theme.colorScheme.surface,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Question $questionNumber of $totalQuestions',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              question.text,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
+            Text(question.text, style: theme.textTheme.titleLarge),
+            const SizedBox(height: 20),
             RadioGroup<String>(
               groupValue: selectedAnswerId,
               onChanged: (value) {
@@ -507,6 +554,7 @@ class _QuestionCard extends StatelessWidget {
                     _AnswerOptionTile(
                       answerOption: answerOption,
                       enabled: enabled,
+                      selected: answerOption.id == selectedAnswerId,
                     ),
                 ],
               ),
@@ -530,18 +578,22 @@ class _QuestionCard extends StatelessWidget {
 }
 
 class _AnswerOptionTile extends StatelessWidget {
-  const _AnswerOptionTile({required this.answerOption, required this.enabled});
+  const _AnswerOptionTile({
+    required this.answerOption,
+    required this.enabled,
+    required this.selected,
+  });
 
   final AnswerOption answerOption;
   final bool enabled;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    return RadioListTile<String>(
-      value: answerOption.id,
+    return AnswerOptionCard(
+      answerOption: answerOption,
+      selected: selected,
       enabled: enabled,
-      contentPadding: EdgeInsets.zero,
-      title: Text(answerOption.text),
     );
   }
 }

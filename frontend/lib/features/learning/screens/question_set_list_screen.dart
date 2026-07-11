@@ -4,6 +4,7 @@ import '../models/question_set.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
 import '../repositories/learning_repository.dart';
+import '../widgets/learning_stat_chip.dart';
 import 'question_set_detail_screen.dart';
 
 class QuestionSetListScreen extends StatefulWidget {
@@ -32,7 +33,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Question Sets')),
+      appBar: AppBar(title: const Text('Question sets')),
       body: SafeArea(
         child: FutureBuilder<_QuestionSetListData>(
           future: _dataFuture,
@@ -51,7 +52,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
             }
 
             return ListView.separated(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
               itemCount: data.questionSets.length + 1,
               separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
@@ -214,6 +215,7 @@ class _QuestionSetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final estimatedMinutes = (questionSet.questionCount * 1.5).ceil();
 
     return Semantics(
       button: true,
@@ -241,31 +243,43 @@ class _QuestionSetCard extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                if (topic != null) ...[
-                  const SizedBox(height: 10),
-                  Text(
-                    topic!.name,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
                 const SizedBox(height: 14),
+                Wrap(
+                  spacing: 7,
+                  runSpacing: 7,
+                  children: [
+                    LearningStatChip(
+                      icon: Icons.help_outline,
+                      label: '${questionSet.questionCount} questions',
+                    ),
+                    LearningStatChip(
+                      icon: Icons.schedule_outlined,
+                      label: '$estimatedMinutes min',
+                    ),
+                    const LearningStatChip(
+                      icon: Icons.signal_cellular_alt,
+                      label: 'Easy',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 Row(
                   children: [
+                    if (topic != null)
+                      Expanded(
+                        child: Text(
+                          topic!.name,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      )
+                    else
+                      const Spacer(),
                     Icon(
-                      Icons.help_outline,
+                      Icons.chevron_right,
                       color: theme.colorScheme.onSurfaceVariant,
-                      size: 18,
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${questionSet.questionCount} questions',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    const Spacer(),
-                    const Icon(Icons.chevron_right),
                   ],
                 ),
               ],
