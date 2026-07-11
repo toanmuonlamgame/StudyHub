@@ -27,6 +27,7 @@ implementation remains the default and requires no PostgreSQL database:
 GET  /learning/subjects
 GET  /learning/subjects/:subjectId/topics
 GET  /learning/subjects/:subjectId/question-sets
+GET  /learning/question-sets?subjectId=...&topicId=...&q=...&limit=20&cursor=...
 GET  /learning/question-sets/:questionSetId
 GET  /learning/question-sets/:questionSetId/questions
 POST /learning/questions/:questionId/check-answer
@@ -35,6 +36,12 @@ POST /learning/question-sets/:questionSetId/submit
 
 Question responses omit correctness metadata. Submit scoring stays inside the
 selected service.
+
+The paginated Question Set endpoint defaults to 20 items, accepts at most 50,
+and returns `{ items, nextCursor, hasMore }`. Its opaque cursor uses stable
+`createdAt` and `id` ordering. List items contain metadata only, never questions
+or answers. Difficulty and estimated time are currently derived from question
+count until those fields become persisted product metadata.
 
 Set `STUDYHUB_LEARNING_DATA_SOURCE=memory` or leave it unset for the current
 default. The prepared `prisma` option requires a valid local `DATABASE_URL` and
