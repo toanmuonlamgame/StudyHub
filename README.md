@@ -11,6 +11,10 @@ grows from a small learning loop into trusted community content.
 
 **Active development**
 
+Phase 1 is complete as a working learning foundation. See the
+[Phase 1 checkpoint](docs/PHASE_1_CHECKPOINT.md) for completed capabilities,
+safety guarantees, limitations, and Phase 2 entry criteria.
+
 - Flutter learner-app prototype with a complete local Exam Mode flow.
 - Fastify Learning API with typed service boundaries.
 - Flutter API mode through `ApiLearningRepository`.
@@ -187,6 +191,7 @@ The complete review standard is documented in
 
 ## Documentation
 
+- [Phase 1 checkpoint](docs/PHASE_1_CHECKPOINT.md)
 - [Project architecture](docs/ARCHITECTURE.md)
 - [Confirmed technology stack](docs/TECH_STACK.md)
 - [Product research](docs/PRODUCT_RESEARCH.md)

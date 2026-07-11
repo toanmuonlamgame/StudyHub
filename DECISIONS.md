@@ -2,6 +2,24 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-11 - Phase 1 Learning Foundation Closed
+Decision: Phase 1 is closed with the core StudyHub learning foundation working
+across Flutter mock/API modes, Fastify memory/Prisma modes, PostgreSQL, quiz
+safety contracts, pagination, indexes, and automated verification.
+
+Reason:
+- The browse, Exam Mode, Practice Mode, result/review, and data-source flows are
+  complete enough to serve as a stable foundation.
+- Keeping UI production polish in a separate phase prevents visual work from
+  obscuring contract, safety, and persistence risks.
+
+Rule:
+- Phase 2 may refine UI structure and interactions but must preserve Phase 1
+  repository/service boundaries, answer safety, API compatibility, and tests.
+- Phase 2 prioritizes professional UI/UX, responsive behavior, accessibility,
+  lightweight animation, and then Vietnamese localization.
+- See `docs/PHASE_1_CHECKPOINT.md` for the complete boundary.
+
 ## 2026-07-11 - Scalable Search And Data Growth
 Decision: StudyHub will use backend-side filtering, stable cursor pagination,
 PostgreSQL-first search, and optional external search only when measured scale or

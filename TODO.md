@@ -1,7 +1,21 @@
 # StudyHub TODO
 
 ## Current Phase
-Foundation / planning.
+Phase 1 foundation complete. Preparing Phase 2 UI/UX polish.
+
+## Phase 1 Checkpoint
+- [x] Complete the Flutter learner flow from Home through Result/Review.
+- [x] Support Exam Mode and Practice Mode with protected correctness data.
+- [x] Support Flutter mock/API and backend memory/Prisma modes.
+- [x] Add PostgreSQL schema, migrations, seed, smoke test, pagination, and initial indexes.
+- [x] Document Phase 1 capabilities, guarantees, limitations, and Phase 2 criteria.
+
+## Phase 2 UI/UX Milestones
+- [ ] CM37: Polish the visual design system and responsive learner surfaces.
+- [ ] CM38: Add lightweight learner animations and micro-interactions.
+- [ ] CM39: Add the Vietnamese localization foundation.
+- [ ] CM40: Add search/filter UI and cursor load-more foundations.
+- [ ] Verify text scaling, accessibility semantics, and touch targets on representative devices.
 
 ## Active
 - [x] Confirm product type: mobile learning platform.

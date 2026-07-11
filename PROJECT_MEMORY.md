@@ -4,7 +4,7 @@
 - Project name: StudyHub
 - Product type: mobile learning platform
 - Goal: learning project and internship portfolio
-- Current phase: foundation / planning
+- Current phase: Phase 1 foundation complete; preparing Phase 2 UI/UX polish
 
 ## Product Purpose
 StudyHub is a mobile learning platform for organizing and studying learning content. The product should help users browse structured learning content, practice question sets, upload their own materials, and contribute useful community content.
@@ -103,10 +103,10 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 
 ## Current Repository Status
 - Local project path: F:\Projects\StudyHub
-- Current phase: foundation / planning
-- Current structure includes project memory files and planning docs.
-- App code has not been started yet.
-- docs/ files should not be created until explicitly requested.
+- Phase 1 is complete as a working learning foundation across Flutter, Fastify,
+  Prisma/PostgreSQL, mock/API modes, pagination, safety boundaries, and tests.
+- Phase 2 should focus on professional learner UI/UX, responsive behavior,
+  lightweight interactions, accessibility, and then Vietnamese localization.
 
 ## Roadmap Summary
 - V1: basic taxonomy, browse question sets, take quiz, view results, upload documents/exams.
