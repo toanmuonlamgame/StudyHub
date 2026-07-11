@@ -12,6 +12,17 @@ npm test
 
 The server uses port `3000` by default and accepts a `PORT` environment variable.
 
+### Flutter Web local CORS
+
+The backend allows development browser origins matching
+`http://localhost:<port>` and `http://127.0.0.1:<port>`, including Flutter Web's
+random local ports. Android/mobile clients and tools without an `Origin` header
+continue to work normally.
+
+This is a local-development allowlist, not a production CORS policy and not an
+authentication boundary. A deployed environment must define its explicit trusted
+web origins rather than broadening this list or reflecting arbitrary origins.
+
 Health check:
 
 ```text

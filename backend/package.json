@@ -18,6 +18,7 @@
     "prisma:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@fastify/cors": "^11.3.0",
     "@prisma/client": "^6.19.3",
     "fastify": "^5.10.0"
   },

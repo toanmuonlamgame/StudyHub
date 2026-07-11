@@ -1,3 +1,4 @@
+import cors from '@fastify/cors';
 import Fastify, { type FastifyInstance } from 'fastify';
 
 import { createLearningRoutes } from './routes/learning.js';
@@ -8,6 +9,27 @@ import { createPrismaLearningService } from './services/prismaLearningService.js
 export interface BuildAppOptions {
   learningService?: LearningService;
   learningDataSource?: string;
+}
+
+function isAllowedDevelopmentOrigin(origin: string): boolean {
+  try {
+    const url = new URL(origin);
+    const isLoopbackHost =
+      url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+    const port = Number(url.port);
+
+    return (
+      url.protocol === 'http:' &&
+      isLoopbackHost &&
+      url.port.length > 0 &&
+      Number.isInteger(port) &&
+      port >= 1 &&
+      port <= 65535 &&
+      url.origin === origin
+    );
+  } catch {
+    return false;
+  }
 }
 
 function createConfiguredLearningService(dataSource: string): LearningService {
@@ -36,6 +58,15 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const learningService =
     options.learningService ?? createConfiguredLearningService(dataSource);
   const app = Fastify({ logger: true });
+
+  app.register(cors, {
+    origin: (origin, callback) => {
+      callback(
+        null,
+        origin === undefined || isAllowedDevelopmentOrigin(origin),
+      );
+    },
+  });
 
   app.get('/health', async () => ({
     status: 'ok',
