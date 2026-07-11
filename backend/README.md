@@ -29,6 +29,7 @@ GET  /learning/subjects/:subjectId/topics
 GET  /learning/subjects/:subjectId/question-sets
 GET  /learning/question-sets/:questionSetId
 GET  /learning/question-sets/:questionSetId/questions
+POST /learning/questions/:questionId/check-answer
 POST /learning/question-sets/:questionSetId/submit
 ```
 
