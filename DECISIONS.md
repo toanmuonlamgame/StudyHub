@@ -2,6 +2,23 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-11 - Scalable Search And Data Growth
+Decision: StudyHub will use backend-side filtering, stable cursor pagination,
+PostgreSQL-first search, and optional external search only when measured scale or
+relevance requirements justify it.
+
+Reason:
+- Mobile clients should receive small screen-specific payloads instead of whole datasets.
+- PostgreSQL already owns transactional truth and can support the initial search/indexing needs.
+- Premature cache, search, and analytics infrastructure would add consistency and operational cost.
+
+Rule:
+- Growing list endpoints validate bounded limits and opaque cursors.
+- Add query-driven PostgreSQL indexes through Prisma migrations.
+- Keep search indexes rebuildable and free of private content, secrets, and unreleased answer keys.
+- Separate future analytical workloads from the transactional API.
+- Follow `docs/SCALABILITY_AND_SEARCH.md` when implementing list/search work.
+
 ## 2026-07-11 - StudyHub Quality System
 Decision: Future StudyHub features use the balanced UX, performance, security, and feature-quality review system in `docs/QUALITY_SYSTEM.md`.
 

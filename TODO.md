@@ -213,6 +213,15 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Apply the frontend performance checklist before major UI feature commits.
 - [ ] Add API pagination when list data grows beyond small V1 fixtures.
 - [ ] Add measured caching later for read-heavy public learning content.
+
+## Scalability And Search
+- [ ] Add a paginated Question Set list endpoint with stable cursor ordering.
+- [ ] Add a paginated Study Material list endpoint when the content model is implemented.
+- [ ] Add query-driven Prisma indexes for list and search filters.
+- [ ] Add validated PostgreSQL-first search query support.
+- [ ] Add debounced search and stale-response handling in Flutter.
+- [ ] Add measured caching later for read-heavy public taxonomy/content metadata.
+- [ ] Add analytics summary tables or materialized views before considering a warehouse.
 - [ ] Measure release app size, startup, and perceived loading on representative devices later.
 
 ## V1 API Checklist

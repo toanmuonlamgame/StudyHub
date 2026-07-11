@@ -290,4 +290,14 @@ V1 should not implement:
 - Marketplace.
 - Full admin dashboard.
 
+## Data Growth Standard
+Growing list and search workflows must use backend-side filtering, stable cursor
+pagination, compact DTOs, and indexed PostgreSQL queries. Flutter should request
+only the slice required by the current screen and fetch detail on demand. The
+current API remains unchanged until paginated endpoints are introduced
+incrementally.
+
+See [SCALABILITY_AND_SEARCH.md](SCALABILITY_AND_SEARCH.md) for the list contract,
+indexing plan, search progression, caching boundaries, and analytics strategy.
+
 These belong in later phases after the core learning loop works.

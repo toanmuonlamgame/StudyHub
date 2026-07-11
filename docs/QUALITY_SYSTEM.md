@@ -158,3 +158,9 @@ avoid startup-blocking refreshes or excessive celebration animation.
 Before a major feature commit, select the relevant sections above and include the
 results in the task handoff. A small feature does not need every item, but skipped
 items should be intentional rather than accidental.
+
+For list, filter, search, caching, or analytics work, also apply the endpoint and
+data-growth checklist in
+[SCALABILITY_AND_SEARCH.md](SCALABILITY_AND_SEARCH.md). In particular, verify
+bounded payloads, stable pagination, indexed filtering, visibility rules, and the
+absence of correctness/private-data leaks.

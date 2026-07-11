@@ -129,6 +129,7 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - Aim for a polished, feature-rich learning experience while keeping the app lightweight, smooth, and API-efficient.
 - Use `docs/QUALITY_SYSTEM.md` as the balanced UX, performance, security, and Definition of Done guardrail for future features.
 - Future AI study aids must come from user-provided sources, retain citations/provenance, and pass review before publication.
+- Plan for data growth with backend filtering, cursor pagination, PostgreSQL indexes, and later measured caching, external search, or analytics only when needed.
 
 ## AI Workflow
 - Codex app: main coding assistant.
