@@ -217,7 +217,9 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 
 ## Scalability And Search
 - [x] Add a paginated Question Set list endpoint with stable cursor ordering.
-- [ ] Migrate Flutter Question Set browsing to consume the paginated endpoint.
+- [x] Migrate Flutter Question Set browsing to consume the first page of the paginated endpoint.
+- [ ] Add load-more/infinite-scroll UI using `nextCursor` when Question Set data grows.
+- [ ] Add search/filter UI with debouncing after the paginated browse flow is stable.
 - [ ] Add a paginated Study Material list endpoint when the content model is implemented.
 - [ ] Add query-driven Prisma indexes for list and search filters.
 - [ ] Add validated PostgreSQL-first search query support.

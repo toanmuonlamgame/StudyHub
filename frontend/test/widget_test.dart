@@ -6,6 +6,7 @@ import 'package:frontend/features/learning/models/answer_check_result.dart';
 import 'package:frontend/features/learning/models/answer_review.dart';
 import 'package:frontend/features/learning/models/question.dart';
 import 'package:frontend/features/learning/models/question_set.dart';
+import 'package:frontend/features/learning/models/paginated_result.dart';
 import 'package:frontend/features/learning/models/quiz_result.dart';
 import 'package:frontend/features/learning/repositories/learning_repository.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
@@ -213,14 +214,26 @@ class _RetryQuestionSetRepository extends MockLearningRepository {
   int questionSetLoadCount = 0;
 
   @override
-  Future<List<QuestionSet>> getQuestionSetsBySubjectId(String subjectId) {
+  Future<PaginatedResult<QuestionSet>> listQuestionSets({
+    String? subjectId,
+    String? topicId,
+    String? q,
+    int limit = 20,
+    String? cursor,
+  }) {
     questionSetLoadCount++;
 
     if (questionSetLoadCount == 1) {
       return Future.error(Exception('Temporary question set error'));
     }
 
-    return super.getQuestionSetsBySubjectId(subjectId);
+    return super.listQuestionSets(
+      subjectId: subjectId,
+      topicId: topicId,
+      q: q,
+      limit: limit,
+      cursor: cursor,
+    );
   }
 }
 

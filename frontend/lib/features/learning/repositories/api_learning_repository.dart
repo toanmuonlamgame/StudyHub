@@ -7,6 +7,7 @@ import '../models/answer_option.dart';
 import '../models/answer_review.dart';
 import '../models/question.dart';
 import '../models/question_set.dart';
+import '../models/paginated_result.dart';
 import '../models/quiz_result.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
@@ -49,6 +50,40 @@ class ApiLearningRepository implements LearningRepository {
       body,
       'questionSets',
     ).map(_questionSetFromJson).toList(growable: false);
+  }
+
+  @override
+  Future<PaginatedResult<QuestionSet>> listQuestionSets({
+    String? subjectId,
+    String? topicId,
+    String? q,
+    int limit = 20,
+    String? cursor,
+  }) async {
+    final normalizedQuery = q?.trim();
+    final queryParameters = <String, String>{
+      'limit': limit.toString(),
+      'subjectId': ?subjectId,
+      'topicId': ?topicId,
+      'cursor': ?cursor,
+    };
+    if (normalizedQuery != null && normalizedQuery.isNotEmpty) {
+      queryParameters['q'] = normalizedQuery;
+    }
+    final uri = _endpoint(
+      'learning/question-sets',
+    ).replace(queryParameters: queryParameters);
+    final response = await _client.get(uri);
+    final body = _decodeResponse(response, 'listQuestionSets');
+
+    return PaginatedResult(
+      items: _readObjectList(
+        body,
+        'items',
+      ).map(_questionSetFromJson).toList(growable: false),
+      nextCursor: _readNullableString(body, 'nextCursor'),
+      hasMore: _readBool(body, 'hasMore'),
+    );
   }
 
   @override
@@ -185,6 +220,9 @@ QuestionSet _questionSetFromJson(Map<String, dynamic> json) {
     title: _readString(json, 'title'),
     description: _readString(json, 'description'),
     questionCount: _readInt(json, 'questionCount'),
+    estimatedMinutes: _readOptionalInt(json, 'estimatedMinutes'),
+    difficulty: _readNullableString(json, 'difficulty'),
+    createdAt: _readOptionalDateTime(json, 'createdAt'),
   );
 }
 
@@ -295,6 +333,32 @@ int _readInt(Map<String, dynamic> json, String key) {
     throw FormatException('Expected "$key" to be an integer.');
   }
   return value;
+}
+
+int? _readOptionalInt(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is! int) {
+    throw FormatException('Expected "$key" to be an integer or null.');
+  }
+  return value;
+}
+
+DateTime? _readOptionalDateTime(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is! String) {
+    throw FormatException('Expected "$key" to be a date string or null.');
+  }
+  final parsed = DateTime.tryParse(value);
+  if (parsed == null) {
+    throw FormatException('Expected "$key" to contain a valid date.');
+  }
+  return parsed;
 }
 
 double _readDouble(Map<String, dynamic> json, String key) {

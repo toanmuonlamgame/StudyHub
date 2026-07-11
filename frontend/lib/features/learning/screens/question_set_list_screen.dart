@@ -80,13 +80,18 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
   }
 
   Future<_QuestionSetListData> _loadData() async {
-    final questionSets = await widget.learningRepository
-        .getQuestionSetsBySubjectId(widget.subject.id);
+    final questionSetPage = await widget.learningRepository.listQuestionSets(
+      subjectId: widget.subject.id,
+      limit: 20,
+    );
     final topics = await widget.learningRepository.getTopicsBySubjectId(
       widget.subject.id,
     );
 
-    return _QuestionSetListData(questionSets: questionSets, topics: topics);
+    return _QuestionSetListData(
+      questionSets: questionSetPage.items,
+      topics: topics,
+    );
   }
 
   void _retryLoadingData() {
@@ -215,7 +220,10 @@ class _QuestionSetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final estimatedMinutes = (questionSet.questionCount * 1.5).ceil();
+    final estimatedMinutes =
+        questionSet.estimatedMinutes ??
+        (questionSet.questionCount * 1.5).ceil();
+    final difficulty = questionSet.difficulty ?? 'easy';
 
     return Semantics(
       button: true,
@@ -256,9 +264,9 @@ class _QuestionSetCard extends StatelessWidget {
                       icon: Icons.schedule_outlined,
                       label: '$estimatedMinutes min',
                     ),
-                    const LearningStatChip(
+                    LearningStatChip(
                       icon: Icons.signal_cellular_alt,
-                      label: 'Easy',
+                      label: _capitalize(difficulty),
                     ),
                   ],
                 ),
@@ -288,6 +296,13 @@ class _QuestionSetCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _capitalize(String value) {
+    if (value.isEmpty) {
+      return value;
+    }
+    return '${value[0].toUpperCase()}${value.substring(1)}';
   }
 }
 

@@ -24,7 +24,10 @@ class QuestionSetDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final estimatedMinutes = (questionSet.questionCount * 1.5).ceil();
+    final estimatedMinutes =
+        questionSet.estimatedMinutes ??
+        (questionSet.questionCount * 1.5).ceil();
+    final difficulty = questionSet.difficulty ?? 'easy';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Question set')),
@@ -67,9 +70,9 @@ class QuestionSetDetailScreen extends StatelessWidget {
                   icon: Icons.schedule_outlined,
                   label: '$estimatedMinutes min',
                 ),
-                const LearningStatChip(
+                LearningStatChip(
                   icon: Icons.signal_cellular_alt,
-                  label: 'Easy',
+                  label: _capitalize(difficulty),
                 ),
               ],
             ),
@@ -127,5 +130,12 @@ class QuestionSetDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _capitalize(String value) {
+    if (value.isEmpty) {
+      return value;
+    }
+    return '${value[0].toUpperCase()}${value.substring(1)}';
   }
 }

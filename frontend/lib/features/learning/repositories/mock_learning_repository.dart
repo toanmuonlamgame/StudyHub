@@ -3,6 +3,7 @@ import '../models/answer_check_result.dart';
 import '../models/answer_review.dart';
 import '../models/question.dart';
 import '../models/question_set.dart';
+import '../models/paginated_result.dart';
 import '../models/quiz_result.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
@@ -39,6 +40,52 @@ class MockLearningRepository implements LearningRepository {
   @override
   Future<List<QuestionSet>> getQuestionSetsBySubjectId(String subjectId) async {
     return mock_data.getQuestionSetsBySubjectId(subjectId);
+  }
+
+  @override
+  Future<PaginatedResult<QuestionSet>> listQuestionSets({
+    String? subjectId,
+    String? topicId,
+    String? q,
+    int limit = 20,
+    String? cursor,
+  }) async {
+    if (limit < 1 || limit > 50) {
+      throw ArgumentError.value(limit, 'limit', 'Must be between 1 and 50.');
+    }
+
+    final search = q?.trim().toLowerCase();
+    final filtered = mock_data.mockQuestionSets
+        .where(
+          (questionSet) =>
+              (subjectId == null || questionSet.subjectId == subjectId) &&
+              (topicId == null || questionSet.topicId == topicId) &&
+              (search == null ||
+                  search.isEmpty ||
+                  questionSet.title.toLowerCase().contains(search)),
+        )
+        .toList(growable: false);
+
+    var startIndex = 0;
+    if (cursor != null) {
+      final cursorIndex = filtered.indexWhere(
+        (questionSet) => questionSet.id == cursor,
+      );
+      if (cursorIndex == -1) {
+        throw StateError('Invalid mock question set cursor.');
+      }
+      startIndex = cursorIndex + 1;
+    }
+
+    final endIndex = (startIndex + limit).clamp(0, filtered.length);
+    final items = filtered.sublist(startIndex, endIndex);
+    final hasMore = endIndex < filtered.length;
+
+    return PaginatedResult(
+      items: List.unmodifiable(items),
+      nextCursor: hasMore && items.isNotEmpty ? items.last.id : null,
+      hasMore: hasMore,
+    );
   }
 
   @override

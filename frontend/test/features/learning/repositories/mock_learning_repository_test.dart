@@ -107,6 +107,32 @@ void main() {
     }
   });
 
+  test('paginates and filters mock question sets', () async {
+    const repository = MockLearningRepository();
+
+    final firstPage = await repository.listQuestionSets(
+      subjectId: 'subject_javascript',
+      limit: 1,
+    );
+    final secondPage = await repository.listQuestionSets(
+      subjectId: 'subject_javascript',
+      limit: 1,
+      cursor: firstPage.nextCursor,
+    );
+    final searchPage = await repository.listQuestionSets(
+      topicId: 'topic_js_functions',
+      q: 'functions',
+    );
+
+    expect(firstPage.items, hasLength(1));
+    expect(firstPage.hasMore, isTrue);
+    expect(firstPage.nextCursor, isNotNull);
+    expect(secondPage.items, hasLength(1));
+    expect(secondPage.hasMore, isFalse);
+    expect(secondPage.items.single.id, isNot(firstPage.items.single.id));
+    expect(searchPage.items.single.id, 'question_set_js_functions');
+  });
+
   test('checks a practice answer and returns correctness afterward', () async {
     const repository = MockLearningRepository();
 

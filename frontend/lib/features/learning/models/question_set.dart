@@ -6,6 +6,9 @@ class QuestionSet {
     required this.description,
     required this.questionCount,
     this.topicId,
+    this.estimatedMinutes,
+    this.difficulty,
+    this.createdAt,
   });
 
   final String id;
@@ -14,4 +17,7 @@ class QuestionSet {
   final String title;
   final String description;
   final int questionCount;
+  final int? estimatedMinutes;
+  final String? difficulty;
+  final DateTime? createdAt;
 }

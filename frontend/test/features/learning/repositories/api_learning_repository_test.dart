@@ -74,6 +74,60 @@ void main() {
     expect(questions.single.answerOptions.first.text, 'var');
   });
 
+  test(
+    'maps paginated question sets and sends list query parameters',
+    () async {
+      final client = MockClient((request) async {
+        expect(request.method, 'GET');
+        expect(request.url.path, '/learning/question-sets');
+        expect(request.url.queryParameters, {
+          'limit': '10',
+          'subjectId': 'subject_javascript',
+          'topicId': 'topic_js_syntax',
+          'q': 'basics',
+          'cursor': 'opaque-cursor',
+        });
+
+        return _jsonResponse({
+          'items': [
+            {
+              'id': 'question_set_js_basics',
+              'subjectId': 'subject_javascript',
+              'topicId': 'topic_js_syntax',
+              'title': 'JavaScript Basics Check',
+              'description': 'Review variables, equality, and arrays.',
+              'questionCount': 3,
+              'estimatedMinutes': 5,
+              'difficulty': 'easy',
+              'createdAt': '2026-01-01T00:00:00.000Z',
+            },
+          ],
+          'nextCursor': 'next-page',
+          'hasMore': true,
+        });
+      });
+      final repository = ApiLearningRepository(
+        baseUrl: 'http://studyhub.test',
+        client: client,
+      );
+
+      final page = await repository.listQuestionSets(
+        subjectId: 'subject_javascript',
+        topicId: 'topic_js_syntax',
+        q: ' basics ',
+        limit: 10,
+        cursor: 'opaque-cursor',
+      );
+
+      expect(page.items, hasLength(1));
+      expect(page.items.single.estimatedMinutes, 5);
+      expect(page.items.single.difficulty, 'easy');
+      expect(page.items.single.createdAt, DateTime.utc(2026));
+      expect(page.nextCursor, 'next-page');
+      expect(page.hasMore, isTrue);
+    },
+  );
+
   test('maps submit result and answer reviews', () async {
     final client = MockClient((request) async {
       expect(request.method, 'POST');
