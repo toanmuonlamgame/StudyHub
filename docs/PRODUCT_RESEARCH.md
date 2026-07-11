@@ -4,6 +4,10 @@
 
 This note extracts product and engineering lessons from established learning platforms. It does not recommend copying their UI, branding, assets, proprietary content, ranking systems, or exact mechanics. Sources are first-party product documentation and engineering publications; recommendations for StudyHub are explicitly presented as adaptations or inferences.
 
+## Balanced product standard
+
+Learning apps succeed not only by being fast, but by feeling useful, engaging, polished, and motivating. StudyHub should balance learning value and modern UX with performance guardrails: preserve purposeful visual polish and valuable features, then implement them with measured startup work, smooth interaction, small payloads, lazy loading, and appropriate caching.
+
 ## Platform lessons
 
 ### Quizlet
@@ -98,4 +102,3 @@ Coursera Engineering describes enforcing a common architecture across iOS and An
 - **Keep one consistent architecture.** Flutter screens depend on repositories; backend routes depend on service contracts; PostgreSQL remains behind Prisma. Add modules within the current modular monolith before considering deployment-level services.
 - **Make AI a reviewed content pipeline, not a chat shortcut.** Source ingestion, citations, draft state, validation, and human approval come before automatic publication.
 - **Use evidence to trigger complexity.** Pagination, caching, offline support, adaptive review, and service extraction should follow measured payload, latency, reliability, or ownership needs.
-

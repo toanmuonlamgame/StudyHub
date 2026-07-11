@@ -67,6 +67,22 @@ including slower devices and networks.
 - Optimize media before delivery and measure on a low-end Android device, not
   only an emulator or development machine.
 
+## Balanced Performance and UX Standard
+- StudyHub should be beautiful, modern, useful, and feature-rich while remaining
+  lightweight and responsive.
+- Optimization means removing unnecessary work, blocking calls, oversized
+  payloads, wasteful rebuilds, and avoidable asset cost. It does not mean
+  stripping away product value or leaving the interface visually unfinished.
+- UI polish is encouraged when it improves clarity, confidence, motivation, or
+  learning feedback and is measured on representative devices.
+- Animations should be lightweight, purposeful, interruptible, and never block
+  navigation, answer selection, quiz submission, or result review.
+- Richer features should be supported through pagination, small endpoint-specific
+  payloads, lazy loading, and measured caching rather than loading all data at
+  once.
+- When a valuable feature creates a performance problem, prefer a
+  performance-aware implementation before removing the feature.
+
 ## Security And Data Safety
 - Pre-submit question responses must never expose `isCorrect`, answer keys, or
   equivalent correctness metadata.

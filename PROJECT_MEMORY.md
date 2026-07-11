@@ -126,6 +126,7 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - Add Kotlin only when a concrete native Android requirement justifies it.
 - Keep the backend a modular monolith with clear service contracts until scale or ownership requires extraction.
 - Treat mobile performance, small API payloads, pagination, and later read caching as product requirements.
+- Aim for a polished, feature-rich learning experience while keeping the app lightweight, smooth, and API-efficient.
 - Future AI study aids must come from user-provided sources, retain citations/provenance, and pass review before publication.
 
 ## AI Workflow

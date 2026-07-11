@@ -2,6 +2,20 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-11 - Balanced Performance And UX
+Decision: Performance must not be used as an excuse to make StudyHub visually poor, unfinished, or feature-poor. StudyHub will prefer a polished, modern learning experience implemented within explicit performance guardrails.
+
+Reason:
+- Visual clarity, feedback, motivation, and trust are part of product quality.
+- Removing useful features is not the default solution to inefficient loading, rendering, assets, or API access.
+- Measured budgets make it possible to keep product value while detecting regressions early.
+
+Rule:
+- Keep purposeful UI polish and lightweight animation when they support learning.
+- Animations must not block navigation or core learning interactions.
+- Use pagination, small payloads, lazy loading, caching, and efficient rendering instead of loading all data at once.
+- Evaluate valuable features for a performance-aware implementation before removing them.
+
 ## 2026-07-11 - Research-Informed Architecture Guardrails
 Decision:
 - Keep Flutter as the learner-facing mobile app.

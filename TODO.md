@@ -198,7 +198,10 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Add moderation/reporting before uploaded materials become broadly discoverable.
 - [ ] Add AI-assisted question extraction from user sources in V3 with citations, provenance, and human review.
 - [ ] Build a React Admin Dashboard later for real moderation and content operations, not as the learner app.
-- [ ] Create and enforce a mobile performance budget/checklist covering app size, startup, smoothness, and API latency.
+- [ ] Define UI polish guidelines for clarity, motivation, accessibility, and visual consistency.
+- [ ] Define an animation budget covering purpose, duration, smoothness, and reduced-motion behavior.
+- [ ] Add a performance checklist before major feature commits.
+- [ ] Later measure release app size, startup time, perceived loading, smoothness, and API latency on representative devices.
 - [ ] Add API pagination before community content lists grow large.
 - [ ] Add measured caching later for stable, read-heavy taxonomy and published content.
 - [ ] Reassess microservices only when scale, ownership, or independent deployment provides clear evidence.
