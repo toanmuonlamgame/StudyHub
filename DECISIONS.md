@@ -2,6 +2,28 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-13 - Honest, Purposeful Learner Hub
+Decision:
+- StudyHub Home is a mobile-first, icon-driven hub with one primary learning
+  route, compact shortcuts, manual feature banners, and clearly separated
+  upcoming destinations.
+- Progress uses honest empty metric shells until persisted attempt data exists.
+- Settings exposes only working preferences; planned controls are visibly
+  unavailable instead of pretending to function.
+
+Reason:
+- A richer interface should improve orientation and motivation without inventing
+  activity, commercial offers, account state, or unfinished capabilities.
+- Keeping Home independent from `LearningRepository` avoids eager API work and
+  preserves fast startup while still giving the product a complete structure.
+
+Rule:
+- Banners must not auto-rotate, make unsupported claims, or mimic discounts.
+- Every unfinished destination must be labeled `Coming soon` and remain inert.
+- Prefer purposeful icons, concise copy, clear hierarchy, and lightweight
+  built-in motion over filler text, decorative clutter, or fake dashboard data.
+- Load Subjects and other learning data only after an explicit Learn action.
+
 ## 2026-07-13 - Localization, Search, And Mobile Accessibility Boundaries
 Decision:
 - Localize StudyHub system interface through Flutter ARB resources for English

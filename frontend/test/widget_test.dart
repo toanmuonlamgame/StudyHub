@@ -10,6 +10,7 @@ import 'package:frontend/features/learning/models/question.dart';
 import 'package:frontend/features/learning/models/question_set.dart';
 import 'package:frontend/features/learning/models/paginated_result.dart';
 import 'package:frontend/features/learning/models/quiz_result.dart';
+import 'package:frontend/features/learning/models/subject.dart';
 import 'package:frontend/features/learning/repositories/learning_repository.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
 import 'package:frontend/features/learning/screens/quiz_result_screen.dart';
@@ -33,14 +34,18 @@ void main() {
     );
 
     expect(find.text('StudyHub'), findsWidgets);
-    expect(find.text('Start learning'), findsOneWidget);
+    expect(find.text('Featured'), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-banner-carousel')), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-banner-indicator')), findsOneWidget);
 
-    await tester.drag(find.byType(ListView), const Offset(0, -500));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Exam Mode'), findsOneWidget);
-    expect(find.text('Practice Mode'), findsOneWidget);
-    expect(find.text('Safe Review'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('home-quick-action-grid')),
+      300,
+      scrollable: _homeScrollable(),
+    );
+    expect(find.text('Quick actions'), findsOneWidget);
+    expect(find.textContaining('discount'), findsNothing);
+    expect(find.textContaining('% off'), findsNothing);
   });
 
   testWidgets('switches between honest top-level app sections', (
@@ -50,26 +55,92 @@ void main() {
       const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
     );
 
-    expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Learn'), findsOneWidget);
-    expect(find.text('Progress'), findsOneWidget);
-    expect(find.text('Settings'), findsOneWidget);
+    expect(_navigationLabel('Home'), findsOneWidget);
+    expect(_navigationLabel('Learn'), findsOneWidget);
+    expect(_navigationLabel('Progress'), findsOneWidget);
+    expect(_navigationLabel('Settings'), findsOneWidget);
 
-    await tester.tap(find.text('Learn'));
+    await tester.tap(_navigationLabel('Learn'));
     await tester.pumpAndSettle();
     expect(find.text('Choose a subject'), findsOneWidget);
 
-    await tester.tap(find.text('Progress'));
+    await tester.tap(_navigationLabel('Progress'));
     await tester.pumpAndSettle();
-    expect(find.text('Progress tracking is planned'), findsOneWidget);
+    expect(find.text('Your learning overview'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('progress-empty-metrics')),
+      findsOneWidget,
+    );
     expect(find.text('Start learning'), findsOneWidget);
     expect(find.textContaining('streak'), findsNothing);
+    expect(find.text('0'), findsNothing);
 
-    await tester.tap(find.text('Settings'));
+    await tester.tap(_navigationLabel('Settings'));
     await tester.pumpAndSettle();
     expect(find.text('About StudyHub'), findsOneWidget);
-    expect(find.text('Learning safety'), findsOneWidget);
+    expect(find.text('Learning safety'), findsWidgets);
     expect(find.byType(Switch), findsNothing);
+  });
+
+  testWidgets('featured banner is manually swipeable', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
+
+    expect(find.bySemanticsLabel('Featured item 1 of 3'), findsWidgets);
+    await tester.drag(find.byType(PageView), const Offset(-320, 0));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Featured item 2 of 3'), findsWidgets);
+  });
+
+  testWidgets('home shortcuts switch tabs without eager subject loading', (
+    WidgetTester tester,
+  ) async {
+    final repository = _SubjectLoadTrackingRepository();
+    await tester.pumpWidget(
+      StudyHubApp(
+        learningRepository: repository,
+        initialLocaleSelection: AppLocaleSelection.english,
+      ),
+    );
+    expect(repository.subjectLoadCount, 0);
+
+    await _tapHomeShortcut(tester, 'progress');
+    expect(find.text('Your learning overview'), findsOneWidget);
+    expect(repository.subjectLoadCount, 0);
+
+    await tester.tap(_navigationLabel('Home'));
+    await tester.pumpAndSettle();
+    await _tapHomeShortcut(tester, 'settings');
+    expect(find.text('Language'), findsOneWidget);
+    expect(repository.subjectLoadCount, 0);
+
+    await tester.tap(_navigationLabel('Home'));
+    await tester.pumpAndSettle();
+    await _startLearningFromHome(tester);
+    expect(find.text('Choose a subject'), findsOneWidget);
+    expect(repository.subjectLoadCount, 1);
+  });
+
+  testWidgets('upcoming Home destinations are labeled honestly', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
+
+    await tester.scrollUntilVisible(
+      find.text('Study Materials'),
+      350,
+      scrollable: _homeScrollable(),
+    );
+    expect(find.text('Coming soon'), findsWidgets);
+    expect(
+      find.bySemanticsLabel('Study Materials, coming soon'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('progress call to action switches to Learn', (
@@ -79,9 +150,17 @@ void main() {
       const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
     );
 
-    await tester.tap(find.text('Progress'));
+    await tester.tap(_navigationLabel('Progress'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Start learning'));
+    final progressCta = find.byKey(const ValueKey('progress-start-learning'));
+    await tester.scrollUntilVisible(
+      progressCta,
+      200,
+      scrollable: _verticalScrollableWithin('progress-list'),
+    );
+    await tester.ensureVisible(progressCta);
+    await tester.pumpAndSettle();
+    await tester.tap(progressCta);
     await tester.pumpAndSettle();
 
     expect(find.text('Choose a subject'), findsOneWidget);
@@ -94,7 +173,7 @@ void main() {
       const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
     );
 
-    await tester.tap(find.text('Start learning'));
+    await _startLearningFromHome(tester);
     await tester.pumpAndSettle();
     await tester.tap(find.text('JavaScript Basics'));
     await tester.pumpAndSettle();
@@ -121,7 +200,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.text('Learn'));
+    await tester.tap(_navigationLabel('Learn'));
     await tester.pumpAndSettle();
     expect(find.text('Choose a subject'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -134,7 +213,7 @@ void main() {
       const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
     );
 
-    await tester.tap(find.text('Settings'));
+    await tester.tap(_navigationLabel('Settings'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Tiếng Việt'));
     await tester.pumpAndSettle();
@@ -144,7 +223,9 @@ void main() {
     expect(find.text('Cài đặt'), findsWidgets);
     expect(find.byIcon(Icons.check_circle), findsOneWidget);
 
-    await tester.tap(find.text('Học tập'));
+    await tester.tap(_navigationLabel('Trang chủ'));
+    await tester.pumpAndSettle();
+    await _startLearningFromHome(tester);
     await tester.pumpAndSettle();
     expect(find.text('Chọn môn học'), findsOneWidget);
     expect(find.text('JavaScript Basics'), findsOneWidget);
@@ -165,7 +246,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Bắt đầu học'), findsOneWidget);
+    expect(find.text('Nổi bật'), findsOneWidget);
     expect(find.text('Học tập'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -176,7 +257,7 @@ void main() {
     await tester.pumpWidget(
       const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
     );
-    await tester.tap(find.text('Settings'));
+    await tester.tap(_navigationLabel('Settings'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Tiếng Việt'));
     await tester.pumpAndSettle();
@@ -186,7 +267,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Học tập'), findsOneWidget);
-    expect(find.text('Cài đặt'), findsOneWidget);
+    expect(_navigationLabel('Cài đặt'), findsOneWidget);
   });
 
   testWidgets('browses subjects and question sets to open a quiz', (
@@ -362,7 +443,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Start learning'));
+    await _startLearningFromHome(tester);
     await tester.pumpAndSettle();
     await tester.tap(find.text('JavaScript Basics'));
     await tester.pumpAndSettle();
@@ -437,6 +518,45 @@ void main() {
   });
 }
 
+Finder _navigationLabel(String label) {
+  return find.descendant(
+    of: find.byType(NavigationBar),
+    matching: find.text(label),
+  );
+}
+
+Future<void> _tapHomeShortcut(WidgetTester tester, String id) async {
+  final shortcut = find.byKey(ValueKey('home-quick-$id'));
+  await tester.fling(_homeScrollable(), const Offset(0, 1200), 1200);
+  await tester.pumpAndSettle();
+  await tester.scrollUntilVisible(shortcut, 250, scrollable: _homeScrollable());
+  await tester.ensureVisible(shortcut);
+  await tester.pumpAndSettle();
+  await tester.tap(shortcut);
+  await tester.pumpAndSettle();
+}
+
+Finder _homeScrollable() {
+  return _verticalScrollableWithin('home-hub-list');
+}
+
+Finder _verticalScrollableWithin(String key) {
+  return find
+      .descendant(
+        of: find.byKey(ValueKey(key)),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        ),
+      )
+      .first;
+}
+
+Future<void> _startLearningFromHome(WidgetTester tester) {
+  return _tapHomeShortcut(tester, 'start-learning');
+}
+
 Future<void> _openJavaScriptBasicsQuiz(
   WidgetTester tester, {
   LearningRepository learningRepository = const MockLearningRepository(),
@@ -449,7 +569,7 @@ Future<void> _openJavaScriptBasicsQuiz(
     ),
   );
 
-  await tester.tap(find.text('Start learning'));
+  await _startLearningFromHome(tester);
   await tester.pumpAndSettle();
   expect(find.text('Choose a subject'), findsOneWidget);
 
@@ -504,6 +624,16 @@ class _RetryQuestionSetRepository extends MockLearningRepository {
       limit: limit,
       cursor: cursor,
     );
+  }
+}
+
+class _SubjectLoadTrackingRepository extends MockLearningRepository {
+  int subjectLoadCount = 0;
+
+  @override
+  Future<List<Subject>> getSubjects() {
+    subjectLoadCount++;
+    return super.getSubjects();
   }
 }
 

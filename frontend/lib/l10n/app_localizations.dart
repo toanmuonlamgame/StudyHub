@@ -829,6 +829,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'StudyHub is growing through small, tested learning milestones.'**
   String get activeDevelopmentDescription;
+
+  /// No description provided for @homeGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to learn?'**
+  String get homeGreeting;
+
+  /// No description provided for @homeSupportingLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a destination and make this session count.'**
+  String get homeSupportingLine;
+
+  /// No description provided for @featuredSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured'**
+  String get featuredSection;
+
+  /// No description provided for @featuredModesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Two ways to learn'**
+  String get featuredModesTitle;
+
+  /// No description provided for @featuredModesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Exam Mode to test yourself or Practice Mode for instant feedback.'**
+  String get featuredModesBody;
+
+  /// No description provided for @featuredModesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore modes'**
+  String get featuredModesAction;
+
+  /// No description provided for @featuredSetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find your next question set'**
+  String get featuredSetsTitle;
+
+  /// No description provided for @featuredSetsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse by subject, search titles, and filter by topic.'**
+  String get featuredSetsBody;
+
+  /// No description provided for @featuredSetsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse sets'**
+  String get featuredSetsAction;
+
+  /// No description provided for @featuredProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress tracking is coming'**
+  String get featuredProgressTitle;
+
+  /// No description provided for @featuredProgressBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The Progress area is ready for real attempt history later.'**
+  String get featuredProgressBody;
+
+  /// No description provided for @featuredProgressAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View Progress'**
+  String get featuredProgressAction;
+
+  /// No description provided for @bannerPageSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured item {current} of {total}'**
+  String bannerPageSemantics(Object current, Object total);
+
+  /// No description provided for @quickActionsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick actions'**
+  String get quickActionsSection;
+
+  /// No description provided for @browseSubjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse subjects'**
+  String get browseSubjects;
+
+  /// No description provided for @continueLearningSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a learning session'**
+  String get continueLearningSection;
+
+  /// No description provided for @continueLearningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a subject and continue to a focused question set.'**
+  String get continueLearningBody;
+
+  /// No description provided for @learningModesCompactSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the mode after opening a question set.'**
+  String get learningModesCompactSubtitle;
+
+  /// No description provided for @examModeCompactBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit at the end, then review.'**
+  String get examModeCompactBody;
+
+  /// No description provided for @practiceModeCompactBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check answers now, then see a summary.'**
+  String get practiceModeCompactBody;
+
+  /// No description provided for @exploreSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore more'**
+  String get exploreSection;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get comingSoon;
+
+  /// No description provided for @studyMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Materials'**
+  String get studyMaterials;
+
+  /// No description provided for @savedContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Content'**
+  String get savedContent;
+
+  /// No description provided for @learningPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning Plans'**
+  String get learningPlans;
+
+  /// No description provided for @upcomingFeatureSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{feature}, coming soon'**
+  String upcomingFeatureSemantics(Object feature);
+
+  /// No description provided for @progressOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your learning overview'**
+  String get progressOverview;
+
+  /// No description provided for @progressOverviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Real attempt data will appear here when progress storage is ready.'**
+  String get progressOverviewSubtitle;
+
+  /// No description provided for @noDataYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get noDataYet;
+
+  /// No description provided for @recentResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Results'**
+  String get recentResults;
+
+  /// No description provided for @accuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy'**
+  String get accuracy;
+
+  /// No description provided for @completedSets.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Sets'**
+  String get completedSets;
+
+  /// No description provided for @learningActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning Activity'**
+  String get learningActivity;
+
+  /// No description provided for @progressStartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Build your first learning record'**
+  String get progressStartTitle;
+
+  /// No description provided for @progressStartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning works now; saved history will follow in a later milestone.'**
+  String get progressStartBody;
+
+  /// No description provided for @futurePreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Future preferences'**
+  String get futurePreferences;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @futurePreferenceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Available in a later milestone'**
+  String get futurePreferenceDescription;
 }
 
 class _AppLocalizationsDelegate

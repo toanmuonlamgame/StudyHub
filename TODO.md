@@ -15,10 +15,21 @@ Phase 1 foundation complete. Phase 2 mobile-first UI/UX polish is active.
 - [x] CM38: Add the mobile app shell, Practice summary, and lightweight learner micro-interactions.
 - [x] CM39: Add English/Vietnamese localization with persisted language selection.
 - [x] CM40: Add repository-driven search, topic filtering, and cursor load-more UI.
+- [x] Build the richer mobile Home hub, manual feature banners, destination
+  shortcuts, honest Progress metrics, and structured Settings groups.
 - [ ] Verify text scaling, accessibility semantics, and touch targets on representative devices.
 - [ ] Manually review compact Android, common Android, and Chrome layouts before localization.
 - [x] Respect the platform disable-animations preference in current custom learner animations.
 - [ ] Persist real learning progress/history before replacing the honest Progress placeholder.
+
+## Rich Learner UI Follow-Up
+- [ ] Connect Home banners to reviewed, managed content with a safe local fallback.
+- [ ] Populate Progress metrics from persisted trusted quiz attempts.
+- [ ] Activate Study Materials only after upload, ownership, validation, and moderation exist.
+- [ ] Define real Saved Content and Learning Plans contracts before enabling those destinations.
+- [ ] Manually test Home banners and shortcuts on compact/common Android devices.
+- [ ] Run TalkBack review for banner position, quick actions, upcoming features,
+  Progress metrics, and disabled Settings preferences.
 
 ## Active
 - [x] Confirm product type: mobile learning platform.

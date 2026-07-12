@@ -424,4 +424,133 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get activeDevelopmentDescription =>
       'StudyHub phát triển qua từng cột mốc học tập nhỏ và có kiểm thử.';
+
+  @override
+  String get homeGreeting => 'Sẵn sàng học chưa?';
+
+  @override
+  String get homeSupportingLine =>
+      'Chọn điểm đến và bắt đầu buổi học hiệu quả.';
+
+  @override
+  String get featuredSection => 'Nổi bật';
+
+  @override
+  String get featuredModesTitle => 'Hai cách học';
+
+  @override
+  String get featuredModesBody =>
+      'Tự kiểm tra với Chế độ kiểm tra hoặc nhận phản hồi ngay khi ôn tập.';
+
+  @override
+  String get featuredModesAction => 'Khám phá chế độ';
+
+  @override
+  String get featuredSetsTitle => 'Tìm bộ câu hỏi tiếp theo';
+
+  @override
+  String get featuredSetsBody =>
+      'Duyệt theo môn, tìm theo tên và lọc theo chủ đề.';
+
+  @override
+  String get featuredSetsAction => 'Xem bộ câu hỏi';
+
+  @override
+  String get featuredProgressTitle => 'Theo dõi tiến độ sắp ra mắt';
+
+  @override
+  String get featuredProgressBody =>
+      'Khu vực Tiến độ đã sẵn sàng để nhận lịch sử làm bài thật sau này.';
+
+  @override
+  String get featuredProgressAction => 'Xem Tiến độ';
+
+  @override
+  String bannerPageSemantics(Object current, Object total) {
+    return 'Nội dung nổi bật $current/$total';
+  }
+
+  @override
+  String get quickActionsSection => 'Thao tác nhanh';
+
+  @override
+  String get browseSubjects => 'Khám phá môn học';
+
+  @override
+  String get continueLearningSection => 'Bắt đầu buổi học';
+
+  @override
+  String get continueLearningBody =>
+      'Chọn môn học rồi tiếp tục với một bộ câu hỏi tập trung.';
+
+  @override
+  String get learningModesCompactSubtitle =>
+      'Chọn chế độ sau khi mở một bộ câu hỏi.';
+
+  @override
+  String get examModeCompactBody => 'Nộp bài cuối buổi rồi xem lại.';
+
+  @override
+  String get practiceModeCompactBody => 'Kiểm tra từng câu rồi xem tổng kết.';
+
+  @override
+  String get exploreSection => 'Khám phá thêm';
+
+  @override
+  String get comingSoon => 'Sắp ra mắt';
+
+  @override
+  String get studyMaterials => 'Tài liệu học tập';
+
+  @override
+  String get savedContent => 'Nội dung đã lưu';
+
+  @override
+  String get learningPlans => 'Kế hoạch học tập';
+
+  @override
+  String upcomingFeatureSemantics(Object feature) {
+    return '$feature, sắp ra mắt';
+  }
+
+  @override
+  String get progressOverview => 'Tổng quan học tập';
+
+  @override
+  String get progressOverviewSubtitle =>
+      'Dữ liệu làm bài thật sẽ xuất hiện khi tính năng lưu tiến độ hoàn tất.';
+
+  @override
+  String get noDataYet => 'Chưa có dữ liệu';
+
+  @override
+  String get recentResults => 'Kết quả gần đây';
+
+  @override
+  String get accuracy => 'Độ chính xác';
+
+  @override
+  String get completedSets => 'Bộ đã hoàn thành';
+
+  @override
+  String get learningActivity => 'Hoạt động học tập';
+
+  @override
+  String get progressStartTitle => 'Tạo dấu mốc học tập đầu tiên';
+
+  @override
+  String get progressStartBody =>
+      'Bạn có thể học ngay; lịch sử đã lưu sẽ được bổ sung ở cột mốc sau.';
+
+  @override
+  String get futurePreferences => 'Tùy chọn tương lai';
+
+  @override
+  String get appearance => 'Giao diện';
+
+  @override
+  String get notifications => 'Thông báo';
+
+  @override
+  String get futurePreferenceDescription => 'Sẽ có ở cột mốc sau';
 }

@@ -109,6 +109,9 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
   lightweight interactions, accessibility, and then Vietnamese localization.
 - The mobile app uses a four-tab top-level shell: Home, Learn, Progress, and
   Settings. Focused learning routes open above the shell without bottom navigation.
+- Home is an icon-driven learner hub with manual, honest feature banners, clear
+  quick destinations, and visibly labeled upcoming features. It remains
+  repository-lazy so learning data loads only after the learner enters Learn.
 - Mobile phone layouts are the learner UI source of truth; wider Chrome layouts
   remain constrained and responsive for development and secondary use.
 - Shared loading, error, and empty states keep learner feedback consistent, while

@@ -12,6 +12,25 @@ from a learning session.
 Progress remains an honest planned state without invented history or streaks.
 Settings exposes only the functional language preference plus app/safety information.
 
+## Home hub architecture
+
+Home is a repository-lazy mobile hub. It does not fetch Subjects or other remote
+learning data during startup. An explicit Start Learning, Browse Subjects, Exam,
+or Practice action switches to Learn; Progress and Settings shortcuts switch to
+their corresponding shell tabs.
+
+The Home feature is split into a screen, immutable banner model, and focused
+widgets under `lib/features/home`. Its `PageView` is manually controlled and does
+not auto-rotate. Banner copy describes real learning flows rather than prices,
+discounts, or unsupported product claims. Planned destinations such as Study
+Materials, Saved Content, and Learning Plans are visibly labeled `Coming soon`
+and have no fake interaction.
+
+Shared presentation primitives such as section headers, icon surfaces, upcoming
+badges, and empty metric cards live in `lib/core/widgets/studyhub_ui.dart`. They
+carry structure and semantics only; learning data and answer safety remain behind
+the repository boundary.
+
 ## Localization
 
 The system interface supports English and Vietnamese through Flutter ARB

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_locale.dart';
-import '../features/home_placeholder.dart';
+import '../features/home/screens/home_screen.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/screens/subject_list_screen.dart';
 import '../features/progress/progress_placeholder_screen.dart';
@@ -31,7 +31,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void initState() {
     super.initState();
-    _builtTabs[0] = HomePlaceholder(onStartLearning: () => _selectTab(1));
+    _builtTabs[0] = _buildHome();
   }
 
   @override
@@ -85,6 +85,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _selectTab(int index) {
+    if (index == _selectedIndex) {
+      return;
+    }
     setState(() {
       _builtTabs[index] ??= _buildTab(index);
       _selectedIndex = index;
@@ -93,7 +96,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Widget _buildTab(int index) {
     return switch (index) {
-      0 => HomePlaceholder(onStartLearning: () => _selectTab(1)),
+      0 => _buildHome(),
       1 => SubjectListScreen(learningRepository: widget.learningRepository),
       2 => ProgressPlaceholderScreen(onStartLearning: () => _selectTab(1)),
       3 => SettingsPlaceholderScreen(
@@ -102,5 +105,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       _ => throw RangeError.index(index, const [0, 1, 2, 3]),
     };
+  }
+
+  Widget _buildHome() {
+    return HomeScreen(
+      onStartLearning: () => _selectTab(1),
+      onOpenProgress: () => _selectTab(2),
+      onOpenSettings: () => _selectTab(3),
+    );
   }
 }

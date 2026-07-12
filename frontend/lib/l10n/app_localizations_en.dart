@@ -425,4 +425,134 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get activeDevelopmentDescription =>
       'StudyHub is growing through small, tested learning milestones.';
+
+  @override
+  String get homeGreeting => 'Ready to learn?';
+
+  @override
+  String get homeSupportingLine =>
+      'Choose a destination and make this session count.';
+
+  @override
+  String get featuredSection => 'Featured';
+
+  @override
+  String get featuredModesTitle => 'Two ways to learn';
+
+  @override
+  String get featuredModesBody =>
+      'Use Exam Mode to test yourself or Practice Mode for instant feedback.';
+
+  @override
+  String get featuredModesAction => 'Explore modes';
+
+  @override
+  String get featuredSetsTitle => 'Find your next question set';
+
+  @override
+  String get featuredSetsBody =>
+      'Browse by subject, search titles, and filter by topic.';
+
+  @override
+  String get featuredSetsAction => 'Browse sets';
+
+  @override
+  String get featuredProgressTitle => 'Progress tracking is coming';
+
+  @override
+  String get featuredProgressBody =>
+      'The Progress area is ready for real attempt history later.';
+
+  @override
+  String get featuredProgressAction => 'View Progress';
+
+  @override
+  String bannerPageSemantics(Object current, Object total) {
+    return 'Featured item $current of $total';
+  }
+
+  @override
+  String get quickActionsSection => 'Quick actions';
+
+  @override
+  String get browseSubjects => 'Browse subjects';
+
+  @override
+  String get continueLearningSection => 'Start a learning session';
+
+  @override
+  String get continueLearningBody =>
+      'Pick a subject and continue to a focused question set.';
+
+  @override
+  String get learningModesCompactSubtitle =>
+      'Choose the mode after opening a question set.';
+
+  @override
+  String get examModeCompactBody => 'Submit at the end, then review.';
+
+  @override
+  String get practiceModeCompactBody =>
+      'Check answers now, then see a summary.';
+
+  @override
+  String get exploreSection => 'Explore more';
+
+  @override
+  String get comingSoon => 'Coming soon';
+
+  @override
+  String get studyMaterials => 'Study Materials';
+
+  @override
+  String get savedContent => 'Saved Content';
+
+  @override
+  String get learningPlans => 'Learning Plans';
+
+  @override
+  String upcomingFeatureSemantics(Object feature) {
+    return '$feature, coming soon';
+  }
+
+  @override
+  String get progressOverview => 'Your learning overview';
+
+  @override
+  String get progressOverviewSubtitle =>
+      'Real attempt data will appear here when progress storage is ready.';
+
+  @override
+  String get noDataYet => 'No data yet';
+
+  @override
+  String get recentResults => 'Recent Results';
+
+  @override
+  String get accuracy => 'Accuracy';
+
+  @override
+  String get completedSets => 'Completed Sets';
+
+  @override
+  String get learningActivity => 'Learning Activity';
+
+  @override
+  String get progressStartTitle => 'Build your first learning record';
+
+  @override
+  String get progressStartBody =>
+      'Learning works now; saved history will follow in a later milestone.';
+
+  @override
+  String get futurePreferences => 'Future preferences';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get futurePreferenceDescription => 'Available in a later milestone';
 }

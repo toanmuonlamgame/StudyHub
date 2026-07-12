@@ -33,6 +33,11 @@ small app size, API efficiency, security, and maintainability.
 - Use familiar icons with accessible labels or tooltips where needed. Visual
   hierarchy should make the next action obvious without filling the screen with
   competing buttons, cards, badges, or colors.
+- Prefer purposeful destinations and concise learner guidance over filler copy.
+  Never use fake progress, fake account activity, discounts, scarcity, or
+  unsupported promotional claims to make a screen appear richer.
+- Label unfinished capabilities clearly and keep them non-interactive until their
+  real contract, data, validation, and failure states exist.
 - Check long text, small screens, text scaling, contrast, and touch-target size.
 
 ## C. Animation Guidelines

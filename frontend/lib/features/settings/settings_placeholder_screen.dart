@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_locale.dart';
+import '../../core/widgets/studyhub_ui.dart';
 import '../../l10n/app_localizations_x.dart';
 
 class SettingsPlaceholderScreen extends StatelessWidget {
@@ -30,10 +31,7 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      l10n.languageSection,
-                      style: theme.textTheme.titleLarge,
-                    ),
+                    StudyHubSectionHeader(title: l10n.languageSection),
                     const SizedBox(height: 10),
                     Card(
                       clipBehavior: Clip.antiAlias,
@@ -63,18 +61,11 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 28),
-                    Text(
-                      l10n.aboutStudyHub,
-                      style: theme.textTheme.headlineSmall,
+                    StudyHubSectionHeader(
+                      title: l10n.aboutStudyHub,
+                      subtitle: l10n.settingsIntro,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.settingsIntro,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                     Card(
                       child: Column(
                         children: [
@@ -86,6 +77,20 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                             ),
                           ),
                           _Divider(color: theme.colorScheme.outlineVariant),
+                          ListTile(
+                            leading: const Icon(Icons.construction_outlined),
+                            title: Text(l10n.activeDevelopment),
+                            subtitle: Text(l10n.activeDevelopmentDescription),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    StudyHubSectionHeader(title: l10n.learningSafety),
+                    const SizedBox(height: 10),
+                    Card(
+                      child: Column(
+                        children: [
                           ListTile(
                             leading: const Icon(Icons.visibility_off_outlined),
                             title: Text(l10n.learningSafety),
@@ -100,36 +105,24 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.secondaryContainer,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 24),
+                    StudyHubSectionHeader(title: l10n.futurePreferences),
+                    const SizedBox(height: 10),
+                    Card(
+                      child: Column(
                         children: [
-                          Icon(
-                            Icons.construction_outlined,
-                            color: theme.colorScheme.onSecondaryContainer,
+                          _UpcomingPreferenceTile(
+                            icon: Icons.palette_outlined,
+                            title: l10n.appearance,
+                            subtitle: l10n.futurePreferenceDescription,
+                            badge: l10n.comingSoon,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.activeDevelopment,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(l10n.activeDevelopmentDescription),
-                              ],
-                            ),
+                          _Divider(color: theme.colorScheme.outlineVariant),
+                          _UpcomingPreferenceTile(
+                            icon: Icons.notifications_none_outlined,
+                            title: l10n.notifications,
+                            subtitle: l10n.futurePreferenceDescription,
+                            badge: l10n.comingSoon,
                           ),
                         ],
                       ),
@@ -140,6 +133,35 @@ class SettingsPlaceholderScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _UpcomingPreferenceTile extends StatelessWidget {
+  const _UpcomingPreferenceTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.badge,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String badge;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      enabled: false,
+      label: context.l10n.upcomingFeatureSemantics(title),
+      child: ListTile(
+        enabled: false,
+        leading: Icon(icon),
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: ComingSoonBadge(label: badge),
       ),
     );
   }
