@@ -2,6 +2,16 @@
 
 The Flutter app uses `MockLearningRepository` by default.
 
+## Learner navigation
+
+StudyHub is mobile-first. The top-level Material 3 shell contains Home, Learn,
+Progress, and Settings. Browse, detail, mode selection, quiz, and result screens
+open as focused routes above the shell, so bottom navigation does not distract
+from a learning session.
+
+Progress and Settings intentionally show honest planned states. They do not invent
+history, streaks, account data, or controls that are not functional yet.
+
 Run with local mock data:
 
 ```bash

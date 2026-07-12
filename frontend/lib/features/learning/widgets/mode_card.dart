@@ -38,7 +38,7 @@ class ModeCard extends StatelessWidget {
                 color: highlighted
                     ? theme.colorScheme.primary
                     : theme.colorScheme.secondaryContainer,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,

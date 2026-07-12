@@ -2,6 +2,25 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-13 - Mobile-First Learner UI Standard
+Decision: StudyHub designs and validates learner surfaces for phones first. Wider
+Flutter Web layouts remain responsive and constrained, but they do not drive the
+learner information architecture.
+
+Reason:
+- StudyHub is a mobile learning product, so touch comfort, focused vertical flows,
+  readable wrapping, and compact-screen behavior are primary product requirements.
+- Consistent loading, error, empty, and feedback states make API-backed learning
+  flows feel intentional without adding fake data or hiding failures.
+
+Rule:
+- Keep top-level navigation in the app shell and hide it on focused deep routes.
+- Keep Progress and Settings honest until their data and controls are functional.
+- Use lightweight Material motion, clear icon-and-text status feedback, and
+  reusable state views without moving trusted correctness logic into Flutter UI.
+- Validate compact Android, common Android, Chrome, larger text, and long content
+  manually before claiming accessibility completion.
+
 ## 2026-07-12 - Mobile App Shell And Practice Summary
 Decision: StudyHub uses a Material 3 four-tab mobile shell for Home, Learn,
 Progress, and Settings. Focused browse-detail-quiz-result routes are pushed above

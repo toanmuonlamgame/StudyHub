@@ -25,7 +25,7 @@ class AnswerOptionCard extends StatelessWidget {
             ? theme.colorScheme.primaryContainer.withValues(alpha: 0.55)
             : theme.colorScheme.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           side: BorderSide(
             color: selected
                 ? theme.colorScheme.primary
@@ -37,7 +37,10 @@ class AnswerOptionCard extends StatelessWidget {
         child: RadioListTile<String>(
           value: answerOption.id,
           enabled: enabled,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 4,
+          ),
           title: Text(
             answerOption.text,
             style: theme.textTheme.bodyLarge?.copyWith(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/subject.dart';
 import '../repositories/learning_repository.dart';
+import '../widgets/learning_state_view.dart';
 import 'question_set_list_screen.dart';
 
 class SubjectListScreen extends StatefulWidget {
@@ -31,16 +32,25 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
           future: _subjectsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
+              return const LearningLoadingState(message: 'Loading subjects');
             }
 
             if (snapshot.hasError) {
-              return _SubjectLoadError(onRetry: _retryLoadingSubjects);
+              return LearningErrorState(
+                title: 'Subjects could not be loaded',
+                message: 'Check your connection and try again.',
+                onRetry: _retryLoadingSubjects,
+              );
             }
 
             final subjects = snapshot.data ?? const <Subject>[];
             if (subjects.isEmpty) {
-              return const _EmptySubjects();
+              return const LearningEmptyState(
+                icon: Icons.school_outlined,
+                title: 'No subjects yet',
+                message:
+                    'Subjects will appear here when learning content is available.',
+              );
             }
 
             return ListView.separated(
@@ -77,36 +87,6 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
         builder: (context) => QuestionSetListScreen(
           subject: subject,
           learningRepository: widget.learningRepository,
-        ),
-      ),
-    );
-  }
-}
-
-class _SubjectLoadError extends StatelessWidget {
-  const _SubjectLoadError({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Subjects could not be loaded.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Try again'),
-            ),
-          ],
         ),
       ),
     );
@@ -239,22 +219,5 @@ class _SubjectCard extends StatelessWidget {
     }
 
     return parts.isEmpty ? null : parts.join(' | ');
-  }
-}
-
-class _EmptySubjects extends StatelessWidget {
-  const _EmptySubjects();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Text(
-          'No subjects are available yet.',
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
   }
 }

@@ -44,10 +44,63 @@ void main() {
     await tester.tap(find.text('Progress'));
     await tester.pumpAndSettle();
     expect(find.text('Progress tracking is planned'), findsOneWidget);
+    expect(find.text('Start learning'), findsOneWidget);
+    expect(find.textContaining('streak'), findsNothing);
 
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
-    expect(find.text('StudyHub settings'), findsOneWidget);
+    expect(find.text('About StudyHub'), findsOneWidget);
+    expect(find.text('Learning safety'), findsOneWidget);
+    expect(find.byType(Switch), findsNothing);
+  });
+
+  testWidgets('progress call to action switches to Learn', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const StudyHubApp());
+
+    await tester.tap(find.text('Progress'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start learning'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Choose a subject'), findsOneWidget);
+  });
+
+  testWidgets('deep learning route returns to subject list cleanly', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const StudyHubApp());
+
+    await tester.tap(find.text('Start learning'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('JavaScript Basics'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NavigationBar), findsNothing);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Choose a subject'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
+  });
+
+  testWidgets('top-level learner UI fits a compact phone surface', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const StudyHubApp());
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Learn'));
+    await tester.pumpAndSettle();
+    expect(find.text('Choose a subject'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('browses subjects and question sets to open a quiz', (
@@ -57,7 +110,6 @@ void main() {
 
     expect(find.byType(NavigationBar), findsNothing);
     expect(find.text('Exam Mode'), findsOneWidget);
-    expect(find.text('JavaScript Basics Check'), findsOneWidget);
     expect(find.text('Question 1 of 3'), findsOneWidget);
     expect(
       find.text(
@@ -219,7 +271,7 @@ void main() {
     await tester.tap(find.text('JavaScript Basics'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Question sets could not be loaded.'), findsOneWidget);
+    expect(find.text('Question sets could not be loaded'), findsOneWidget);
 
     await tester.tap(find.text('Try again'));
     await tester.pumpAndSettle();
@@ -234,7 +286,7 @@ void main() {
     final repository = _RetryQuestionRepository();
     await _openJavaScriptBasicsQuiz(tester, learningRepository: repository);
 
-    expect(find.text('Questions could not be loaded.'), findsOneWidget);
+    expect(find.text('Questions could not be loaded'), findsOneWidget);
 
     await tester.tap(find.text('Try again'));
     await tester.pumpAndSettle();

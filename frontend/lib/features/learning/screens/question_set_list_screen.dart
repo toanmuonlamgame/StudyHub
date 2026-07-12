@@ -4,6 +4,7 @@ import '../models/question_set.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
 import '../repositories/learning_repository.dart';
+import '../widgets/learning_state_view.dart';
 import '../widgets/learning_stat_chip.dart';
 import 'question_set_detail_screen.dart';
 
@@ -39,16 +40,27 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
           future: _dataFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
+              return const LearningLoadingState(
+                message: 'Loading question sets',
+              );
             }
 
             if (snapshot.hasError) {
-              return _QuestionSetLoadError(onRetry: _retryLoadingData);
+              return LearningErrorState(
+                title: 'Question sets could not be loaded',
+                message: 'Check your connection and try again.',
+                onRetry: _retryLoadingData,
+              );
             }
 
             final data = snapshot.data;
             if (data == null || data.questionSets.isEmpty) {
-              return _EmptyQuestionSets(subjectName: widget.subject.name);
+              return LearningEmptyState(
+                icon: Icons.quiz_outlined,
+                title: 'No question sets yet',
+                message:
+                    'There are no question sets for ${widget.subject.name} yet.',
+              );
             }
 
             return ListView.separated(
@@ -140,36 +152,6 @@ class _QuestionSetListData {
 
   final List<QuestionSet> questionSets;
   final List<Topic> topics;
-}
-
-class _QuestionSetLoadError extends StatelessWidget {
-  const _QuestionSetLoadError({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Question sets could not be loaded.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Try again'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _QuestionSetListHeader extends StatelessWidget {
@@ -303,24 +285,5 @@ class _QuestionSetCard extends StatelessWidget {
       return value;
     }
     return '${value[0].toUpperCase()}${value.substring(1)}';
-  }
-}
-
-class _EmptyQuestionSets extends StatelessWidget {
-  const _EmptyQuestionSets({required this.subjectName});
-
-  final String subjectName;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          'No question sets are available for $subjectName yet.',
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
   }
 }

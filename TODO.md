@@ -1,7 +1,7 @@
 # StudyHub TODO
 
 ## Current Phase
-Phase 1 foundation complete. Preparing Phase 2 UI/UX polish.
+Phase 1 foundation complete. Phase 2 mobile-first UI/UX polish is active.
 
 ## Phase 1 Checkpoint
 - [x] Complete the Flutter learner flow from Home through Result/Review.
@@ -11,11 +11,13 @@ Phase 1 foundation complete. Preparing Phase 2 UI/UX polish.
 - [x] Document Phase 1 capabilities, guarantees, limitations, and Phase 2 criteria.
 
 ## Phase 2 UI/UX Milestones
-- [ ] CM37: Polish the visual design system and responsive learner surfaces.
+- [x] CM37: Polish the visual design system and responsive learner surfaces.
 - [x] CM38: Add the mobile app shell, Practice summary, and lightweight learner micro-interactions.
 - [ ] CM39: Add the Vietnamese localization foundation.
 - [ ] CM40: Add search/filter UI and cursor load-more foundations.
 - [ ] Verify text scaling, accessibility semantics, and touch targets on representative devices.
+- [ ] Manually review compact Android, common Android, and Chrome layouts before localization.
+- [ ] Add reduced-motion handling if future animation work introduces custom controllers.
 - [ ] Persist real learning progress/history before replacing the honest Progress placeholder.
 
 ## Active

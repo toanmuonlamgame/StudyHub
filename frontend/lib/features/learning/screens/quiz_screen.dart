@@ -9,6 +9,7 @@ import '../models/quiz_mode.dart';
 import '../models/quiz_result.dart';
 import '../repositories/learning_repository.dart';
 import '../widgets/answer_option_card.dart';
+import '../widgets/learning_state_view.dart';
 import 'quiz_result_screen.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -60,16 +61,24 @@ class _QuizScreenState extends State<QuizScreen> {
           future: _questionsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
+              return const LearningLoadingState(message: 'Loading questions');
             }
 
             if (snapshot.hasError) {
-              return _QuizLoadError(onRetry: _retryLoadingQuestions);
+              return LearningErrorState(
+                title: 'Questions could not be loaded',
+                message: 'Check your connection and try again.',
+                onRetry: _retryLoadingQuestions,
+              );
             }
 
             final questions = snapshot.data ?? const <Question>[];
             if (questions.isEmpty) {
-              return const _EmptyQuiz();
+              return const LearningEmptyState(
+                icon: Icons.quiz_outlined,
+                title: 'No questions yet',
+                message: 'This question set is not ready for a quiz session.',
+              );
             }
 
             return _isPracticeMode
@@ -306,7 +315,7 @@ class _QuizScreenState extends State<QuizScreen> {
       decoration: BoxDecoration(
         color: feedbackColor.withValues(alpha: 0.1),
         border: Border.all(color: feedbackColor.withValues(alpha: 0.4)),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -530,36 +539,6 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 }
 
-class _QuizLoadError extends StatelessWidget {
-  const _QuizLoadError({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Questions could not be loaded.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Try again'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _AnimatedQuizProgress extends StatelessWidget {
   const _AnimatedQuizProgress({required this.value});
 
@@ -662,23 +641,6 @@ class _AnswerOptionTile extends StatelessWidget {
       answerOption: answerOption,
       selected: selected,
       enabled: enabled,
-    );
-  }
-}
-
-class _EmptyQuiz extends StatelessWidget {
-  const _EmptyQuiz();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Text(
-          'This question set does not have any questions yet.',
-          textAlign: TextAlign.center,
-        ),
-      ),
     );
   }
 }

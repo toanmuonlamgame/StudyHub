@@ -49,7 +49,7 @@ class QuestionSetDetailScreen extends StatelessWidget {
                   child: Text(
                     topic == null
                         ? subject.name
-                        : '${subject.name} · ${topic!.name}',
+                        : '${subject.name} / ${topic!.name}',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -92,7 +92,7 @@ class QuestionSetDetailScreen extends StatelessWidget {
                 color: theme.colorScheme.primaryContainer.withValues(
                   alpha: 0.45,
                 ),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
                 children: [

@@ -75,7 +75,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return switch (index) {
       0 => HomePlaceholder(onStartLearning: () => _selectTab(1)),
       1 => SubjectListScreen(learningRepository: widget.learningRepository),
-      2 => const ProgressPlaceholderScreen(),
+      2 => ProgressPlaceholderScreen(onStartLearning: () => _selectTab(1)),
       3 => const SettingsPlaceholderScreen(),
       _ => throw RangeError.index(index, const [0, 1, 2, 3]),
     };

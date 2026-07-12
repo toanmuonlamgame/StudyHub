@@ -10,40 +10,91 @@ class SettingsPlaceholderScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.tune_outlined,
-                    size: 44,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  Text('StudyHub settings', style: theme.textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(
-                    'App preferences will be added when they are functional and ready to persist.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 520),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'About StudyHub',
+                      style: theme.textTheme.headlineSmall,
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'StudyHub · Learning foundation',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    const SizedBox(height: 8),
+                    Text(
+                      'Preferences will appear here only when they are functional and ready to persist.',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    Card(
+                      child: Column(
+                        children: [
+                          const ListTile(
+                            leading: Icon(Icons.school_outlined),
+                            title: Text('Mobile learning platform'),
+                            subtitle: Text(
+                              'Browse question sets, practise, take exams, and review results.',
+                            ),
+                          ),
+                          Divider(
+                            height: 1,
+                            indent: 64,
+                            color: theme.colorScheme.outlineVariant,
+                          ),
+                          const ListTile(
+                            leading: Icon(Icons.visibility_off_outlined),
+                            title: Text('Learning safety'),
+                            subtitle: Text(
+                              'Correct answers stay hidden until submit or check answer.',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.construction_outlined,
+                            color: theme.colorScheme.onSecondaryContainer,
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Active development',
+                                  style: TextStyle(fontWeight: FontWeight.w700),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Language, theme, and notification controls are planned, not active.',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
