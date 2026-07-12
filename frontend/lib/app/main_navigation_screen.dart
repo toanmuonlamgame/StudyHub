@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../core/app_locale.dart';
 import '../features/home_placeholder.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/screens/subject_list_screen.dart';
 import '../features/progress/progress_placeholder_screen.dart';
 import '../features/settings/settings_placeholder_screen.dart';
+import '../l10n/app_localizations_x.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key, required this.learningRepository});
+  const MainNavigationScreen({
+    super.key,
+    required this.learningRepository,
+    required this.localeSelection,
+    required this.onLocaleSelected,
+  });
 
   final LearningRepository learningRepository;
+  final AppLocaleSelection localeSelection;
+  final ValueChanged<AppLocaleSelection> onLocaleSelected;
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
@@ -26,7 +35,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   @override
+  void didUpdateWidget(covariant MainNavigationScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.localeSelection != widget.localeSelection &&
+        _builtTabs.containsKey(3)) {
+      _builtTabs[3] = _buildTab(3);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
@@ -38,26 +58,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: _selectTab,
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: l10n.homeTab,
           ),
           NavigationDestination(
-            icon: Icon(Icons.menu_book_outlined),
-            selectedIcon: Icon(Icons.menu_book),
-            label: 'Learn',
+            icon: const Icon(Icons.menu_book_outlined),
+            selectedIcon: const Icon(Icons.menu_book),
+            label: l10n.learnTab,
           ),
           NavigationDestination(
-            icon: Icon(Icons.insights_outlined),
-            selectedIcon: Icon(Icons.insights),
-            label: 'Progress',
+            icon: const Icon(Icons.insights_outlined),
+            selectedIcon: const Icon(Icons.insights),
+            label: l10n.progressTab,
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: l10n.settingsTab,
           ),
         ],
       ),
@@ -76,7 +96,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       0 => HomePlaceholder(onStartLearning: () => _selectTab(1)),
       1 => SubjectListScreen(learningRepository: widget.learningRepository),
       2 => ProgressPlaceholderScreen(onStartLearning: () => _selectTab(1)),
-      3 => const SettingsPlaceholderScreen(),
+      3 => SettingsPlaceholderScreen(
+        localeSelection: widget.localeSelection,
+        onLocaleSelected: widget.onLocaleSelected,
+      ),
       _ => throw RangeError.index(index, const [0, 1, 2, 3]),
     };
   }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:frontend/app/studyhub_app.dart';
+import 'package:frontend/core/app_locale.dart';
 import 'package:frontend/features/learning/models/answer_check_result.dart';
 import 'package:frontend/features/learning/models/answer_review.dart';
 import 'package:frontend/features/learning/models/question.dart';
@@ -11,18 +13,32 @@ import 'package:frontend/features/learning/models/quiz_result.dart';
 import 'package:frontend/features/learning/repositories/learning_repository.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
 import 'package:frontend/features/learning/screens/quiz_result_screen.dart';
+import 'package:frontend/l10n/app_localizations.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
+  test('supports English and Vietnamese interface locales', () {
+    expect(
+      AppLocalizations.supportedLocales,
+      containsAll(const [Locale('en'), Locale('vi')]),
+    );
+  });
+
   testWidgets('opens the StudyHub app', (WidgetTester tester) async {
-    await tester.pumpWidget(const StudyHubApp());
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
 
     expect(find.text('StudyHub'), findsWidgets);
     expect(find.text('Start learning'), findsOneWidget);
-    expect(find.text('Exam Mode'), findsOneWidget);
 
     await tester.drag(find.byType(ListView), const Offset(0, -500));
     await tester.pumpAndSettle();
 
+    expect(find.text('Exam Mode'), findsOneWidget);
     expect(find.text('Practice Mode'), findsOneWidget);
     expect(find.text('Safe Review'), findsOneWidget);
   });
@@ -30,7 +46,9 @@ void main() {
   testWidgets('switches between honest top-level app sections', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const StudyHubApp());
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
 
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Learn'), findsOneWidget);
@@ -57,7 +75,9 @@ void main() {
   testWidgets('progress call to action switches to Learn', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const StudyHubApp());
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
 
     await tester.tap(find.text('Progress'));
     await tester.pumpAndSettle();
@@ -70,7 +90,9 @@ void main() {
   testWidgets('deep learning route returns to subject list cleanly', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const StudyHubApp());
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
 
     await tester.tap(find.text('Start learning'));
     await tester.pumpAndSettle();
@@ -93,7 +115,9 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const StudyHubApp());
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
@@ -101,6 +125,68 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Choose a subject'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('switches to Vietnamese and keeps learning content unchanged', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
+
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tiếng Việt'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Trang chủ'), findsOneWidget);
+    expect(find.text('Học tập'), findsOneWidget);
+    expect(find.text('Cài đặt'), findsWidgets);
+    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+
+    await tester.tap(find.text('Học tập'));
+    await tester.pumpAndSettle();
+    expect(find.text('Chọn môn học'), findsOneWidget);
+    expect(find.text('JavaScript Basics'), findsOneWidget);
+  });
+
+  testWidgets('Vietnamese shell supports compact phone and larger text', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.vietnamese),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bắt đầu học'), findsOneWidget);
+    expect(find.text('Học tập'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('persists the selected interface language', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tiếng Việt'));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(const StudyHubApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Học tập'), findsOneWidget);
+    expect(find.text('Cài đặt'), findsOneWidget);
   });
 
   testWidgets('browses subjects and question sets to open a quiz', (
@@ -250,7 +336,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const MaterialApp(home: QuizResultScreen(result: result)),
+      MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const QuizResultScreen(result: result),
+      ),
     );
 
     expect(find.text('Result-only Question Set'), findsOneWidget);
@@ -264,7 +355,12 @@ void main() {
     WidgetTester tester,
   ) async {
     final repository = _RetryQuestionSetRepository();
-    await tester.pumpWidget(StudyHubApp(learningRepository: repository));
+    await tester.pumpWidget(
+      StudyHubApp(
+        learningRepository: repository,
+        initialLocaleSelection: AppLocaleSelection.english,
+      ),
+    );
 
     await tester.tap(find.text('Start learning'));
     await tester.pumpAndSettle();
@@ -278,6 +374,51 @@ void main() {
 
     expect(find.text('JavaScript Basics Check'), findsOneWidget);
     expect(repository.questionSetLoadCount, 2);
+  });
+
+  testWidgets('Vietnamese result fits compact screen with larger text', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    const result = QuizResult(
+      questionSetId: 'compact_result',
+      questionSetTitle: 'Nội dung học giữ nguyên',
+      correctCount: 2,
+      wrongCount: 1,
+      totalCount: 3,
+      percentageScore: 66.67,
+      answerReviews: [
+        AnswerReview(
+          questionId: 'compact_question',
+          questionText: 'Creator content is not translated',
+          selectedAnswerOptionId: 'selected',
+          selectedAnswerText: 'Selected content',
+          correctAnswerOptionId: 'correct',
+          correctAnswerText: 'Correct content',
+          isCorrect: false,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('vi'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const QuizResultScreen(result: result),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kết quả kiểm tra'), findsOneWidget);
+    expect(find.text('Nội dung học giữ nguyên'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('retries loading quiz questions after an error', (
@@ -301,7 +442,12 @@ Future<void> _openJavaScriptBasicsQuiz(
   LearningRepository learningRepository = const MockLearningRepository(),
   String startButtonText = 'Start Exam Mode',
 }) async {
-  await tester.pumpWidget(StudyHubApp(learningRepository: learningRepository));
+  await tester.pumpWidget(
+    StudyHubApp(
+      learningRepository: learningRepository,
+      initialLocaleSelection: AppLocaleSelection.english,
+    ),
+  );
 
   await tester.tap(find.text('Start learning'));
   await tester.pumpAndSettle();

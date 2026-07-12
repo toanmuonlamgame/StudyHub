@@ -13,11 +13,11 @@ Phase 1 foundation complete. Phase 2 mobile-first UI/UX polish is active.
 ## Phase 2 UI/UX Milestones
 - [x] CM37: Polish the visual design system and responsive learner surfaces.
 - [x] CM38: Add the mobile app shell, Practice summary, and lightweight learner micro-interactions.
-- [ ] CM39: Add the Vietnamese localization foundation.
-- [ ] CM40: Add search/filter UI and cursor load-more foundations.
+- [x] CM39: Add English/Vietnamese localization with persisted language selection.
+- [x] CM40: Add repository-driven search, topic filtering, and cursor load-more UI.
 - [ ] Verify text scaling, accessibility semantics, and touch targets on representative devices.
 - [ ] Manually review compact Android, common Android, and Chrome layouts before localization.
-- [ ] Add reduced-motion handling if future animation work introduces custom controllers.
+- [x] Respect the platform disable-animations preference in current custom learner animations.
 - [ ] Persist real learning progress/history before replacing the honest Progress placeholder.
 
 ## Active
@@ -235,13 +235,15 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 ## Scalability And Search
 - [x] Add a paginated Question Set list endpoint with stable cursor ordering.
 - [x] Migrate Flutter Question Set browsing to consume the first page of the paginated endpoint.
-- [ ] Add load-more/infinite-scroll UI using `nextCursor` when Question Set data grows.
-- [ ] Add search/filter UI with debouncing after the paginated browse flow is stable.
+- [x] Add cursor load-more UI with separate next-page loading/error/retry states.
+- [x] Add debounced Question Set title search and optional topic filtering.
 - [ ] Add a paginated Study Material list endpoint when the content model is implemented.
 - [x] Add initial query-driven Prisma indexes for learning filters and ordering.
 - [ ] Evaluate PostgreSQL full-text or trigram indexes after search usage is measurable.
 - [ ] Add validated PostgreSQL-first search query support.
-- [ ] Add debounced search and stale-response handling in Flutter.
+- [x] Add debounced search, pagination reset, deduplication, and stale-response handling in Flutter.
+- [ ] Manually verify English/Vietnamese UI at text scales 1.0, 1.3, and 1.5 on representative devices.
+- [ ] Perform TalkBack/VoiceOver and keyboard-focus review before claiming accessibility compliance.
 - [ ] Add measured caching later for read-heavy public taxonomy/content metadata.
 - [ ] Add analytics summary tables or materialized views before considering a warehouse.
 - [ ] Measure release app size, startup, and perceived loading on representative devices later.

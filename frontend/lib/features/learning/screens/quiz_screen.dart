@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/app_motion.dart';
+import '../../../l10n/app_localizations_x.dart';
 import '../models/answer_check_result.dart';
 import '../models/answer_option.dart';
 import '../models/answer_review.dart';
@@ -52,32 +54,34 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isPracticeMode ? 'Practice Mode' : 'Exam Mode'),
+        title: Text(_isPracticeMode ? l10n.practiceMode : l10n.examMode),
       ),
       body: SafeArea(
         child: FutureBuilder<List<Question>>(
           future: _questionsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return const LearningLoadingState(message: 'Loading questions');
+              return LearningLoadingState(message: l10n.loadingQuestions);
             }
 
             if (snapshot.hasError) {
               return LearningErrorState(
-                title: 'Questions could not be loaded',
-                message: 'Check your connection and try again.',
+                title: l10n.questionsLoadErrorTitle,
+                message: l10n.connectionRetryMessage,
                 onRetry: _retryLoadingQuestions,
               );
             }
 
             final questions = snapshot.data ?? const <Question>[];
             if (questions.isEmpty) {
-              return const LearningEmptyState(
+              return LearningEmptyState(
                 icon: Icons.quiz_outlined,
-                title: 'No questions yet',
-                message: 'This question set is not ready for a quiz session.',
+                title: l10n.noQuestionsTitle,
+                message: l10n.noQuestionsMessage,
               );
             }
 
@@ -92,6 +96,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Widget _buildExamContent(BuildContext context, List<Question> questions) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final question = questions[_examQuestionIndex];
     final isFirstQuestion = _examQuestionIndex == 0;
     final isLastQuestion = _examQuestionIndex == questions.length - 1;
@@ -103,14 +108,14 @@ class _QuizScreenState extends State<QuizScreen> {
           children: [
             Expanded(
               child: Text(
-                'Question ${_examQuestionIndex + 1} of ${questions.length}',
+                l10n.questionProgress(_examQuestionIndex + 1, questions.length),
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: theme.colorScheme.primary,
                 ),
               ),
             ),
             Text(
-              '${_examSelectedAnswerIds.length} answered',
+              l10n.answeredCount(_examSelectedAnswerIds.length),
               style: theme.textTheme.labelMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -144,7 +149,7 @@ class _QuizScreenState extends State<QuizScreen> {
                       ? null
                       : _previousExamQuestion,
                   icon: const Icon(Icons.arrow_back),
-                  label: const Text('Previous'),
+                  label: Text(l10n.previous),
                 ),
               ),
               const SizedBox(width: 12),
@@ -165,10 +170,10 @@ class _QuizScreenState extends State<QuizScreen> {
                     : Icon(isLastQuestion ? Icons.check : Icons.arrow_forward),
                 label: Text(
                   _isSubmittingExamModeQuiz
-                      ? 'Submitting...'
+                      ? l10n.submitting
                       : isLastQuestion
-                      ? 'Submit Quiz'
-                      : 'Next Question',
+                      ? l10n.submitQuiz
+                      : l10n.nextQuestion,
                 ),
               ),
             ),
@@ -188,6 +193,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Widget _buildPracticeContent(BuildContext context, List<Question> questions) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final question = questions[_practiceQuestionIndex];
     final isLastQuestion = _practiceQuestionIndex == questions.length - 1;
 
@@ -198,14 +204,17 @@ class _QuizScreenState extends State<QuizScreen> {
           children: [
             Expanded(
               child: Text(
-                'Question ${_practiceQuestionIndex + 1} of ${questions.length}',
+                l10n.questionProgress(
+                  _practiceQuestionIndex + 1,
+                  questions.length,
+                ),
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: theme.colorScheme.primary,
                 ),
               ),
             ),
             Text(
-              'Instant feedback',
+              l10n.instantFeedback,
               style: theme.textTheme.labelMedium?.copyWith(
                 color: theme.colorScheme.secondary,
               ),
@@ -228,7 +237,10 @@ class _QuizScreenState extends State<QuizScreen> {
             _checkPracticeAnswer(question, answerOptionId);
           },
           feedback: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
+            duration: AppMotion.duration(
+              context,
+              const Duration(milliseconds: 180),
+            ),
             transitionBuilder: (child, animation) => FadeTransition(
               opacity: animation,
               child: ScaleTransition(
@@ -245,7 +257,7 @@ class _QuizScreenState extends State<QuizScreen> {
               ? null
               : () => _continuePractice(questions),
           icon: Icon(isLastQuestion ? Icons.done : Icons.arrow_forward),
-          label: Text(isLastQuestion ? 'Finish Practice' : 'Next Question'),
+          label: Text(isLastQuestion ? l10n.finishPractice : l10n.nextQuestion),
           style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
         ),
       ],
@@ -254,19 +266,20 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Widget? _buildPracticeFeedback(BuildContext context, Question question) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     if (_isCheckingPracticeAnswer) {
-      return const Padding(
-        key: ValueKey('checking-practice-answer'),
-        padding: EdgeInsets.only(top: 12),
+      return Padding(
+        key: const ValueKey('checking-practice-answer'),
+        padding: const EdgeInsets.only(top: 12),
         child: Row(
           children: [
-            SizedBox.square(
+            const SizedBox.square(
               dimension: 18,
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
-            SizedBox(width: 10),
-            Text('Checking answer...'),
+            const SizedBox(width: 10),
+            Flexible(child: Text(l10n.checkingAnswer)),
           ],
         ),
       );
@@ -280,7 +293,7 @@ class _QuizScreenState extends State<QuizScreen> {
           children: [
             Expanded(
               child: Text(
-                'Answer could not be checked.',
+                l10n.answerCheckError,
                 style: TextStyle(color: theme.colorScheme.error),
               ),
             ),
@@ -292,7 +305,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 }
               },
               icon: const Icon(Icons.refresh),
-              label: const Text('Try again'),
+              label: Text(l10n.tryAgain),
             ),
           ],
         ),
@@ -330,15 +343,15 @@ class _QuizScreenState extends State<QuizScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  result.isCorrect ? 'Correct' : 'Incorrect',
+                  result.isCorrect ? l10n.correct : l10n.incorrect,
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: feedbackColor,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text('Your answer: ${result.selectedAnswerText}'),
-                Text('Correct answer: ${result.correctAnswerText}'),
+                Text(l10n.yourAnswer(result.selectedAnswerText)),
+                Text(l10n.correctAnswer(result.correctAnswerText)),
               ],
             ),
           ),
@@ -494,9 +507,7 @@ class _QuizScreenState extends State<QuizScreen> {
       final messenger = ScaffoldMessenger.of(context);
       messenger.hideCurrentSnackBar();
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Answer every question before submitting.'),
-        ),
+        SnackBar(content: Text(context.l10n.answerEveryQuestion)),
       );
       return;
     }
@@ -529,9 +540,9 @@ class _QuizScreenState extends State<QuizScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Quiz could not be submitted.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.quizSubmitError)));
       setState(() {
         _isSubmittingExamModeQuiz = false;
       });
@@ -548,7 +559,7 @@ class _AnimatedQuizProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
       tween: Tween(end: value),
-      duration: const Duration(milliseconds: 220),
+      duration: AppMotion.duration(context, const Duration(milliseconds: 220)),
       curve: Curves.easeOutCubic,
       builder: (context, animatedValue, child) => LinearProgressIndicator(
         value: animatedValue,
@@ -609,7 +620,7 @@ class _QuestionCard extends StatelessWidget {
             if (showError) ...[
               const SizedBox(height: 4),
               Text(
-                'Choose one answer.',
+                context.l10n.chooseOneAnswer,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.error,
                   fontWeight: FontWeight.w600,

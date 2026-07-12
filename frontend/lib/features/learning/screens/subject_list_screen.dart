@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations_x.dart';
 import '../models/subject.dart';
 import '../repositories/learning_repository.dart';
 import '../widgets/learning_state_view.dart';
@@ -25,31 +26,32 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Browse subjects')),
+      appBar: AppBar(title: Text(l10n.browseSubjectsTitle)),
       body: SafeArea(
         child: FutureBuilder<List<Subject>>(
           future: _subjectsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return const LearningLoadingState(message: 'Loading subjects');
+              return LearningLoadingState(message: l10n.loadingSubjects);
             }
 
             if (snapshot.hasError) {
               return LearningErrorState(
-                title: 'Subjects could not be loaded',
-                message: 'Check your connection and try again.',
+                title: l10n.subjectsLoadErrorTitle,
+                message: l10n.connectionRetryMessage,
                 onRetry: _retryLoadingSubjects,
               );
             }
 
             final subjects = snapshot.data ?? const <Subject>[];
             if (subjects.isEmpty) {
-              return const LearningEmptyState(
+              return LearningEmptyState(
                 icon: Icons.school_outlined,
-                title: 'No subjects yet',
-                message:
-                    'Subjects will appear here when learning content is available.',
+                title: l10n.noSubjectsTitle,
+                message: l10n.noSubjectsMessage,
               );
             }
 
@@ -106,14 +108,14 @@ class _SubjectListHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Choose a subject',
+            context.l10n.chooseSubjectTitle,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            'Start with a subject to find question sets for your next study session.',
+            context.l10n.chooseSubjectSubtitle,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -133,11 +135,12 @@ class _SubjectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final metadata = _buildMetadata(subject);
+    final l10n = context.l10n;
+    final metadata = _buildMetadata(context, subject);
 
     return Semantics(
       button: true,
-      label: 'Open ${subject.name}',
+      label: l10n.openSubjectSemantics(subject.name),
       child: Card(
         clipBehavior: Clip.antiAlias,
         color: theme.colorScheme.surface,
@@ -205,17 +208,18 @@ class _SubjectCard extends StatelessWidget {
     );
   }
 
-  String? _buildMetadata(Subject subject) {
+  String? _buildMetadata(BuildContext context, Subject subject) {
+    final l10n = context.l10n;
     final parts = <String>[];
 
     if (subject.school != null) {
-      parts.add('School: ${subject.school}');
+      parts.add(l10n.schoolMetadata(subject.school!));
     }
     if (subject.program != null) {
-      parts.add('Program: ${subject.program}');
+      parts.add(l10n.programMetadata(subject.program!));
     }
     if (subject.major != null) {
-      parts.add('Major: ${subject.major}');
+      parts.add(l10n.majorMetadata(subject.major!));
     }
 
     return parts.isEmpty ? null : parts.join(' | ');

@@ -15,7 +15,7 @@ Phase 1 is complete as a working learning foundation. See the
 [Phase 1 checkpoint](docs/PHASE_1_CHECKPOINT.md) for completed capabilities,
 safety guarantees, limitations, and Phase 2 entry criteria.
 
-- Flutter learner-app prototype with a complete local Exam Mode flow.
+- Flutter learner app with English/Vietnamese UI and complete Exam/Practice flows.
 - Fastify Learning API with typed service boundaries.
 - Flutter API mode through `ApiLearningRepository`.
 - PostgreSQL schema, Prisma migration, and repeatable seed foundation.
@@ -27,6 +27,8 @@ safety guarantees, limitations, and Phase 2 entry criteria.
 ### Learning Experience
 
 - Browse Subjects and their Question Sets.
+- Search Question Set titles, filter by topic, and load cursor pages in mock/API modes.
+- Switch between system, English, and Vietnamese interface languages with local persistence.
 - Use Practice Mode for immediate per-question feedback without exposing answer keys in question payloads.
 - View Question Set details and question counts.
 - Complete a multiple-choice quiz in Exam Mode.
@@ -63,7 +65,7 @@ the backend calculates the score and answer review.
 - User-uploaded Study Materials with validation, ownership, and moderation.
 - AI-assisted question extraction with source provenance, citations, and human
   review before publication.
-- Search, filters, pagination, and measured caching for growing public content.
+- More advanced ranked search and measured caching for growing public content.
 - User progress, targeted review, and carefully designed streaks.
 - React + TypeScript Admin Dashboard for future moderation workflows.
 - Study Credits and content unlocks in a later roadmap phase.

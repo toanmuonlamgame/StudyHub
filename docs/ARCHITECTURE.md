@@ -76,21 +76,16 @@ frontend/lib/
 
 Keep the existing models, screens, and `mock_learning_data.dart`. Add `repositories/` only when implementing the migration. Renaming or moving Home is optional cleanup and is not required for backend integration.
 
-### Current Dependency Risk
-The repository migration has started. `SubjectListScreen` now loads subjects through `LearningRepository`, while these screens still depend directly on `mock_learning_data.dart`:
+### Current Dependency Status
+The repository migration is complete for the active learner flow. Subject,
+Question Set, quiz, answer-check, submission, search, topic filtering, and cursor
+pagination operations all pass through `LearningRepository`. Screens do not
+import `mock_learning_data.dart` directly.
 
-- `QuestionSetListScreen`
-- `QuizScreen`
-
-The remaining direct dependencies still spread lookup and local quiz submission behavior into the UI. They should move behind the same repository seam incrementally.
-
-Current migration status:
-
-- `LearningRepository` defines asynchronous read operations for Subjects, Topics, Question Sets, and Questions.
-- `MockLearningRepository` adapts the existing mock data to that interface.
-- `StudyHubApp` selects the mock adapter and passes it through Home.
-- `SubjectListScreen` supports repository loading, error, retry, and empty states.
-- Question Set and Quiz screens are intentionally not migrated yet.
+`StudyHubApp` remains the composition root for the selected learning repository
+and the app-level interface locale. Locale state is independent of learning
+content: ARB resources translate system UI, while repository content remains
+unchanged.
 
 ### Target Dependency Direction
 Use a repository seam so screens depend on one small interface instead of a concrete data source.

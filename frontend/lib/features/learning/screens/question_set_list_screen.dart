@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations_x.dart';
 import '../models/question_set.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
@@ -23,106 +26,366 @@ class QuestionSetListScreen extends StatefulWidget {
 }
 
 class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
-  late Future<_QuestionSetListData> _dataFuture;
+  static const _pageSize = 20;
+  static const _searchDebounce = Duration(milliseconds: 400);
+
+  final TextEditingController _searchController = TextEditingController();
+  final List<QuestionSet> _questionSets = [];
+  List<Topic> _topics = const [];
+  Timer? _searchTimer;
+  String _query = '';
+  String? _selectedTopicId;
+  String? _nextCursor;
+  bool _hasMore = false;
+  bool _isInitialLoading = true;
+  bool _initialLoadFailed = false;
+  bool _isLoadingMore = false;
+  bool _loadMoreFailed = false;
+  int _requestGeneration = 0;
 
   @override
   void initState() {
     super.initState();
-    _dataFuture = _loadData();
+    unawaited(_loadTopics());
+    unawaited(_loadFirstPage());
+  }
+
+  @override
+  void dispose() {
+    _requestGeneration++;
+    _searchTimer?.cancel();
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Question sets')),
+      appBar: AppBar(title: Text(l10n.questionSetsTitle)),
       body: SafeArea(
-        child: FutureBuilder<_QuestionSetListData>(
-          future: _dataFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const LearningLoadingState(
-                message: 'Loading question sets',
-              );
-            }
-
-            if (snapshot.hasError) {
-              return LearningErrorState(
-                title: 'Question sets could not be loaded',
-                message: 'Check your connection and try again.',
-                onRetry: _retryLoadingData,
-              );
-            }
-
-            final data = snapshot.data;
-            if (data == null || data.questionSets.isEmpty) {
-              return LearningEmptyState(
-                icon: Icons.quiz_outlined,
-                title: 'No question sets yet',
-                message:
-                    'There are no question sets for ${widget.subject.name} yet.',
-              );
-            }
-
-            return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-              itemCount: data.questionSets.length + 1,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _QuestionSetListHeader(
-                    subjectName: widget.subject.name,
-                  );
-                }
-
-                final questionSet = data.questionSets[index - 1];
-                final topic = _findTopic(data.topics, questionSet.topicId);
-
-                return _QuestionSetCard(
-                  key: ValueKey(questionSet.id),
-                  questionSet: questionSet,
-                  topic: topic,
-                  onTap: () => _openQuestionSet(context, questionSet, topic),
-                );
-              },
-            );
-          },
+        child: Column(
+          children: [
+            _QuestionSetListHeader(subjectName: widget.subject.name),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+              child: TextField(
+                key: const ValueKey('question-set-search-field'),
+                controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onChanged: _onSearchChanged,
+                onSubmitted: _submitSearch,
+                decoration: InputDecoration(
+                  hintText: l10n.searchQuestionSetsHint,
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchController.text.isEmpty
+                      ? null
+                      : IconButton(
+                          tooltip: l10n.clearSearchTooltip,
+                          onPressed: _clearSearch,
+                          icon: const Icon(Icons.close),
+                        ),
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ),
+            if (_topics.isNotEmpty)
+              Semantics(
+                label: l10n.topicsLabel,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(20, 2, 20, 10),
+                  child: Row(
+                    children: [
+                      ChoiceChip(
+                        label: Text(l10n.allTopics),
+                        selected: _selectedTopicId == null,
+                        onSelected: (_) => _selectTopic(null),
+                      ),
+                      for (final topic in _topics) ...[
+                        const SizedBox(width: 8),
+                        ChoiceChip(
+                          label: Text(topic.name),
+                          selected: _selectedTopicId == topic.id,
+                          onSelected: (_) => _selectTopic(topic.id),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            Expanded(child: _buildContent(context)),
+          ],
         ),
       ),
     );
   }
 
-  Future<_QuestionSetListData> _loadData() async {
-    final questionSetPage = await widget.learningRepository.listQuestionSets(
-      subjectId: widget.subject.id,
-      limit: 20,
-    );
-    final topics = await widget.learningRepository.getTopicsBySubjectId(
-      widget.subject.id,
-    );
+  Widget _buildContent(BuildContext context) {
+    final l10n = context.l10n;
 
-    return _QuestionSetListData(
-      questionSets: questionSetPage.items,
-      topics: topics,
+    if (_isInitialLoading) {
+      return LearningLoadingState(
+        message: _query.isEmpty
+            ? l10n.loadingQuestionSets
+            : l10n.searchingQuestionSets,
+      );
+    }
+
+    if (_initialLoadFailed) {
+      return LearningErrorState(
+        title: _query.isEmpty
+            ? l10n.questionSetsLoadErrorTitle
+            : l10n.searchLoadErrorTitle,
+        message: l10n.connectionRetryMessage,
+        onRetry: _loadFirstPage,
+      );
+    }
+
+    if (_questionSets.isEmpty) {
+      final searching = _query.isNotEmpty;
+      return LearningEmptyState(
+        icon: searching ? Icons.search_off : Icons.quiz_outlined,
+        title: searching ? l10n.noSearchResultsTitle : l10n.noQuestionSetsTitle,
+        message: searching
+            ? l10n.noSearchResultsMessage
+            : l10n.noQuestionSetsMessage(widget.subject.name),
+        actionLabel: searching ? l10n.clearSearch : null,
+        onAction: searching ? _clearSearch : null,
+      );
+    }
+
+    return ListView.separated(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+      itemCount: _questionSets.length + 1,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        if (index == _questionSets.length) {
+          return _buildLoadMore(context);
+        }
+
+        final questionSet = _questionSets[index];
+        final topic = _findTopic(questionSet.topicId);
+        return _QuestionSetCard(
+          key: ValueKey(questionSet.id),
+          questionSet: questionSet,
+          topic: topic,
+          onTap: () => _openQuestionSet(context, questionSet, topic),
+        );
+      },
     );
   }
 
-  void _retryLoadingData() {
+  Widget _buildLoadMore(BuildContext context) {
+    final l10n = context.l10n;
+
+    if (_isLoadingMore) {
+      return Semantics(
+        liveRegion: true,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: 10),
+              Flexible(child: Text(l10n.loadingMore)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_loadMoreFailed) {
+      return Column(
+        children: [
+          Text(
+            l10n.loadMoreError,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: _loadMore,
+            icon: const Icon(Icons.refresh),
+            label: Text(l10n.retryLoadMore),
+          ),
+        ],
+      );
+    }
+
+    if (!_hasMore) {
+      return const SizedBox.shrink();
+    }
+
+    return OutlinedButton.icon(
+      onPressed: _loadMore,
+      icon: const Icon(Icons.expand_more),
+      label: Text(l10n.loadMore),
+    );
+  }
+
+  Future<void> _loadTopics() async {
+    try {
+      final topics = await widget.learningRepository.getTopicsBySubjectId(
+        widget.subject.id,
+      );
+      if (mounted) {
+        setState(() => _topics = topics);
+      }
+    } catch (_) {
+      // Topic filtering is optional; the question-set list remains usable.
+    }
+  }
+
+  Future<void> _loadFirstPage() async {
+    final generation = ++_requestGeneration;
     setState(() {
-      _dataFuture = _loadData();
+      _isInitialLoading = true;
+      _initialLoadFailed = false;
+      _isLoadingMore = false;
+      _loadMoreFailed = false;
+      _questionSets.clear();
+      _nextCursor = null;
+      _hasMore = false;
     });
+
+    try {
+      final page = await widget.learningRepository.listQuestionSets(
+        subjectId: widget.subject.id,
+        topicId: _selectedTopicId,
+        q: _query.isEmpty ? null : _query,
+        limit: _pageSize,
+      );
+      if (!mounted ||
+          generation != _requestGeneration ||
+          _searchController.text.trim() != _query) {
+        return;
+      }
+      setState(() {
+        _questionSets.addAll(_deduplicate(page.items));
+        _nextCursor = page.nextCursor;
+        _hasMore = page.hasMore && page.nextCursor != null;
+        _isInitialLoading = false;
+      });
+    } catch (_) {
+      if (!mounted ||
+          generation != _requestGeneration ||
+          _searchController.text.trim() != _query) {
+        return;
+      }
+      setState(() {
+        _isInitialLoading = false;
+        _initialLoadFailed = true;
+      });
+    }
   }
 
-  Topic? _findTopic(List<Topic> topics, String? topicId) {
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore || _nextCursor == null) {
+      return;
+    }
+
+    final generation = _requestGeneration;
+    final cursor = _nextCursor;
+    setState(() {
+      _isLoadingMore = true;
+      _loadMoreFailed = false;
+    });
+
+    try {
+      final page = await widget.learningRepository.listQuestionSets(
+        subjectId: widget.subject.id,
+        topicId: _selectedTopicId,
+        q: _query.isEmpty ? null : _query,
+        limit: _pageSize,
+        cursor: cursor,
+      );
+      if (!mounted ||
+          generation != _requestGeneration ||
+          _searchController.text.trim() != _query) {
+        return;
+      }
+      setState(() {
+        final existingIds = _questionSets.map((item) => item.id).toSet();
+        _questionSets.addAll(
+          page.items.where((item) => existingIds.add(item.id)),
+        );
+        _nextCursor = page.nextCursor;
+        _hasMore = page.hasMore && page.nextCursor != null;
+        _isLoadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted ||
+          generation != _requestGeneration ||
+          _searchController.text.trim() != _query) {
+        return;
+      }
+      setState(() {
+        _isLoadingMore = false;
+        _loadMoreFailed = true;
+      });
+    }
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {});
+    _searchTimer?.cancel();
+    _searchTimer = Timer(_searchDebounce, () => _applySearch(value));
+  }
+
+  void _submitSearch(String value) {
+    _searchTimer?.cancel();
+    _applySearch(value);
+  }
+
+  void _applySearch(String value) {
+    final normalized = value.trim();
+    if (normalized == _query) {
+      return;
+    }
+    _query = normalized;
+    unawaited(_loadFirstPage());
+  }
+
+  void _clearSearch() {
+    _searchTimer?.cancel();
+    _searchController.clear();
+    if (_query.isEmpty) {
+      setState(() {});
+      return;
+    }
+    _query = '';
+    unawaited(_loadFirstPage());
+  }
+
+  void _selectTopic(String? topicId) {
+    if (topicId == _selectedTopicId) {
+      return;
+    }
+    _selectedTopicId = topicId;
+    unawaited(_loadFirstPage());
+  }
+
+  List<QuestionSet> _deduplicate(List<QuestionSet> items) {
+    final ids = <String>{};
+    return items.where((item) => ids.add(item.id)).toList(growable: false);
+  }
+
+  Topic? _findTopic(String? topicId) {
     if (topicId == null) {
       return null;
     }
-
-    for (final topic in topics) {
+    for (final topic in _topics) {
       if (topic.id == topicId) {
         return topic;
       }
     }
-
     return null;
   }
 
@@ -144,16 +407,6 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
   }
 }
 
-class _QuestionSetListData {
-  const _QuestionSetListData({
-    required this.questionSets,
-    required this.topics,
-  });
-
-  final List<QuestionSet> questionSets;
-  final List<Topic> topics;
-}
-
 class _QuestionSetListHeader extends StatelessWidget {
   const _QuestionSetListHeader({required this.subjectName});
 
@@ -164,19 +417,14 @@ class _QuestionSetListHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            subjectName,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          Text(subjectName, style: theme.textTheme.headlineSmall),
           const SizedBox(height: 6),
           Text(
-            'Choose a question set to review its details.',
+            context.l10n.chooseQuestionSetSubtitle,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -202,6 +450,7 @@ class _QuestionSetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final estimatedMinutes =
         questionSet.estimatedMinutes ??
         (questionSet.questionCount * 1.5).ceil();
@@ -209,10 +458,9 @@ class _QuestionSetCard extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: 'Open ${questionSet.title}',
+      label: l10n.openQuestionSetSemantics(questionSet.title),
       child: Card(
         clipBehavior: Clip.antiAlias,
-        color: theme.colorScheme.surface,
         child: InkWell(
           onTap: onTap,
           child: Padding(
@@ -220,12 +468,7 @@ class _QuestionSetCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  questionSet.title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                Text(questionSet.title, style: theme.textTheme.titleMedium),
                 const SizedBox(height: 6),
                 Text(
                   questionSet.description,
@@ -240,15 +483,15 @@ class _QuestionSetCard extends StatelessWidget {
                   children: [
                     LearningStatChip(
                       icon: Icons.help_outline,
-                      label: '${questionSet.questionCount} questions',
+                      label: l10n.questionCount(questionSet.questionCount),
                     ),
                     LearningStatChip(
                       icon: Icons.schedule_outlined,
-                      label: '$estimatedMinutes min',
+                      label: l10n.minuteCount(estimatedMinutes),
                     ),
                     LearningStatChip(
                       icon: Icons.signal_cellular_alt,
-                      label: _capitalize(difficulty),
+                      label: _difficultyLabel(context, difficulty),
                     ),
                   ],
                 ),
@@ -280,10 +523,12 @@ class _QuestionSetCard extends StatelessWidget {
     );
   }
 
-  String _capitalize(String value) {
-    if (value.isEmpty) {
-      return value;
-    }
-    return '${value[0].toUpperCase()}${value.substring(1)}';
+  String _difficultyLabel(BuildContext context, String value) {
+    final l10n = context.l10n;
+    return switch (value.toLowerCase()) {
+      'medium' => l10n.difficultyMedium,
+      'hard' => l10n.difficultyHard,
+      _ => l10n.difficultyEasy,
+    };
   }
 }

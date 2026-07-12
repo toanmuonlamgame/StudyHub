@@ -1,38 +1,39 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations_x.dart';
+
 class HomePlaceholder extends StatelessWidget {
   const HomePlaceholder({super.key, required this.onStartLearning});
 
   final VoidCallback onStartLearning;
 
-  static const _learningModes = [
-    _ModePreviewData(
-      icon: Icons.assignment_outlined,
-      title: 'Exam Mode',
-      description: 'Answer the full set, then submit once for your result.',
-    ),
-    _ModePreviewData(
-      icon: Icons.school_outlined,
-      title: 'Practice Mode',
-      description: 'Check each answer and learn from immediate feedback.',
-    ),
-    _ModePreviewData(
-      icon: Icons.fact_check_outlined,
-      title: 'Safe Review',
-      description: 'See correct answers only after you submit or check.',
-    ),
-  ];
-
-  static const _learningSteps = [
-    'Pick a subject',
-    'Choose a question set',
-    'Practise or take an exam',
-    'Review your results',
-  ];
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final learningModes = [
+      _ModePreviewData(
+        icon: Icons.assignment_outlined,
+        title: l10n.examMode,
+        description: l10n.examModePreview,
+      ),
+      _ModePreviewData(
+        icon: Icons.school_outlined,
+        title: l10n.practiceMode,
+        description: l10n.practiceModePreview,
+      ),
+      _ModePreviewData(
+        icon: Icons.fact_check_outlined,
+        title: l10n.safeReview,
+        description: l10n.safeReviewPreview,
+      ),
+    ];
+    final learningSteps = [
+      l10n.pickSubjectStep,
+      l10n.chooseQuestionSetStep,
+      l10n.learnOrExamStep,
+      l10n.reviewResultsStep,
+    ];
 
     return Scaffold(
       body: SafeArea(
@@ -45,14 +46,14 @@ class HomePlaceholder extends StatelessWidget {
                 const _AppHeader(),
                 const SizedBox(height: 34),
                 Text(
-                  'Study smarter, one set at a time.',
+                  l10n.homeHeadline,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Choose a subject, practise with focused question sets, and understand every result.',
+                  l10n.homeSubtitle,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -61,31 +62,31 @@ class HomePlaceholder extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: onStartLearning,
                   icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Start learning'),
+                  label: Text(l10n.startLearning),
                 ),
                 const SizedBox(height: 14),
                 _SafetyNote(colorScheme: theme.colorScheme),
                 const SizedBox(height: 36),
-                const _SectionHeader(
-                  title: 'Choose how you learn',
-                  subtitle: 'Switch modes for each question set.',
+                _SectionHeader(
+                  title: l10n.learningModes,
+                  subtitle: l10n.learningModesSubtitle,
                 ),
                 const SizedBox(height: 14),
-                for (final mode in _learningModes) ...[
+                for (final mode in learningModes) ...[
                   _ModePreview(data: mode),
                   const SizedBox(height: 10),
                 ],
                 const SizedBox(height: 26),
-                const _SectionHeader(
-                  title: 'A simple learning flow',
-                  subtitle: 'From choosing a subject to reviewing your work.',
+                _SectionHeader(
+                  title: l10n.howItWorks,
+                  subtitle: l10n.howItWorksSubtitle,
                 ),
                 const SizedBox(height: 16),
-                for (var index = 0; index < _learningSteps.length; index++)
+                for (var index = 0; index < learningSteps.length; index++)
                   _LearningStep(
                     number: index + 1,
-                    label: _learningSteps[index],
-                    isLast: index == _learningSteps.length - 1,
+                    label: learningSteps[index],
+                    isLast: index == learningSteps.length - 1,
                   ),
               ],
             ),
@@ -119,7 +120,7 @@ class _AppHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Text('StudyHub', style: theme.textTheme.titleLarge),
+        Text(context.l10n.appTitle, style: theme.textTheme.titleLarge),
       ],
     );
   }
@@ -147,7 +148,7 @@ class _SafetyNote extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Answers stay hidden until you submit or check.',
+              context.l10n.answersHiddenNote,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSecondaryContainer,
                 fontWeight: FontWeight.w600,

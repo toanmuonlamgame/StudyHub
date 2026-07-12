@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/app_motion.dart';
+import '../../../l10n/app_localizations_x.dart';
 import '../models/answer_review.dart';
 import '../models/quiz_mode.dart';
 import '../models/quiz_result.dart';
@@ -12,21 +15,21 @@ class QuizResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final modeLabel = result.quizMode == QuizMode.practice
-        ? 'Practice Mode'
-        : 'Exam Mode';
+        ? l10n.practiceMode
+        : l10n.examMode;
     final message = result.percentageScore >= 80
-        ? 'Strong result. Keep the momentum going.'
+        ? l10n.strongResultMessage
         : result.percentageScore >= 50
-        ? 'Good progress. Review the missed answers below.'
-        : 'Every review builds understanding. Try the set again when ready.';
-
+        ? l10n.goodResultMessage
+        : l10n.learningResultMessage;
     return Scaffold(
       appBar: AppBar(
         title: Text(
           result.quizMode == QuizMode.practice
-              ? 'Practice Result'
-              : 'Exam Result',
+              ? l10n.practiceResult
+              : l10n.examResult,
         ),
       ),
       body: SafeArea(
@@ -71,10 +74,15 @@ class QuizResultScreen extends StatelessWidget {
                       ),
                       child: TweenAnimationBuilder<double>(
                         tween: Tween(end: result.percentageScore),
-                        duration: const Duration(milliseconds: 280),
+                        duration: AppMotion.duration(
+                          context,
+                          const Duration(milliseconds: 280),
+                        ),
                         curve: Curves.easeOutCubic,
                         builder: (context, value, child) => Text(
-                          '${value.toStringAsFixed(0)}%',
+                          NumberFormat.percentPattern(
+                            Localizations.localeOf(context).toLanguageTag(),
+                          ).format(value / 100),
                           style: theme.textTheme.headlineMedium?.copyWith(
                             color: theme.colorScheme.primary,
                           ),
@@ -94,21 +102,21 @@ class QuizResultScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: _ResultStat(
-                            label: 'Correct answers',
+                            label: l10n.correctAnswers,
                             value: result.correctCount.toString(),
                             color: theme.colorScheme.secondary,
                           ),
                         ),
                         Expanded(
                           child: _ResultStat(
-                            label: 'Wrong answers',
+                            label: l10n.wrongAnswers,
                             value: result.wrongCount.toString(),
                             color: theme.colorScheme.error,
                           ),
                         ),
                         Expanded(
                           child: _ResultStat(
-                            label: 'Total questions',
+                            label: l10n.totalQuestions,
                             value: result.totalCount.toString(),
                             color: theme.colorScheme.primary,
                           ),
@@ -122,12 +130,15 @@ class QuizResultScreen extends StatelessWidget {
             const SizedBox(height: 28),
             TweenAnimationBuilder<double>(
               tween: Tween(end: 1),
-              duration: const Duration(milliseconds: 260),
+              duration: AppMotion.duration(
+                context,
+                const Duration(milliseconds: 260),
+              ),
               curve: Curves.easeOutCubic,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Answer review', style: theme.textTheme.titleLarge),
+                  Text(l10n.answerReview, style: theme.textTheme.titleLarge),
                   const SizedBox(height: 12),
                   for (
                     var index = 0;
@@ -155,7 +166,7 @@ class QuizResultScreen extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: () => Navigator.of(context).pop(),
               icon: const Icon(Icons.arrow_back),
-              label: const Text('Back to Question Set'),
+              label: Text(l10n.backToQuestionSet),
             ),
           ],
         ),
@@ -177,6 +188,7 @@ class _AnswerReviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final statusColor = answerReview.isCorrect
         ? theme.colorScheme.secondary
         : theme.colorScheme.error;
@@ -203,14 +215,14 @@ class _AnswerReviewCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Question $questionNumber',
+                  l10n.questionNumber(questionNumber),
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
               Text(
-                answerReview.isCorrect ? 'Correct' : 'Incorrect',
+                answerReview.isCorrect ? l10n.correct : l10n.incorrect,
                 style: theme.textTheme.labelLarge?.copyWith(color: statusColor),
               ),
             ],
@@ -219,8 +231,9 @@ class _AnswerReviewCard extends StatelessWidget {
           Text(answerReview.questionText, style: theme.textTheme.titleMedium),
           const SizedBox(height: 12),
           Text(
-            'Your answer: '
-            '${answerReview.selectedAnswerText ?? 'Not answered'}',
+            l10n.yourAnswer(
+              answerReview.selectedAnswerText ?? l10n.notAnswered,
+            ),
             style: TextStyle(
               color: answerReview.isCorrect
                   ? theme.colorScheme.onSurface
@@ -229,7 +242,7 @@ class _AnswerReviewCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Correct answer: ${answerReview.correctAnswerText}',
+            l10n.correctAnswer(answerReview.correctAnswerText),
             style: TextStyle(color: theme.colorScheme.secondary),
           ),
         ],

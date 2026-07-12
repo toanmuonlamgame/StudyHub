@@ -130,8 +130,10 @@ Useful future aggregates include:
 Analytics processing must not slow or weaken the transactional API.
 
 ## 9. Flutter Implications
-- List screens should evolve toward pagination or infinite scrolling.
-- Debounce search input and cancel/ignore stale responses.
+- Question Set browsing now consumes cursor pages with an explicit load-more action.
+- Title search uses a 400 ms debounce and ignores stale responses.
+- Subject and optional topic filters stay repository/backend-driven.
+- Next-page failures preserve current items and support focused retry.
 - Do not cache large datasets blindly; define bounded, purpose-specific caches.
 - Preserve loading, empty, error, retry, and end-of-list states.
 - Avoid unnecessary rebuilds in long lists and use stable item identities.
@@ -159,4 +161,6 @@ Every growing list/search endpoint should:
 
 Progress: the paginated Question Set endpoint is complete in memory and Prisma
 modes while the existing subject-specific endpoint remains compatible. Initial
-Prisma indexes for current learning filters and ordering are also complete.
+Prisma indexes for current learning filters and ordering are also complete. The
+Flutter client now consumes search, topic filters, and cursor load-more in both
+mock and API modes without loading all Question Sets at once.

@@ -2,6 +2,32 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-13 - Localization, Search, And Mobile Accessibility Boundaries
+Decision:
+- Localize StudyHub system interface through Flutter ARB resources for English
+  and Vietnamese, while keeping creator and learning content unchanged.
+- Own selected locale state at `StudyHubApp` and persist only the non-sensitive
+  `system`, `en`, or `vi` preference locally.
+- Keep Question Set search, topic filtering, and cursor pagination behind
+  `LearningRepository`; Flutter must not fetch all API data and filter locally.
+- Support larger text and platform reduced-motion preferences instead of
+  disabling accessibility settings to preserve a fixed layout.
+
+Reason:
+- Interface language and educational-content language are separate user choices.
+- App-level locale ownership updates the full navigation tree consistently
+  without adding a state-management package.
+- Backend/repository-driven queries preserve compact payloads and scale beyond
+  the prototype dataset.
+- Mobile accessibility is part of product quality, not optional visual polish.
+
+Rule:
+- Never auto-translate user-created questions, answers, subjects, materials, or uploads.
+- Persist no secret, identity, or sensitive data in the locale preference.
+- Debounce search, invalidate stale responses, reset cursors when filters change,
+  and preserve loaded items when a next-page request fails.
+- Do not globally clamp text scale or require motion to understand an interaction.
+
 ## 2026-07-13 - Mobile-First Learner UI Standard
 Decision: StudyHub designs and validates learner surfaces for phones first. Wider
 Flutter Web layouts remain responsive and constrained, but they do not drive the

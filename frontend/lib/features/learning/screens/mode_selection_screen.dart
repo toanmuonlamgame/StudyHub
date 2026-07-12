@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations_x.dart';
 import '../models/question_set.dart';
 import '../models/quiz_mode.dart';
 import '../repositories/learning_repository.dart';
@@ -19,15 +20,16 @@ class ModeSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Choose a mode')),
+      appBar: AppBar(title: Text(l10n.modeSelectionTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           children: [
             Text(
-              'How do you want to learn?',
+              l10n.modeSelectionHeading,
               style: theme.textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
@@ -40,20 +42,18 @@ class ModeSelectionScreen extends StatelessWidget {
             const SizedBox(height: 24),
             ModeCard(
               icon: Icons.assignment_outlined,
-              title: 'Exam Mode',
-              description:
-                  'Answer every question, then submit once to see your score and full review.',
-              actionLabel: 'Start Exam Mode',
+              title: l10n.examMode,
+              description: l10n.examModeDescription,
+              actionLabel: l10n.startExamMode,
               highlighted: true,
               onPressed: () => _startQuiz(context, QuizMode.exam),
             ),
             const SizedBox(height: 14),
             ModeCard(
               icon: Icons.school_outlined,
-              title: 'Practice Mode',
-              description:
-                  'Check each answer immediately and learn from feedback before moving on.',
-              actionLabel: 'Start Practice Mode',
+              title: l10n.practiceMode,
+              description: l10n.practiceModeDescription,
+              actionLabel: l10n.startPracticeMode,
               onPressed: () => _startQuiz(context, QuizMode.practice),
             ),
           ],

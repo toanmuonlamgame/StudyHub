@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations_x.dart';
 import '../models/question_set.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
@@ -24,13 +25,14 @@ class QuestionSetDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final estimatedMinutes =
         questionSet.estimatedMinutes ??
         (questionSet.questionCount * 1.5).ceil();
     final difficulty = questionSet.difficulty ?? 'easy';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Question set')),
+      appBar: AppBar(title: Text(l10n.questionSetTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
@@ -64,20 +66,20 @@ class QuestionSetDetailScreen extends StatelessWidget {
               children: [
                 LearningStatChip(
                   icon: Icons.help_outline,
-                  label: '${questionSet.questionCount} questions',
+                  label: l10n.questionCount(questionSet.questionCount),
                 ),
                 LearningStatChip(
                   icon: Icons.schedule_outlined,
-                  label: '$estimatedMinutes min',
+                  label: l10n.minuteCount(estimatedMinutes),
                 ),
                 LearningStatChip(
                   icon: Icons.signal_cellular_alt,
-                  label: _capitalize(difficulty),
+                  label: _localizedDifficulty(context, difficulty),
                 ),
               ],
             ),
             const SizedBox(height: 30),
-            Text('About this question set', style: theme.textTheme.titleLarge),
+            Text(l10n.aboutQuestionSet, style: theme.textTheme.titleLarge),
             const SizedBox(height: 9),
             Text(
               questionSet.description,
@@ -101,11 +103,7 @@ class QuestionSetDetailScreen extends StatelessWidget {
                     color: theme.colorScheme.primary,
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Correct answers stay hidden until you submit or check an answer.',
-                    ),
-                  ),
+                  Expanded(child: Text(l10n.answersHiddenDetail)),
                 ],
               ),
             ),
@@ -113,7 +111,7 @@ class QuestionSetDetailScreen extends StatelessWidget {
             FilledButton.icon(
               onPressed: () => _chooseMode(context),
               icon: const Icon(Icons.arrow_forward),
-              label: const Text('Choose learning mode'),
+              label: Text(l10n.chooseLearningMode),
             ),
           ],
         ),
@@ -132,10 +130,12 @@ class QuestionSetDetailScreen extends StatelessWidget {
     );
   }
 
-  String _capitalize(String value) {
-    if (value.isEmpty) {
-      return value;
-    }
-    return '${value[0].toUpperCase()}${value.substring(1)}';
+  String _localizedDifficulty(BuildContext context, String value) {
+    final l10n = context.l10n;
+    return switch (value.toLowerCase()) {
+      'medium' => l10n.difficultyMedium,
+      'hard' => l10n.difficultyHard,
+      _ => l10n.difficultyEasy,
+    };
   }
 }

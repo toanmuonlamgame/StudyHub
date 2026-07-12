@@ -113,6 +113,14 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
   remain constrained and responsive for development and secondary use.
 - Shared loading, error, and empty states keep learner feedback consistent, while
   Progress and Settings remain honest until persistence and preferences are real.
+- StudyHub supports English and Vietnamese system UI. The app-level locale
+  selection supports system default, persists locally, and updates immediately.
+- Interface localization is separate from learning-content language: subject,
+  topic, question-set, question, answer, and creator-uploaded text is not auto-translated.
+- Flutter Question Set search, topic filtering, and cursor load-more are
+  repository-driven in both mock/API modes, with debouncing and stale-response protection.
+- Compact-screen, large-text, semantics, and reduced-motion behavior are core
+  mobile quality requirements; representative-device review is still required.
 - Practice Mode ends with a summary assembled only from trusted per-question
   `checkAnswer` responses; Exam Mode continues to use backend `submitQuiz`.
 

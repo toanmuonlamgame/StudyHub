@@ -1,17 +1,44 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../core/app_locale.dart';
 import '../core/app_theme.dart';
+import '../core/locale_preference_store.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/repositories/mock_learning_repository.dart';
+import '../l10n/app_localizations.dart';
 import 'main_navigation_screen.dart';
 
-class StudyHubApp extends StatelessWidget {
+class StudyHubApp extends StatefulWidget {
   const StudyHubApp({
     super.key,
     this.learningRepository = const MockLearningRepository(),
+    this.initialLocaleSelection,
+    this.localePreferenceStore = const LocalePreferenceStore(),
   });
 
   final LearningRepository learningRepository;
+  final AppLocaleSelection? initialLocaleSelection;
+  final LocalePreferenceStore localePreferenceStore;
+
+  @override
+  State<StudyHubApp> createState() => _StudyHubAppState();
+}
+
+class _StudyHubAppState extends State<StudyHubApp> {
+  late AppLocaleSelection _localeSelection;
+  bool _localeSelectedInSession = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _localeSelection =
+        widget.initialLocaleSelection ?? AppLocaleSelection.system;
+    if (widget.initialLocaleSelection == null) {
+      unawaited(_loadStoredLocale());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +46,34 @@ class StudyHubApp extends StatelessWidget {
       title: 'StudyHub',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: MainNavigationScreen(learningRepository: learningRepository),
+      locale: _localeSelection.locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      home: MainNavigationScreen(
+        learningRepository: widget.learningRepository,
+        localeSelection: _localeSelection,
+        onLocaleSelected: _selectLocale,
+      ),
     );
+  }
+
+  Future<void> _loadStoredLocale() async {
+    final storedLocale = await widget.localePreferenceStore.load();
+    if (!mounted ||
+        _localeSelectedInSession ||
+        storedLocale == _localeSelection) {
+      return;
+    }
+    setState(() => _localeSelection = storedLocale);
+  }
+
+  void _selectLocale(AppLocaleSelection selection) {
+    _localeSelectedInSession = true;
+    if (selection == _localeSelection) {
+      unawaited(widget.localePreferenceStore.save(selection));
+      return;
+    }
+    setState(() => _localeSelection = selection);
+    unawaited(widget.localePreferenceStore.save(selection));
   }
 }

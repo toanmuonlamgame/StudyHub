@@ -128,6 +128,25 @@ void main() {
     },
   );
 
+  test('normalizes an empty next cursor', () async {
+    final repository = ApiLearningRepository(
+      baseUrl: 'http://studyhub.test',
+      client: MockClient(
+        (_) async => _jsonResponse({
+          'items': <Object>[],
+          'nextCursor': '',
+          'hasMore': false,
+        }),
+      ),
+    );
+
+    final page = await repository.listQuestionSets();
+
+    expect(page.items, isEmpty);
+    expect(page.nextCursor, isNull);
+    expect(page.hasMore, isFalse);
+  });
+
   test('maps submit result and answer reviews', () async {
     final client = MockClient((request) async {
       expect(request.method, 'POST');

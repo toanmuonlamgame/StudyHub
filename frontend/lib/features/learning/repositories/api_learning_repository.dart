@@ -75,13 +75,16 @@ class ApiLearningRepository implements LearningRepository {
     ).replace(queryParameters: queryParameters);
     final response = await _client.get(uri);
     final body = _decodeResponse(response, 'listQuestionSets');
+    final parsedNextCursor = _readNullableString(body, 'nextCursor');
 
     return PaginatedResult(
       items: _readObjectList(
         body,
         'items',
       ).map(_questionSetFromJson).toList(growable: false),
-      nextCursor: _readNullableString(body, 'nextCursor'),
+      nextCursor: parsedNextCursor == null || parsedNextCursor.isEmpty
+          ? null
+          : parsedNextCursor,
       hasMore: _readBool(body, 'hasMore'),
     );
   }

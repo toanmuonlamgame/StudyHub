@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../../core/app_locale.dart';
+import '../../l10n/app_localizations_x.dart';
+
 class SettingsPlaceholderScreen extends StatelessWidget {
-  const SettingsPlaceholderScreen({super.key});
+  const SettingsPlaceholderScreen({
+    super.key,
+    required this.localeSelection,
+    required this.onLocaleSelected,
+  });
+
+  final AppLocaleSelection localeSelection;
+  final ValueChanged<AppLocaleSelection> onLocaleSelected;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.settingsTab)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
@@ -20,12 +31,45 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'About StudyHub',
+                      l10n.languageSection,
+                      style: theme.textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 10),
+                    Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          _LanguageOptionTile(
+                            label: l10n.systemDefault,
+                            value: AppLocaleSelection.system,
+                            selectedValue: localeSelection,
+                            onSelected: onLocaleSelected,
+                          ),
+                          _Divider(color: theme.colorScheme.outlineVariant),
+                          _LanguageOptionTile(
+                            label: l10n.english,
+                            value: AppLocaleSelection.english,
+                            selectedValue: localeSelection,
+                            onSelected: onLocaleSelected,
+                          ),
+                          _Divider(color: theme.colorScheme.outlineVariant),
+                          _LanguageOptionTile(
+                            label: l10n.vietnamese,
+                            value: AppLocaleSelection.vietnamese,
+                            selectedValue: localeSelection,
+                            onSelected: onLocaleSelected,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    Text(
+                      l10n.aboutStudyHub,
                       style: theme.textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Preferences will appear here only when they are functional and ready to persist.',
+                      l10n.settingsIntro,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -34,24 +78,24 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                     Card(
                       child: Column(
                         children: [
-                          const ListTile(
-                            leading: Icon(Icons.school_outlined),
-                            title: Text('Mobile learning platform'),
+                          ListTile(
+                            leading: const Icon(Icons.school_outlined),
+                            title: Text(l10n.mobileLearningPlatform),
                             subtitle: Text(
-                              'Browse question sets, practise, take exams, and review results.',
+                              l10n.mobileLearningPlatformDescription,
                             ),
                           ),
-                          Divider(
-                            height: 1,
-                            indent: 64,
-                            color: theme.colorScheme.outlineVariant,
+                          _Divider(color: theme.colorScheme.outlineVariant),
+                          ListTile(
+                            leading: const Icon(Icons.visibility_off_outlined),
+                            title: Text(l10n.learningSafety),
+                            subtitle: Text(l10n.learningSafetyDescription),
                           ),
-                          const ListTile(
-                            leading: Icon(Icons.visibility_off_outlined),
-                            title: Text('Learning safety'),
-                            subtitle: Text(
-                              'Correct answers stay hidden until submit or check answer.',
-                            ),
+                          _Divider(color: theme.colorScheme.outlineVariant),
+                          ListTile(
+                            leading: const Icon(Icons.key_off_outlined),
+                            title: Text(l10n.dataSafety),
+                            subtitle: Text(l10n.dataSafetyDescription),
                           ),
                         ],
                       ),
@@ -72,18 +116,18 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                             color: theme.colorScheme.onSecondaryContainer,
                           ),
                           const SizedBox(width: 12),
-                          const Expanded(
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Active development',
-                                  style: TextStyle(fontWeight: FontWeight.w700),
+                                  l10n.activeDevelopment,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'Language, theme, and notification controls are planned, not active.',
-                                ),
+                                const SizedBox(height: 4),
+                                Text(l10n.activeDevelopmentDescription),
                               ],
                             ),
                           ),
@@ -98,5 +142,58 @@ class SettingsPlaceholderScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _LanguageOptionTile extends StatelessWidget {
+  const _LanguageOptionTile({
+    required this.label,
+    required this.value,
+    required this.selectedValue,
+    required this.onSelected,
+  });
+
+  final String label;
+  final AppLocaleSelection value;
+  final AppLocaleSelection selectedValue;
+  final ValueChanged<AppLocaleSelection> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = value == selectedValue;
+    final l10n = context.l10n;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: selected ? l10n.selectedLanguageSemantics(label) : label,
+      child: ListTile(
+        minTileHeight: 56,
+        onTap: () => onSelected(value),
+        leading: Icon(
+          value == AppLocaleSelection.system
+              ? Icons.language_outlined
+              : Icons.translate_outlined,
+        ),
+        title: Text(label),
+        trailing: selected
+            ? Icon(
+                Icons.check_circle,
+                color: Theme.of(context).colorScheme.primary,
+              )
+            : const Icon(Icons.circle_outlined),
+      ),
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Divider(height: 1, indent: 64, color: color);
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations_x.dart';
+
 class ProgressPlaceholderScreen extends StatelessWidget {
   const ProgressPlaceholderScreen({super.key, required this.onStartLearning});
 
@@ -8,9 +10,10 @@ class ProgressPlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Progress')),
+      appBar: AppBar(title: Text(l10n.progressTab)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
@@ -38,13 +41,13 @@ class ProgressPlaceholderScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          'Progress tracking is planned',
+                          l10n.progressPlannedTitle,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.titleLarge,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Completed sessions and learning history will appear here after secure progress storage is implemented.',
+                          l10n.progressPlannedMessage,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
@@ -54,7 +57,7 @@ class ProgressPlaceholderScreen extends StatelessWidget {
                         FilledButton.icon(
                           onPressed: onStartLearning,
                           icon: const Icon(Icons.menu_book_outlined),
-                          label: const Text('Start learning'),
+                          label: Text(l10n.startLearning),
                         ),
                       ],
                     ),

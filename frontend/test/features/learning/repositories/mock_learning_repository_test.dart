@@ -133,6 +133,31 @@ void main() {
     expect(searchPage.items.single.id, 'question_set_js_functions');
   });
 
+  test('keeps pagination stable, unique, and empty-search aware', () async {
+    const repository = MockLearningRepository();
+
+    final firstRun = await repository.listQuestionSets(limit: 2);
+    final repeatedRun = await repository.listQuestionSets(limit: 2);
+    final secondPage = await repository.listQuestionSets(
+      limit: 2,
+      cursor: firstRun.nextCursor,
+    );
+    final emptySearch = await repository.listQuestionSets(q: 'missing title');
+
+    expect(
+      repeatedRun.items.map((item) => item.id),
+      orderedEquals(firstRun.items.map((item) => item.id)),
+    );
+    final ids = [
+      ...firstRun.items,
+      ...secondPage.items,
+    ].map((item) => item.id).toList();
+    expect(ids.toSet(), hasLength(ids.length));
+    expect(emptySearch.items, isEmpty);
+    expect(emptySearch.hasMore, isFalse);
+    expect(emptySearch.nextCursor, isNull);
+  });
+
   test('checks a practice answer and returns correctness afterward', () async {
     const repository = MockLearningRepository();
 
