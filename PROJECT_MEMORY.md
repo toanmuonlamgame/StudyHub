@@ -114,8 +114,9 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
   repository-lazy so learning data loads only after the learner enters Learn.
 - Mobile phone layouts are the learner UI source of truth; wider Chrome layouts
   remain constrained and responsive for development and secondary use.
-- Shared loading, error, and empty states keep learner feedback consistent, while
-  Progress and Settings remain honest until persistence and preferences are real.
+- Shared loading, error, and empty states keep learner feedback consistent.
+  Progress now stores trusted completed-session summaries on the current device;
+  Settings remains honest until additional preferences are functional.
 - StudyHub supports English and Vietnamese system UI. The app-level locale
   selection supports system default, persists locally, and updates immediately.
 - Interface localization is separate from learning-content language: subject,
@@ -126,6 +127,10 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
   mobile quality requirements; representative-device review is still required.
 - Practice Mode ends with a summary assembled only from trusted per-question
   `checkAnswer` responses; Exam Mode continues to use backend `submitQuiz`.
+- Local Progress persists only post-result metadata from Exam and Practice. It
+  keeps the newest 100 sessions in `shared_preferences`, stores no answer keys or
+  full question payloads, and will remain device-only until authentication and
+  backend sync are deliberately implemented.
 
 ## Roadmap Summary
 - V1: basic taxonomy, browse question sets, take quiz, view results, upload documents/exams.

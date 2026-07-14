@@ -9,6 +9,72 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get progressCompletedSessions => 'Completed sessions';
+
+  @override
+  String get progressAverageAccuracy => 'Average accuracy';
+
+  @override
+  String get progressCompletedQuestionSets => 'Completed sets';
+
+  @override
+  String get progressLatestActivity => 'Latest activity';
+
+  @override
+  String get progressRecentResults => 'Recent results';
+
+  @override
+  String get progressNoHistoryTitle => 'No progress yet';
+
+  @override
+  String get progressNoHistoryBody =>
+      'Complete an Exam or Practice session to build your local learning history.';
+
+  @override
+  String get progressExamSession => 'Exam';
+
+  @override
+  String get progressPracticeSession => 'Practice';
+
+  @override
+  String progressScoreSummary(Object correct, Object total) {
+    return '$correct of $total correct';
+  }
+
+  @override
+  String get progressClearHistory => 'Clear history';
+
+  @override
+  String get progressClearHistoryTitle => 'Clear local history?';
+
+  @override
+  String get progressClearHistoryBody =>
+      'This removes completed sessions stored on this device. It cannot be undone.';
+
+  @override
+  String get progressCancel => 'Cancel';
+
+  @override
+  String get progressConfirmClear => 'Clear';
+
+  @override
+  String get progressHistoryCleared => 'Progress history cleared.';
+
+  @override
+  String get progressHistoryClearError =>
+      'Progress history could not be cleared.';
+
+  @override
+  String get progressLoadError => 'Progress could not be loaded.';
+
+  @override
+  String get progressSaveError =>
+      'Your result is safe, but local progress could not be saved.';
+
+  @override
+  String get progressLocalOnlyNote => 'Saved on this device only';
+
+  @override
   String get appTitle => 'StudyHub';
 
   @override
@@ -457,11 +523,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featuredSetsAction => 'Browse sets';
 
   @override
-  String get featuredProgressTitle => 'Progress tracking is coming';
+  String get featuredProgressTitle => 'Review your progress';
 
   @override
   String get featuredProgressBody =>
-      'The Progress area is ready for real attempt history later.';
+      'Completed Exam and Practice sessions are saved on this device.';
 
   @override
   String get featuredProgressAction => 'View Progress';

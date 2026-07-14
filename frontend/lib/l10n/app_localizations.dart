@@ -98,6 +98,126 @@ abstract class AppLocalizations {
     Locale('vi'),
   ];
 
+  /// No description provided for @progressCompletedSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed sessions'**
+  String get progressCompletedSessions;
+
+  /// No description provided for @progressAverageAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Average accuracy'**
+  String get progressAverageAccuracy;
+
+  /// No description provided for @progressCompletedQuestionSets.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed sets'**
+  String get progressCompletedQuestionSets;
+
+  /// No description provided for @progressLatestActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest activity'**
+  String get progressLatestActivity;
+
+  /// No description provided for @progressRecentResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent results'**
+  String get progressRecentResults;
+
+  /// No description provided for @progressNoHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No progress yet'**
+  String get progressNoHistoryTitle;
+
+  /// No description provided for @progressNoHistoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete an Exam or Practice session to build your local learning history.'**
+  String get progressNoHistoryBody;
+
+  /// No description provided for @progressExamSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam'**
+  String get progressExamSession;
+
+  /// No description provided for @progressPracticeSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice'**
+  String get progressPracticeSession;
+
+  /// No description provided for @progressScoreSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{correct} of {total} correct'**
+  String progressScoreSummary(Object correct, Object total);
+
+  /// No description provided for @progressClearHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear history'**
+  String get progressClearHistory;
+
+  /// No description provided for @progressClearHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear local history?'**
+  String get progressClearHistoryTitle;
+
+  /// No description provided for @progressClearHistoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes completed sessions stored on this device. It cannot be undone.'**
+  String get progressClearHistoryBody;
+
+  /// No description provided for @progressCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get progressCancel;
+
+  /// No description provided for @progressConfirmClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get progressConfirmClear;
+
+  /// No description provided for @progressHistoryCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress history cleared.'**
+  String get progressHistoryCleared;
+
+  /// No description provided for @progressHistoryClearError.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress history could not be cleared.'**
+  String get progressHistoryClearError;
+
+  /// No description provided for @progressLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress could not be loaded.'**
+  String get progressLoadError;
+
+  /// No description provided for @progressSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your result is safe, but local progress could not be saved.'**
+  String get progressSaveError;
+
+  /// No description provided for @progressLocalOnlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on this device only'**
+  String get progressLocalOnlyNote;
+
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
@@ -887,13 +1007,13 @@ abstract class AppLocalizations {
   /// No description provided for @featuredProgressTitle.
   ///
   /// In en, this message translates to:
-  /// **'Progress tracking is coming'**
+  /// **'Review your progress'**
   String get featuredProgressTitle;
 
   /// No description provided for @featuredProgressBody.
   ///
   /// In en, this message translates to:
-  /// **'The Progress area is ready for real attempt history later.'**
+  /// **'Completed Exam and Practice sessions are saved on this device.'**
   String get featuredProgressBody;
 
   /// No description provided for @featuredProgressAction.

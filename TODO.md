@@ -20,11 +20,12 @@ Phase 1 foundation complete. Phase 2 mobile-first UI/UX polish is active.
 - [ ] Verify text scaling, accessibility semantics, and touch targets on representative devices.
 - [ ] Manually review compact Android, common Android, and Chrome layouts before localization.
 - [x] Respect the platform disable-animations preference in current custom learner animations.
-- [ ] Persist real learning progress/history before replacing the honest Progress placeholder.
+- [x] Persist trusted completed Exam/Practice summaries and replace the Progress placeholder.
 
 ## Rich Learner UI Follow-Up
 - [ ] Connect Home banners to reviewed, managed content with a safe local fallback.
-- [ ] Populate Progress metrics from persisted trusted quiz attempts.
+- [x] Populate Progress metrics from persisted trusted completed sessions.
+- [ ] Add authenticated backend progress sync and conflict handling after real auth exists.
 - [ ] Activate Study Materials only after upload, ownership, validation, and moderation exist.
 - [ ] Define real Saved Content and Learning Plans contracts before enabling those destinations.
 - [ ] Manually test Home banners and shortcuts on compact/common Android devices.
@@ -238,7 +239,7 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Restructure the Flutter learner flow into focused Home, browse, detail, mode, quiz, and result screens.
 - [x] Apply the quality and security checklist to the Practice Mode foundation.
 - [ ] Polish Practice Mode progress, accessibility, and feedback after user testing.
-- [ ] Decide whether Practice Mode history belongs in V2 user progress.
+- [x] Include trusted completed Practice Mode summaries in device-local progress.
 - [ ] Apply the frontend performance checklist before major UI feature commits.
 - [x] Add the first backend API pagination contract for Question Sets.
 - [ ] Add measured caching later for read-heavy public learning content.

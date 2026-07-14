@@ -159,6 +159,11 @@ Use progress to motivate learning rather than punish absence. Define timezone an
 offline behavior, keep calculations backend-owned when they affect rewards, and
 avoid startup-blocking refreshes or excessive celebration animation.
 
+Before authentication, device-local progress may store bounded summaries from
+trusted post-result data only. Keep persistence behind an injectable store, never
+derive correctness again in Progress UI, and never invent streaks, history, or
+analytics. Account sync must later define ownership, migration, and conflict rules.
+
 ## Review Use
 Before a major feature commit, select the relevant sections above and include the
 results in the task handoff. A small feature does not need every item, but skipped

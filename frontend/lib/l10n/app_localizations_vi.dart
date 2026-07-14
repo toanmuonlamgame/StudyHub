@@ -9,6 +9,71 @@ class AppLocalizationsVi extends AppLocalizations {
   AppLocalizationsVi([String locale = 'vi']) : super(locale);
 
   @override
+  String get progressCompletedSessions => 'Phiên đã hoàn thành';
+
+  @override
+  String get progressAverageAccuracy => 'Độ chính xác trung bình';
+
+  @override
+  String get progressCompletedQuestionSets => 'Bộ câu hỏi đã làm';
+
+  @override
+  String get progressLatestActivity => 'Hoạt động gần nhất';
+
+  @override
+  String get progressRecentResults => 'Kết quả gần đây';
+
+  @override
+  String get progressNoHistoryTitle => 'Chưa có tiến độ';
+
+  @override
+  String get progressNoHistoryBody =>
+      'Hoàn thành một phiên Kiểm tra hoặc Luyện tập để tạo lịch sử học trên thiết bị này.';
+
+  @override
+  String get progressExamSession => 'Kiểm tra';
+
+  @override
+  String get progressPracticeSession => 'Luyện tập';
+
+  @override
+  String progressScoreSummary(Object correct, Object total) {
+    return 'Đúng $correct/$total câu';
+  }
+
+  @override
+  String get progressClearHistory => 'Xóa lịch sử';
+
+  @override
+  String get progressClearHistoryTitle => 'Xóa lịch sử trên thiết bị?';
+
+  @override
+  String get progressClearHistoryBody =>
+      'Thao tác này xóa các phiên đã hoàn thành trên thiết bị và không thể hoàn tác.';
+
+  @override
+  String get progressCancel => 'Hủy';
+
+  @override
+  String get progressConfirmClear => 'Xóa';
+
+  @override
+  String get progressHistoryCleared => 'Đã xóa lịch sử tiến độ.';
+
+  @override
+  String get progressHistoryClearError => 'Không thể xóa lịch sử tiến độ.';
+
+  @override
+  String get progressLoadError => 'Không thể tải tiến độ.';
+
+  @override
+  String get progressSaveError =>
+      'Kết quả vẫn an toàn nhưng không thể lưu tiến độ trên thiết bị.';
+
+  @override
+  String get progressLocalOnlyNote => 'Chỉ lưu trên thiết bị này';
+
+  @override
   String get appTitle => 'StudyHub';
 
   @override
@@ -456,11 +521,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get featuredSetsAction => 'Xem bộ câu hỏi';
 
   @override
-  String get featuredProgressTitle => 'Theo dõi tiến độ sắp ra mắt';
+  String get featuredProgressTitle => 'Xem lại tiến độ';
 
   @override
   String get featuredProgressBody =>
-      'Khu vực Tiến độ đã sẵn sàng để nhận lịch sử làm bài thật sau này.';
+      'Các phiên Kiểm tra và Luyện tập đã hoàn thành được lưu trên thiết bị này.';
 
   @override
   String get featuredProgressAction => 'Xem Tiến độ';

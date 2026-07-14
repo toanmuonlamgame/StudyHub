@@ -67,10 +67,7 @@ void main() {
     await tester.tap(_navigationLabel('Progress'));
     await tester.pumpAndSettle();
     expect(find.text('Your learning overview'), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('progress-empty-metrics')),
-      findsOneWidget,
-    );
+    expect(find.text('No progress yet'), findsOneWidget);
     expect(find.text('Start learning'), findsOneWidget);
     expect(find.textContaining('streak'), findsNothing);
     expect(find.text('0'), findsNothing);

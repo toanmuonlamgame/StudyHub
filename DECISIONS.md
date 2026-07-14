@@ -2,6 +2,29 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-14 - Device-Local Learning Progress
+Decision:
+- StudyHub records completed Exam and Practice summaries locally through a
+  `ProgressStore` abstraction backed by `shared_preferences`.
+- Trusted `QuizResult` data is the only source for a completed session. The app
+  does not reconstruct correctness from selected answers.
+- Local history is ordered newest first, deduplicated by session ID, and bounded
+  to the newest 100 sessions.
+
+Reason:
+- Real local progress makes the learner experience useful before authentication
+  exists without pretending that account sync or analytics are available.
+- A store boundary keeps persistence out of screens and allows later replacement
+  or migration without rewriting Progress UI.
+
+Rule:
+- Persist only session ID, question-set identity/title, mode, score summary, and
+  completion time. Do not persist answer keys, full questions, secrets, or credentials.
+- A persistence failure must never block access to a completed result.
+- Clear history requires explicit confirmation.
+- Cross-device sync, account ownership, conflict resolution, streaks, and
+  analytics remain future backend/auth work.
+
 ## 2026-07-13 - Honest, Purposeful Learner Hub
 Decision:
 - StudyHub Home is a mobile-first, icon-driven hub with one primary learning

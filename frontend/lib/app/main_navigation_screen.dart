@@ -4,7 +4,7 @@ import '../core/app_locale.dart';
 import '../features/home/screens/home_screen.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/screens/subject_list_screen.dart';
-import '../features/progress/progress_placeholder_screen.dart';
+import '../features/progress/progress_screen.dart';
 import '../features/settings/settings_placeholder_screen.dart';
 import '../l10n/app_localizations_x.dart';
 
@@ -98,7 +98,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return switch (index) {
       0 => _buildHome(),
       1 => SubjectListScreen(learningRepository: widget.learningRepository),
-      2 => ProgressPlaceholderScreen(onStartLearning: () => _selectTab(1)),
+      2 => ProgressScreen(onStartLearning: () => _selectTab(1)),
       3 => SettingsPlaceholderScreen(
         localeSelection: widget.localeSelection,
         onLocaleSelected: widget.onLocaleSelected,

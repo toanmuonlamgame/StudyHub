@@ -1,16 +1,72 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/app_motion.dart';
+import '../../progress/models/completed_learning_session.dart';
+import '../../progress/progress_store_scope.dart';
+import '../../progress/repositories/progress_store.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../models/answer_review.dart';
 import '../models/quiz_mode.dart';
 import '../models/quiz_result.dart';
 
-class QuizResultScreen extends StatelessWidget {
+class QuizResultScreen extends StatefulWidget {
   const QuizResultScreen({super.key, required this.result});
 
   final QuizResult result;
+
+  @override
+  State<QuizResultScreen> createState() => _QuizResultScreenState();
+}
+
+class _QuizResultScreenState extends State<QuizResultScreen> {
+  bool _saveStarted = false;
+
+  QuizResult get result => widget.result;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_saveStarted) {
+      return;
+    }
+    final progressStore = ProgressStoreScope.maybeOf(context);
+    if (progressStore == null) {
+      return;
+    }
+    _saveStarted = true;
+    final completedAt = DateTime.now();
+    final session = CompletedLearningSession.fromQuizResult(
+      id:
+          '${result.questionSetId}-${result.quizMode.name}-'
+          '${completedAt.microsecondsSinceEpoch}',
+      result: result,
+      completedAt: completedAt,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        unawaited(_saveProgress(progressStore, session));
+      }
+    });
+  }
+
+  Future<void> _saveProgress(
+    ProgressStore progressStore,
+    CompletedLearningSession session,
+  ) async {
+    try {
+      await progressStore.saveCompletedSession(session);
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.progressSaveError)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

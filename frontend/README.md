@@ -9,8 +9,26 @@ Progress, and Settings. Browse, detail, mode selection, quiz, and result screens
 open as focused routes above the shell, so bottom navigation does not distract
 from a learning session.
 
-Progress remains an honest planned state without invented history or streaks.
-Settings exposes only the functional language preference plus app/safety information.
+Progress shows real completed Exam and Practice summaries stored on the current
+device without invented history, charts, or streaks. Settings exposes only the
+functional language preference plus app/safety information.
+
+## Device-local progress
+
+`ProgressStore` separates Progress UI from persistence. The default
+`SharedPreferencesProgressStore` stores a compact JSON history ordered newest
+first and bounded to 100 sessions. `StudyHubApp` owns or accepts an injected store,
+which keeps widget tests independent from device storage.
+
+Each completed session is created once from trusted `QuizResult` data after Exam
+submit or the final Practice check. Stored fields are limited to session ID,
+question-set ID/title, mode, correct/total counts, percentage, and completion
+time. Full questions, selected answers, answer keys, credentials, and secrets are
+not persisted. Save failures do not block the result screen.
+
+This history is device-local until real authentication and backend progress sync
+are implemented. Clearing it requires confirmation and cannot currently be undone
+or recovered from another device.
 
 ## Home hub architecture
 
