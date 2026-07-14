@@ -224,3 +224,23 @@ correctness metadata, and checks a 100% seeded quiz submission. Normal
 `npm test` remains memory-only and does not require PostgreSQL.
 
 Never commit `backend/.env` or its database credentials.
+
+## Study Materials API
+
+Study Materials are currently a published metadata browsing feature. The API
+does not accept binary uploads and does not expose draft/review/moderation data.
+
+```text
+GET /learning/materials
+GET /learning/materials/:materialId
+```
+
+The list accepts `subjectId`, `topicId`, `q`, `materialType`, `language`,
+`limit` (default 20, maximum 50), and an opaque `cursor`. It returns compact
+`{ items, nextCursor, hasMore }` metadata. The detail endpoint may return a safe
+external URL or uploaded-file metadata for a published record.
+
+Migration `20260714135447_study_material_foundation` adds the PostgreSQL model,
+relations, publication/filter indexes, and seeded development fixtures. Run
+`npm run prisma:seed` after migration. `npm run test:prisma-smoke` verifies the
+material list/detail contract in Prisma mode as well as the existing quiz flow.

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:frontend/features/learning/models/answer_option.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
+import 'package:frontend/features/materials/models/study_material.dart';
 
 void main() {
   test(
@@ -156,6 +157,32 @@ void main() {
     expect(emptySearch.items, isEmpty);
     expect(emptySearch.hasMore, isFalse);
     expect(emptySearch.nextCursor, isNull);
+  });
+
+  test('filters and paginates published mock study materials', () async {
+    const repository = MockLearningRepository();
+
+    final firstPage = await repository.listStudyMaterials(limit: 2);
+    final secondPage = await repository.listStudyMaterials(
+      limit: 2,
+      cursor: firstPage.nextCursor,
+    );
+    final filtered = await repository.listStudyMaterials(
+      subjectId: 'subject_database',
+      materialType: StudyMaterialType.notes,
+      language: 'en',
+      q: 'normalization',
+    );
+
+    expect(firstPage.items, hasLength(2));
+    expect(firstPage.hasMore, isTrue);
+    expect(secondPage.items, hasLength(2));
+    expect(secondPage.hasMore, isFalse);
+    expect(filtered.items.single.id, 'material_database_normalization');
+    expect(
+      {...firstPage.items, ...secondPage.items}.map((item) => item.id).toSet(),
+      hasLength(4),
+    );
   });
 
   test('checks a practice answer and returns correctness afterward', () async {

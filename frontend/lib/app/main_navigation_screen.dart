@@ -4,6 +4,7 @@ import '../core/app_locale.dart';
 import '../features/home/screens/home_screen.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/screens/subject_list_screen.dart';
+import '../features/materials/screens/study_material_list_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/settings/settings_placeholder_screen.dart';
 import '../l10n/app_localizations_x.dart';
@@ -112,6 +113,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       onStartLearning: () => _selectTab(1),
       onOpenProgress: () => _selectTab(2),
       onOpenSettings: () => _selectTab(3),
+      onOpenStudyMaterials: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => StudyMaterialListScreen(
+            learningRepository: widget.learningRepository,
+          ),
+        ),
+      ),
     );
   }
 }

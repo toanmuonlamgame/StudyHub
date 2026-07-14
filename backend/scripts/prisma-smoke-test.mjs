@@ -83,6 +83,40 @@ try {
   assert.equal(JSON.stringify(paginatedQuestionSets).includes('questions'), false);
   assert.equal(JSON.stringify(paginatedQuestionSets).includes('isCorrect'), false);
 
+  const materials = await expectOk({
+    method: 'GET',
+    url: '/learning/materials?subjectId=subject_database&limit=1',
+  });
+  assert.equal(materials.items.length, 1);
+  assert.equal(materials.items[0].subjectId, 'subject_database');
+  assert.equal(materials.hasMore, true);
+  assert.equal(typeof materials.nextCursor, 'string');
+  assert.equal(JSON.stringify(materials).includes('sourceUrl'), false);
+  assert.equal(JSON.stringify(materials).includes('status'), false);
+
+  const filteredMaterials = await expectOk({
+    method: 'GET',
+    url: '/learning/materials?materialType=notes&q=normalization',
+  });
+  assert.equal(filteredMaterials.items.length, 1);
+  assert.equal(
+    filteredMaterials.items[0].id,
+    'material_database_normalization',
+  );
+
+  const materialDetail = await expectOk({
+    method: 'GET',
+    url: '/learning/materials/material_database_normalization',
+  });
+  assert.equal(materialDetail.material.status, undefined);
+  assert.equal(materialDetail.material.sourceType, 'externalLink');
+
+  const unpublishedMaterial = await app.inject({
+    method: 'GET',
+    url: '/learning/materials/material_database_draft',
+  });
+  assert.equal(unpublishedMaterial.statusCode, 404);
+
   const questions = await expectOk({
     method: 'GET',
     url: '/learning/question-sets/question_set_database/questions',

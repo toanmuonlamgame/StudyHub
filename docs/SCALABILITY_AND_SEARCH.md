@@ -164,3 +164,11 @@ modes while the existing subject-specific endpoint remains compatible. Initial
 Prisma indexes for current learning filters and ordering are also complete. The
 Flutter client now consumes search, topic filters, and cursor load-more in both
 mock and API modes without loading all Question Sets at once.
+
+The first paginated Study Material endpoint is complete in memory and Prisma
+modes. It supports subject/topic/type/language filters and case-insensitive
+title/description search, uses compact published-only list DTOs, and fetches
+detail on demand. Flutter provides matching debounce, stale-response,
+deduplication, load-more, retry, empty, and error behavior. Prisma indexes cover
+publication ordering plus current subject, topic, and material-type filters.
+PostgreSQL full-text or trigram search remains deferred until usage justifies it.

@@ -1183,6 +1183,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Available in a later milestone'**
   String get futurePreferenceDescription;
+
+  /// No description provided for @studyMaterialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Materials'**
+  String get studyMaterialsTitle;
+
+  /// No description provided for @studyMaterialsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse trusted learning resources by subject and format.'**
+  String get studyMaterialsSubtitle;
+
+  /// No description provided for @searchMaterialsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search study materials'**
+  String get searchMaterialsHint;
+
+  /// No description provided for @allSubjects.
+  ///
+  /// In en, this message translates to:
+  /// **'All subjects'**
+  String get allSubjects;
+
+  /// No description provided for @allMaterialTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'All types'**
+  String get allMaterialTypes;
+
+  /// No description provided for @allLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'All languages'**
+  String get allLanguages;
+
+  /// No description provided for @materialTypePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get materialTypePdf;
+
+  /// No description provided for @materialTypeSlides.
+  ///
+  /// In en, this message translates to:
+  /// **'Slides'**
+  String get materialTypeSlides;
+
+  /// No description provided for @materialTypeNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get materialTypeNotes;
+
+  /// No description provided for @materialTypeDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get materialTypeDocument;
+
+  /// No description provided for @materialTypeLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get materialTypeLink;
+
+  /// No description provided for @materialTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get materialTypeOther;
+
+  /// No description provided for @loadingMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading study materials'**
+  String get loadingMaterials;
+
+  /// No description provided for @searchingMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching study materials'**
+  String get searchingMaterials;
+
+  /// No description provided for @materialsLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Study materials could not be loaded'**
+  String get materialsLoadErrorTitle;
+
+  /// No description provided for @noMaterialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No study materials yet'**
+  String get noMaterialsTitle;
+
+  /// No description provided for @noMaterialsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another subject, type, language, or search term.'**
+  String get noMaterialsMessage;
+
+  /// No description provided for @materialDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Study material'**
+  String get materialDetailTitle;
+
+  /// No description provided for @materialSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get materialSource;
+
+  /// No description provided for @externalResource.
+  ///
+  /// In en, this message translates to:
+  /// **'External resource'**
+  String get externalResource;
+
+  /// No description provided for @uploadedFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded file'**
+  String get uploadedFile;
+
+  /// No description provided for @fileUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not available in the prototype yet.'**
+  String get fileUnavailable;
+
+  /// No description provided for @fileNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'File: {name}'**
+  String fileNameLabel(Object name);
+
+  /// No description provided for @fileSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Size: {size}'**
+  String fileSizeLabel(Object size);
+
+  /// No description provided for @languageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Language: {language}'**
+  String languageLabel(Object language);
+
+  /// No description provided for @openMaterialSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Open study material {title}'**
+  String openMaterialSemantics(Object title);
 }
 
 class _AppLocalizationsDelegate

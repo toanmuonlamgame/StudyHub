@@ -198,36 +198,51 @@ class FeaturePreviewTile extends StatelessWidget {
     super.key,
     required this.icon,
     required this.title,
+    this.onTap,
   });
 
   final IconData icon;
   final String title;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
+    final enabled = onTap != null;
     return Semantics(
-      enabled: false,
-      label: l10n.upcomingFeatureSemantics(title),
+      button: enabled,
+      enabled: enabled,
+      excludeSemantics: true,
+      label: enabled ? title : l10n.upcomingFeatureSemantics(title),
       child: Card(
         color: theme.colorScheme.surface.withValues(alpha: 0.7),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              StudyHubIconSurface(
-                icon: icon,
-                foregroundColor: theme.colorScheme.onSurfaceVariant,
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              ),
-              const SizedBox(height: 12),
-              Text(title, style: theme.textTheme.titleSmall),
-              const SizedBox(height: 8),
-              ComingSoonBadge(label: l10n.comingSoon),
-            ],
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                StudyHubIconSurface(
+                  icon: icon,
+                  foregroundColor: theme.colorScheme.onSurfaceVariant,
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                ),
+                const SizedBox(height: 12),
+                Text(title, style: theme.textTheme.titleSmall),
+                const SizedBox(height: 8),
+                if (!enabled)
+                  ComingSoonBadge(label: l10n.comingSoon)
+                else
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    color: theme.colorScheme.primary,
+                  ),
+              ],
+            ),
           ),
         ),
       ),

@@ -44,6 +44,62 @@ export interface PaginatedQuestionSets {
   hasMore: boolean;
 }
 
+export type StudyMaterialType =
+  | 'pdf'
+  | 'slides'
+  | 'notes'
+  | 'document'
+  | 'link'
+  | 'other';
+
+export type StudyMaterialSourceType = 'externalLink' | 'uploadedFile';
+
+export type StudyMaterialStatus =
+  | 'draft'
+  | 'pendingReview'
+  | 'published'
+  | 'rejected';
+
+export interface StudyMaterialListItem {
+  id: string;
+  subjectId: string;
+  topicId?: string;
+  title: string;
+  description: string;
+  materialType: StudyMaterialType;
+  language?: string;
+  createdAt: string;
+}
+
+export interface StudyMaterial extends StudyMaterialListItem {
+  sourceType: StudyMaterialSourceType;
+  sourceUrl?: string;
+  fileName?: string;
+  mimeType?: string;
+  fileSizeBytes?: number;
+  updatedAt: string;
+}
+
+export interface InternalStudyMaterial extends StudyMaterial {
+  status: StudyMaterialStatus;
+}
+
+export interface ListStudyMaterialsParams {
+  subjectId?: string;
+  topicId?: string;
+  q?: string;
+  materialType?: StudyMaterialType;
+  language?: string;
+  limit: number;
+  cursor?: string;
+}
+
+export interface PaginatedStudyMaterials {
+  items: StudyMaterialListItem[];
+  nextCursor: string | null;
+  hasMore: boolean;
+}
+
 export interface AnswerOption {
   id: string;
   text: string;

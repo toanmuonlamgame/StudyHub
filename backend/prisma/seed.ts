@@ -7,6 +7,7 @@ import {
   subjects,
   topics,
 } from '../src/data/mockLearningData.js';
+import { studyMaterials } from '../src/data/mockStudyMaterials.js';
 
 const prisma = new PrismaClient();
 
@@ -56,6 +57,33 @@ async function seedQuestionSets() {
       where: { id: questionSet.id },
       update: data,
       create: { id: questionSet.id, ...data },
+    });
+  }
+}
+
+async function seedStudyMaterials() {
+  for (const material of studyMaterials) {
+    const data = {
+      subjectId: material.subjectId,
+      topicId: material.topicId ?? null,
+      title: material.title,
+      description: material.description,
+      materialType: material.materialType,
+      sourceType: material.sourceType,
+      sourceUrl: material.sourceUrl ?? null,
+      fileName: material.fileName ?? null,
+      mimeType: material.mimeType ?? null,
+      fileSizeBytes: material.fileSizeBytes ?? null,
+      language: material.language ?? null,
+      status: material.status,
+      createdAt: new Date(material.createdAt),
+      updatedAt: new Date(material.updatedAt),
+    };
+
+    await prisma.studyMaterial.upsert({
+      where: { id: material.id },
+      update: data,
+      create: { id: material.id, ...data },
     });
   }
 }
@@ -115,6 +143,7 @@ async function main() {
   await seedSubjects();
   await seedTopics();
   await seedQuestionSets();
+  await seedStudyMaterials();
   await seedQuestionsAndAnswerOptions();
 }
 

@@ -198,3 +198,65 @@ test('PrismaLearningService lists compact paginated question sets', async () => 
   assert.equal(typeof page.nextCursor, 'string');
   assert.equal(JSON.stringify(page).includes('questions'), false);
 });
+
+test('PrismaLearningService lists only compact material metadata', async () => {
+  const calls = [];
+  const fakePrisma = {
+    studyMaterial: {
+      findMany: async (args) => {
+        calls.push(args);
+        return [
+          {
+            id: 'material_2',
+            subjectId: 'subject_1',
+            topicId: 'topic_1',
+            title: 'Second material',
+            description: 'Second description',
+            materialType: 'link',
+            sourceType: 'externalLink',
+            sourceUrl: 'https://example.com/private-from-list',
+            fileName: null,
+            mimeType: null,
+            fileSizeBytes: null,
+            language: 'en',
+            status: 'published',
+            createdAt: new Date('2026-04-02T00:00:00.000Z'),
+            updatedAt: new Date('2026-04-02T00:00:00.000Z'),
+          },
+          {
+            id: 'material_1',
+            subjectId: 'subject_1',
+            topicId: null,
+            title: 'First material',
+            description: 'First description',
+            materialType: 'notes',
+            sourceType: 'uploadedFile',
+            sourceUrl: null,
+            fileName: 'notes.pdf',
+            mimeType: 'application/pdf',
+            fileSizeBytes: 1024,
+            language: 'en',
+            status: 'published',
+            createdAt: new Date('2026-04-01T00:00:00.000Z'),
+            updatedAt: new Date('2026-04-01T00:00:00.000Z'),
+          },
+        ];
+      },
+    },
+  };
+  const service = createPrismaLearningService(fakePrisma);
+
+  const page = await service.listStudyMaterials({
+    subjectId: 'subject_1',
+    materialType: 'link',
+    limit: 1,
+  });
+
+  assert.equal(calls[0].where.status, 'published');
+  assert.equal(calls[0].take, 2);
+  assert.equal(page.items.length, 1);
+  assert.equal(page.hasMore, true);
+  assert.equal(typeof page.nextCursor, 'string');
+  assert.equal(JSON.stringify(page).includes('sourceUrl'), false);
+  assert.equal(JSON.stringify(page).includes('status'), false);
+});

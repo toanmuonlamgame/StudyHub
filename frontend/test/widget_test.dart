@@ -121,7 +121,7 @@ void main() {
     expect(repository.subjectLoadCount, 1);
   });
 
-  testWidgets('upcoming Home destinations are labeled honestly', (
+  testWidgets('Home labels active and upcoming destinations honestly', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -134,10 +134,8 @@ void main() {
       scrollable: _homeScrollable(),
     );
     expect(find.text('Coming soon'), findsWidgets);
-    expect(
-      find.bySemanticsLabel('Study Materials, coming soon'),
-      findsOneWidget,
-    );
+    expect(find.bySemanticsLabel('Study Materials'), findsOneWidget);
+    expect(find.bySemanticsLabel('Study Materials, coming soon'), findsNothing);
   });
 
   testWidgets('progress call to action switches to Learn', (

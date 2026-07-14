@@ -12,11 +12,13 @@ class HomeScreen extends StatelessWidget {
     required this.onStartLearning,
     required this.onOpenProgress,
     required this.onOpenSettings,
+    required this.onOpenStudyMaterials,
   });
 
   final VoidCallback onStartLearning;
   final VoidCallback onOpenProgress;
   final VoidCallback onOpenSettings;
+  final VoidCallback onOpenStudyMaterials;
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +148,7 @@ class HomeScreen extends StatelessWidget {
                           child: FeaturePreviewTile(
                             icon: Icons.description_outlined,
                             title: l10n.studyMaterials,
+                            onTap: onOpenStudyMaterials,
                           ),
                         ),
                         SizedBox(

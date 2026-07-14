@@ -618,4 +618,92 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get futurePreferenceDescription => 'Sẽ có ở cột mốc sau';
+
+  @override
+  String get studyMaterialsTitle => 'Tài liệu học tập';
+
+  @override
+  String get studyMaterialsSubtitle =>
+      'Khám phá tài nguyên học tập đáng tin cậy theo môn và định dạng.';
+
+  @override
+  String get searchMaterialsHint => 'Tìm tài liệu học tập';
+
+  @override
+  String get allSubjects => 'Tất cả môn học';
+
+  @override
+  String get allMaterialTypes => 'Tất cả định dạng';
+
+  @override
+  String get allLanguages => 'Tất cả ngôn ngữ';
+
+  @override
+  String get materialTypePdf => 'PDF';
+
+  @override
+  String get materialTypeSlides => 'Bài trình chiếu';
+
+  @override
+  String get materialTypeNotes => 'Ghi chú';
+
+  @override
+  String get materialTypeDocument => 'Tài liệu';
+
+  @override
+  String get materialTypeLink => 'Liên kết';
+
+  @override
+  String get materialTypeOther => 'Khác';
+
+  @override
+  String get loadingMaterials => 'Đang tải tài liệu học tập';
+
+  @override
+  String get searchingMaterials => 'Đang tìm tài liệu học tập';
+
+  @override
+  String get materialsLoadErrorTitle => 'Không thể tải tài liệu học tập';
+
+  @override
+  String get noMaterialsTitle => 'Chưa có tài liệu học tập';
+
+  @override
+  String get noMaterialsMessage =>
+      'Hãy thử môn học, định dạng, ngôn ngữ hoặc từ khóa khác.';
+
+  @override
+  String get materialDetailTitle => 'Tài liệu học tập';
+
+  @override
+  String get materialSource => 'Nguồn';
+
+  @override
+  String get externalResource => 'Tài nguyên bên ngoài';
+
+  @override
+  String get uploadedFile => 'Tệp đã tải lên';
+
+  @override
+  String get fileUnavailable => 'Tệp này chưa khả dụng trong bản thử nghiệm.';
+
+  @override
+  String fileNameLabel(Object name) {
+    return 'Tệp: $name';
+  }
+
+  @override
+  String fileSizeLabel(Object size) {
+    return 'Dung lượng: $size';
+  }
+
+  @override
+  String languageLabel(Object language) {
+    return 'Ngôn ngữ: $language';
+  }
+
+  @override
+  String openMaterialSemantics(Object title) {
+    return 'Mở tài liệu $title';
+  }
 }

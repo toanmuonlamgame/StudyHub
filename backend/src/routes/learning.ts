@@ -12,6 +12,7 @@ import {
 } from '../services/learningService.js';
 import type {
   CheckAnswerBody,
+  StudyMaterialType,
   SubmitQuizBody,
 } from '../types/learning.js';
 
@@ -27,6 +28,15 @@ interface QuestionParams {
   questionId: string;
 }
 
+interface MaterialParams {
+  materialId: string;
+}
+
+interface StudyMaterialListQuery extends QuestionSetListQuery {
+  materialType?: string;
+  language?: string;
+}
+
 interface QuestionSetListQuery {
   subjectId?: string;
   topicId?: string;
@@ -37,6 +47,14 @@ interface QuestionSetListQuery {
 
 const DEFAULT_LIST_LIMIT = 20;
 const MAX_LIST_LIMIT = 50;
+const STUDY_MATERIAL_TYPES = new Set<StudyMaterialType>([
+  'pdf',
+  'slides',
+  'notes',
+  'document',
+  'link',
+  'other',
+]);
 
 const submitQuizBodySchema = {
   type: 'object',
@@ -79,6 +97,66 @@ export function createLearningRoutes(
   service: LearningService,
 ): FastifyPluginAsync {
   return async function learningRoutes(app): Promise<void> {
+    app.get<{ Querystring: StudyMaterialListQuery }>(
+      '/materials',
+      async (request, reply) => {
+        const limit = parseListLimit(request.query.limit);
+        if (limit === null) {
+          return reply.code(400).send({
+            error: `limit must be an integer between 1 and ${MAX_LIST_LIMIT}.`,
+          });
+        }
+        const materialType = request.query.materialType;
+        if (
+          materialType !== undefined &&
+          !STUDY_MATERIAL_TYPES.has(materialType as StudyMaterialType)
+        ) {
+          return reply.code(400).send({ error: 'materialType is invalid.' });
+        }
+
+        try {
+          return await service.listStudyMaterials({
+            limit,
+            ...(request.query.subjectId === undefined
+              ? {}
+              : { subjectId: request.query.subjectId }),
+            ...(request.query.topicId === undefined
+              ? {}
+              : { topicId: request.query.topicId }),
+            ...(request.query.q === undefined ? {} : { q: request.query.q }),
+            ...(materialType === undefined
+              ? {}
+              : { materialType: materialType as StudyMaterialType }),
+            ...(request.query.language === undefined
+              ? {}
+              : { language: request.query.language }),
+            ...(request.query.cursor === undefined
+              ? {}
+              : { cursor: request.query.cursor }),
+          });
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
+    app.get<{ Params: MaterialParams }>(
+      '/materials/:materialId',
+      async (request, reply) => {
+        try {
+          const material = await service.getStudyMaterialById(
+            request.params.materialId,
+          );
+          if (material === null) {
+            return reply.code(404).send({ error: 'Study material not found.' });
+          }
+          return { material };
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
     app.get<{ Querystring: QuestionSetListQuery }>(
       '/question-sets',
       async (request, reply) => {

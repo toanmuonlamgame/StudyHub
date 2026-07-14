@@ -28,6 +28,8 @@ safety guarantees, limitations, and Phase 2 entry criteria.
 
 - Browse Subjects and their Question Sets.
 - Search Question Set titles, filter by topic, and load cursor pages in mock/API modes.
+- Browse published Study Material metadata with search, subject/type/language
+  filters, cursor pagination, and on-demand detail in mock/API modes.
 - Switch between system, English, and Vietnamese interface languages with local persistence.
 - Use Practice Mode for immediate per-question feedback without exposing answer keys in question payloads.
 - View Question Set details and question counts.
@@ -61,8 +63,8 @@ the backend calculates the score and answer review.
 
 ## Planned Features
 
-- Practice Mode progress history and measured feedback polish.
-- User-uploaded Study Materials with validation, ownership, and moderation.
+- Auth-backed progress sync and measured feedback polish.
+- User-uploaded Study Materials with binary storage, validation, ownership, and moderation.
 - AI-assisted question extraction with source provenance, citations, and human
   review before publication.
 - More advanced ranked search and measured caching for growing public content.

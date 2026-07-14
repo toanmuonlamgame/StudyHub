@@ -4,6 +4,8 @@ import type {
   Question,
   QuestionSet,
   Subject,
+  StudyMaterial,
+  StudyMaterialListItem,
   Topic,
 } from '../types/learning.js';
 
@@ -14,6 +16,8 @@ type QuestionSetWithCount = Prisma.QuestionSetGetPayload<{
 type QuestionWithAnswerOptions = Prisma.QuestionGetPayload<{
   include: { answerOptions: true };
 }>;
+
+type StudyMaterialRow = Prisma.StudyMaterialGetPayload<object>;
 
 export function mapSubject(subject: Prisma.SubjectGetPayload<object>): Subject {
   return {
@@ -57,5 +61,34 @@ export function mapQuestion(question: QuestionWithAnswerOptions): Question {
     questionSetId: question.questionSetId,
     text: question.text,
     answerOptions: question.answerOptions.map(({ id, text }) => ({ id, text })),
+  };
+}
+
+export function mapStudyMaterialListItem(
+  material: StudyMaterialRow,
+): StudyMaterialListItem {
+  return {
+    id: material.id,
+    subjectId: material.subjectId,
+    ...(material.topicId === null ? {} : { topicId: material.topicId }),
+    title: material.title,
+    description: material.description,
+    materialType: material.materialType,
+    ...(material.language === null ? {} : { language: material.language }),
+    createdAt: material.createdAt.toISOString(),
+  };
+}
+
+export function mapStudyMaterial(material: StudyMaterialRow): StudyMaterial {
+  return {
+    ...mapStudyMaterialListItem(material),
+    sourceType: material.sourceType,
+    ...(material.sourceUrl === null ? {} : { sourceUrl: material.sourceUrl }),
+    ...(material.fileName === null ? {} : { fileName: material.fileName }),
+    ...(material.mimeType === null ? {} : { mimeType: material.mimeType }),
+    ...(material.fileSizeBytes === null
+      ? {}
+      : { fileSizeBytes: material.fileSizeBytes }),
+    updatedAt: material.updatedAt.toISOString(),
   };
 }

@@ -305,3 +305,29 @@ See [SCALABILITY_AND_SEARCH.md](SCALABILITY_AND_SEARCH.md) for the list contract
 indexing plan, search progression, caching boundaries, and analytics strategy.
 
 These belong in later phases after the core learning loop works.
+
+## Study Materials Foundation
+Study Materials use the existing replaceable data-source boundaries:
+
+```text
+Flutter StudyMaterial screens
+  -> LearningRepository
+  -> MockLearningRepository / ApiLearningRepository
+  -> Fastify Learning routes
+  -> LearningService
+  -> InMemoryLearningService / PrismaLearningService
+  -> PostgreSQL
+```
+
+Public APIs are metadata-first:
+
+```text
+GET /learning/materials?subjectId=...&topicId=...&q=...&materialType=...&language=...&limit=20&cursor=...
+GET /learning/materials/:materialId
+```
+
+Lists use stable `createdAt + id` cursor ordering, default to 20, cap at 50,
+and return only published compact items. Detail is fetched only when opened.
+Draft, pending-review, rejected, moderation, and ownership data remain internal.
+The current uploaded-file source is metadata only; no binary upload or cloud
+delivery is implemented.

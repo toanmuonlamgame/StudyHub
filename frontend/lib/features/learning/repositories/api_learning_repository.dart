@@ -12,6 +12,7 @@ import '../models/quiz_result.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
 import 'learning_repository.dart';
+import '../../materials/models/study_material.dart';
 
 class ApiLearningRepository implements LearningRepository {
   ApiLearningRepository({required String baseUrl, http.Client? client})
@@ -95,6 +96,49 @@ class ApiLearningRepository implements LearningRepository {
       'learning/question-sets/${Uri.encodeComponent(id)}',
     );
     return _questionSetFromJson(_readObject(body, 'questionSet'));
+  }
+
+  @override
+  Future<PaginatedResult<StudyMaterial>> listStudyMaterials({
+    String? subjectId,
+    String? topicId,
+    String? q,
+    StudyMaterialType? materialType,
+    String? language,
+    int limit = 20,
+    String? cursor,
+  }) async {
+    final normalizedQuery = q?.trim();
+    final queryParameters = <String, String>{
+      'limit': limit.toString(),
+      'subjectId': ?subjectId,
+      'topicId': ?topicId,
+      'materialType': ?materialType?.name,
+      'language': ?language,
+      'cursor': ?cursor,
+    };
+    if (normalizedQuery != null && normalizedQuery.isNotEmpty) {
+      queryParameters['q'] = normalizedQuery;
+    }
+    final response = await _client.get(
+      _endpoint('learning/materials').replace(queryParameters: queryParameters),
+    );
+    final body = _decodeResponse(response, 'listStudyMaterials');
+    final nextCursor = _readNullableString(body, 'nextCursor');
+    return PaginatedResult(
+      items: _readObjectList(
+        body,
+        'items',
+      ).map(_studyMaterialFromJson).toList(growable: false),
+      nextCursor: nextCursor == null || nextCursor.isEmpty ? null : nextCursor,
+      hasMore: _readBool(body, 'hasMore'),
+    );
+  }
+
+  @override
+  Future<StudyMaterial?> getStudyMaterialById(String id) async {
+    final body = await _get('learning/materials/${Uri.encodeComponent(id)}');
+    return _studyMaterialFromJson(_readObject(body, 'material'));
   }
 
   @override
@@ -283,6 +327,50 @@ AnswerCheckResult _answerCheckResultFromJson(Map<String, dynamic> json) {
     correctAnswerOptionId: _readString(json, 'correctAnswerOptionId'),
     correctAnswerText: _readString(json, 'correctAnswerText'),
     isCorrect: _readBool(json, 'isCorrect'),
+  );
+}
+
+StudyMaterial _studyMaterialFromJson(Map<String, dynamic> json) {
+  final createdAt = _readOptionalDateTime(json, 'createdAt');
+  if (createdAt == null) {
+    throw const FormatException('Expected "createdAt" to be a date string.');
+  }
+  return StudyMaterial(
+    id: _readString(json, 'id'),
+    subjectId: _readString(json, 'subjectId'),
+    topicId: _readNullableString(json, 'topicId'),
+    title: _readString(json, 'title'),
+    description: _readString(json, 'description'),
+    materialType: _studyMaterialTypeFromJson(_readString(json, 'materialType')),
+    language: _readNullableString(json, 'language'),
+    createdAt: createdAt,
+    sourceType: _studyMaterialSourceTypeFromJson(
+      _readNullableString(json, 'sourceType'),
+    ),
+    sourceUrl: _readNullableString(json, 'sourceUrl'),
+    fileName: _readNullableString(json, 'fileName'),
+    mimeType: _readNullableString(json, 'mimeType'),
+    fileSizeBytes: _readOptionalInt(json, 'fileSizeBytes'),
+    updatedAt: _readOptionalDateTime(json, 'updatedAt'),
+  );
+}
+
+StudyMaterialType _studyMaterialTypeFromJson(String value) {
+  return StudyMaterialType.values.firstWhere(
+    (type) => type.name == value,
+    orElse: () =>
+        throw FormatException('Unknown study material type "$value".'),
+  );
+}
+
+StudyMaterialSourceType? _studyMaterialSourceTypeFromJson(String? value) {
+  if (value == null) {
+    return null;
+  }
+  return StudyMaterialSourceType.values.firstWhere(
+    (type) => type.name == value,
+    orElse: () =>
+        throw FormatException('Unknown study material source type "$value".'),
   );
 }
 

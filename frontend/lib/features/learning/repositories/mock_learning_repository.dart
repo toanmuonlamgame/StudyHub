@@ -8,6 +8,8 @@ import '../models/quiz_result.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
 import 'learning_repository.dart';
+import '../../materials/data/mock_study_material_data.dart';
+import '../../materials/models/study_material.dart';
 
 class MockLearningRepository implements LearningRepository {
   const MockLearningRepository();
@@ -91,6 +93,61 @@ class MockLearningRepository implements LearningRepository {
   @override
   Future<QuestionSet?> getQuestionSetById(String id) async {
     return mock_data.getQuestionSetById(id);
+  }
+
+  @override
+  Future<PaginatedResult<StudyMaterial>> listStudyMaterials({
+    String? subjectId,
+    String? topicId,
+    String? q,
+    StudyMaterialType? materialType,
+    String? language,
+    int limit = 20,
+    String? cursor,
+  }) async {
+    if (limit < 1 || limit > 50) {
+      throw ArgumentError.value(limit, 'limit', 'Must be between 1 and 50.');
+    }
+    final search = q?.trim().toLowerCase();
+    final filtered = mockStudyMaterials
+        .where(
+          (material) =>
+              (subjectId == null || material.subjectId == subjectId) &&
+              (topicId == null || material.topicId == topicId) &&
+              (materialType == null || material.materialType == materialType) &&
+              (language == null || material.language == language) &&
+              (search == null ||
+                  search.isEmpty ||
+                  material.title.toLowerCase().contains(search) ||
+                  material.description.toLowerCase().contains(search)),
+        )
+        .toList(growable: false);
+    var startIndex = 0;
+    if (cursor != null) {
+      final index = filtered.indexWhere((material) => material.id == cursor);
+      if (index == -1) {
+        throw StateError('Invalid mock study material cursor.');
+      }
+      startIndex = index + 1;
+    }
+    final endIndex = (startIndex + limit).clamp(0, filtered.length);
+    final items = filtered.sublist(startIndex, endIndex);
+    final hasMore = endIndex < filtered.length;
+    return PaginatedResult(
+      items: List.unmodifiable(items),
+      nextCursor: hasMore && items.isNotEmpty ? items.last.id : null,
+      hasMore: hasMore,
+    );
+  }
+
+  @override
+  Future<StudyMaterial?> getStudyMaterialById(String id) async {
+    for (final material in mockStudyMaterials) {
+      if (material.id == id) {
+        return material;
+      }
+    }
+    return null;
   }
 
   @override

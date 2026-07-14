@@ -226,6 +226,136 @@ test('GET paginated question sets supports subject, topic, and title filters', a
   );
 });
 
+test('GET materials returns compact published metadata', async (t) => {
+  const app = createTestApp(t);
+  const response = await app.inject({
+    method: 'GET',
+    url: '/learning/materials',
+  });
+  const body = response.json();
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(body.items.length, 4);
+  assert.equal(body.hasMore, false);
+  assert.equal(body.nextCursor, null);
+  assert.ok(body.items.every(({ id }) => id !== 'material_database_draft'));
+  assert.deepEqual(Object.keys(body.items[0]).sort(), [
+    'createdAt',
+    'description',
+    'id',
+    'language',
+    'materialType',
+    'subjectId',
+    'title',
+    'topicId',
+  ]);
+
+  const serialized = JSON.stringify(body);
+  assert.equal(serialized.includes('status'), false);
+  assert.equal(serialized.includes('sourceUrl'), false);
+  assert.equal(serialized.includes('moderation'), false);
+});
+
+test('GET materials supports filters and metadata search', async (t) => {
+  const app = createTestApp(t);
+  const cases = [
+    ['subjectId=subject_database', 2],
+    ['topicId=topic_database_relations', 1],
+    ['q=normalization', 1],
+    ['materialType=link', 1],
+    ['language=vi', 1],
+  ];
+
+  for (const [query, expectedCount] of cases) {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/learning/materials?${query}`,
+    });
+    assert.equal(response.statusCode, 200, query);
+    assert.equal(response.json().items.length, expectedCount, query);
+  }
+});
+
+test('GET materials supports stable cursor pagination', async (t) => {
+  const app = createTestApp(t);
+  const firstResponse = await app.inject({
+    method: 'GET',
+    url: '/learning/materials?limit=2',
+  });
+  const firstPage = firstResponse.json();
+
+  assert.equal(firstResponse.statusCode, 200);
+  assert.equal(firstPage.items.length, 2);
+  assert.equal(firstPage.hasMore, true);
+  assert.equal(typeof firstPage.nextCursor, 'string');
+
+  const secondResponse = await app.inject({
+    method: 'GET',
+    url: `/learning/materials?limit=2&cursor=${encodeURIComponent(firstPage.nextCursor)}`,
+  });
+  const secondPage = secondResponse.json();
+  assert.equal(secondResponse.statusCode, 200);
+  assert.equal(secondPage.items.length, 2);
+  assert.equal(secondPage.hasMore, false);
+  assert.equal(
+    new Set([
+      ...firstPage.items.map(({ id }) => id),
+      ...secondPage.items.map(({ id }) => id),
+    ]).size,
+    4,
+  );
+});
+
+test('GET materials validates list query values', async (t) => {
+  const app = createTestApp(t);
+  const maximumPage = await app.inject({
+    method: 'GET',
+    url: '/learning/materials?limit=50',
+  });
+  assert.equal(maximumPage.statusCode, 200);
+
+  for (const query of [
+    'limit=0',
+    'limit=51',
+    'limit=1.5',
+    'materialType=video',
+    'cursor=not-a-cursor',
+  ]) {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/learning/materials?${query}`,
+    });
+    assert.equal(response.statusCode, 400, query);
+  }
+});
+
+test('GET published material returns safe detail metadata', async (t) => {
+  const app = createTestApp(t);
+  const response = await app.inject({
+    method: 'GET',
+    url: '/learning/materials/material_js_functions',
+  });
+  const { material } = response.json();
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(material.id, 'material_js_functions');
+  assert.equal(material.sourceType, 'externalLink');
+  assert.match(material.sourceUrl, /^https:\/\//);
+  assert.equal('status' in material, false);
+  assert.equal('moderationNotes' in material, false);
+});
+
+test('GET material hides missing and unpublished resources', async (t) => {
+  const app = createTestApp(t);
+  for (const materialId of ['missing-material', 'material_database_draft']) {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/learning/materials/${materialId}`,
+    });
+    assert.equal(response.statusCode, 404, materialId);
+  }
+});
+
 test('GET questions never exposes correctness metadata', async (t) => {
   const app = createTestApp(t);
   const response = await app.inject({

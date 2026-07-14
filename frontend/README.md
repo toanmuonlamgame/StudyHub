@@ -40,8 +40,8 @@ their corresponding shell tabs.
 The Home feature is split into a screen, immutable banner model, and focused
 widgets under `lib/features/home`. Its `PageView` is manually controlled and does
 not auto-rotate. Banner copy describes real learning flows rather than prices,
-discounts, or unsupported product claims. Planned destinations such as Study
-Materials, Saved Content, and Learning Plans are visibly labeled `Coming soon`
+discounts, or unsupported product claims. Study Materials is now an active deep
+route. Saved Content and Learning Plans remain visibly labeled `Coming soon`
 and have no fake interaction.
 
 Shared presentation primitives such as section headers, icon surfaces, upcoming
@@ -100,3 +100,15 @@ Run checks with:
 flutter analyze --no-pub
 flutter test
 ```
+
+## Study Materials
+
+The Home Study Materials tile opens a separate mobile-first browsing flow.
+`LearningRepository` provides paginated metadata listing and on-demand detail in
+both mock and API modes. Search is debounced, filters reset pagination, stale
+responses are ignored, and next-page failures preserve existing cards.
+
+Only published metadata is presented. External URLs are displayed as selectable
+resource text; uploaded-file entries show honest metadata and an unavailable
+prototype state. There is no binary upload, cloud storage, authentication,
+ownership, or moderation UI yet.

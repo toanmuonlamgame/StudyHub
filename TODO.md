@@ -15,6 +15,8 @@ Phase 1 foundation complete. Phase 2 mobile-first UI/UX polish is active.
 - [x] CM38: Add the mobile app shell, Practice summary, and lightweight learner micro-interactions.
 - [x] CM39: Add English/Vietnamese localization with persisted language selection.
 - [x] CM40: Add repository-driven search, topic filtering, and cursor load-more UI.
+- [x] CM41: Add Study Materials metadata browsing across Flutter, memory API,
+  Prisma, migration, seed, and smoke coverage.
 - [x] Build the richer mobile Home hub, manual feature banners, destination
   shortcuts, honest Progress metrics, and structured Settings groups.
 - [ ] Verify text scaling, accessibility semantics, and touch targets on representative devices.
@@ -26,7 +28,9 @@ Phase 1 foundation complete. Phase 2 mobile-first UI/UX polish is active.
 - [ ] Connect Home banners to reviewed, managed content with a safe local fallback.
 - [x] Populate Progress metrics from persisted trusted completed sessions.
 - [ ] Add authenticated backend progress sync and conflict handling after real auth exists.
-- [ ] Activate Study Materials only after upload, ownership, validation, and moderation exist.
+- [x] Activate safe, published Study Materials metadata browsing from Home.
+- [ ] Add authenticated material upload, ownership, storage, validation, and moderation.
+- [ ] Manually verify Study Materials in mock/API mode on a real Android device.
 - [ ] Define real Saved Content and Learning Plans contracts before enabling those destinations.
 - [ ] Manually test Home banners and shortcuts on compact/common Android devices.
 - [ ] Run TalkBack review for banner position, quick actions, upcoming features,
@@ -249,7 +253,7 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Migrate Flutter Question Set browsing to consume the first page of the paginated endpoint.
 - [x] Add cursor load-more UI with separate next-page loading/error/retry states.
 - [x] Add debounced Question Set title search and optional topic filtering.
-- [ ] Add a paginated Study Material list endpoint when the content model is implemented.
+- [x] Add a paginated Study Material list endpoint with published-only visibility.
 - [x] Add initial query-driven Prisma indexes for learning filters and ordering.
 - [ ] Evaluate PostgreSQL full-text or trigram indexes after search usage is measurable.
 - [ ] Add validated PostgreSQL-first search query support.

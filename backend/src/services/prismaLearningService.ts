@@ -5,16 +5,21 @@ import type {
   AnswerCheckResult,
   AnswerReview,
   ListQuestionSetsParams,
+  ListStudyMaterialsParams,
   PaginatedQuestionSets,
+  PaginatedStudyMaterials,
   Question,
   QuestionSet,
   QuizResult,
   Subject,
+  StudyMaterial,
   Topic,
 } from '../types/learning.js';
 import {
   mapQuestion,
   mapQuestionSet,
+  mapStudyMaterial,
+  mapStudyMaterialListItem,
   mapSubject,
   mapTopic,
 } from './learningMappers.js';
@@ -29,6 +34,10 @@ import {
   decodeQuestionSetCursor,
   encodeQuestionSetCursor,
 } from './questionSetPagination.js';
+import {
+  decodeStudyMaterialCursor,
+  encodeStudyMaterialCursor,
+} from './studyMaterialPagination.js';
 
 export class PrismaLearningService implements LearningService {
   constructor(private readonly prisma: PrismaClient) {}
@@ -125,6 +134,75 @@ export class PrismaLearningService implements LearningService {
     });
 
     return questionSet === null ? null : mapQuestionSet(questionSet);
+  }
+
+  async listStudyMaterials(
+    params: ListStudyMaterialsParams,
+  ): Promise<PaginatedStudyMaterials> {
+    const cursor =
+      params.cursor === undefined
+        ? undefined
+        : decodeStudyMaterialCursor(params.cursor);
+    const search = params.q?.trim();
+    const materials = await this.prisma.studyMaterial.findMany({
+      where: {
+        status: 'published',
+        ...(params.subjectId === undefined
+          ? {}
+          : { subjectId: params.subjectId }),
+        ...(params.topicId === undefined ? {} : { topicId: params.topicId }),
+        ...(params.materialType === undefined
+          ? {}
+          : { materialType: params.materialType }),
+        ...(params.language === undefined
+          ? {}
+          : { language: params.language }),
+        ...(search === undefined || search.length === 0
+          ? {}
+          : {
+              OR: [
+                { title: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
+              ],
+            }),
+        ...(cursor === undefined
+          ? {}
+          : {
+              AND: [
+                {
+                  OR: [
+                    { createdAt: { lt: new Date(cursor.createdAt) } },
+                    {
+                      createdAt: new Date(cursor.createdAt),
+                      id: { lt: cursor.id },
+                    },
+                  ],
+                },
+              ],
+            }),
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: params.limit + 1,
+    });
+
+    const hasMore = materials.length > params.limit;
+    const items = materials.slice(0, params.limit).map(mapStudyMaterialListItem);
+    const lastItem = items.at(-1);
+    return {
+      items,
+      nextCursor:
+        hasMore && lastItem !== undefined
+          ? encodeStudyMaterialCursor(lastItem)
+          : null,
+      hasMore,
+    };
+  }
+
+  async getStudyMaterialById(materialId: string): Promise<StudyMaterial | null> {
+    const material = await this.prisma.studyMaterial.findFirst({
+      where: { id: materialId, status: 'published' },
+    });
+    return material === null ? null : mapStudyMaterial(material);
   }
 
   async getQuestionsByQuestionSetId(

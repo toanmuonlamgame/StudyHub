@@ -5,15 +5,19 @@ import {
   subjects,
   topics,
 } from '../data/mockLearningData.js';
+import { studyMaterials } from '../data/mockStudyMaterials.js';
 import type {
   AnswerCheckResult,
   AnswerReview,
   ListQuestionSetsParams,
+  ListStudyMaterialsParams,
   PaginatedQuestionSets,
+  PaginatedStudyMaterials,
   Question,
   QuestionSet,
   QuizResult,
   Subject,
+  StudyMaterial,
   Topic,
 } from '../types/learning.js';
 import {
@@ -27,6 +31,12 @@ import {
   decodeQuestionSetCursor,
   encodeQuestionSetCursor,
 } from './questionSetPagination.js';
+import {
+  decodeStudyMaterialCursor,
+  encodeStudyMaterialCursor,
+  toPublicStudyMaterial,
+  toStudyMaterialListItem,
+} from './studyMaterialPagination.js';
 
 const questionSetCreatedAtById = new Map(
   questionSets.map((questionSet, index) => [
@@ -107,6 +117,64 @@ export class InMemoryLearningService implements LearningService {
 
   async getQuestionSetById(questionSetId: string): Promise<QuestionSet | null> {
     return questionSets.find(({ id }) => id === questionSetId) ?? null;
+  }
+
+  async listStudyMaterials(
+    params: ListStudyMaterialsParams,
+  ): Promise<PaginatedStudyMaterials> {
+    const search = params.q?.trim().toLocaleLowerCase();
+    const cursor =
+      params.cursor === undefined
+        ? undefined
+        : decodeStudyMaterialCursor(params.cursor);
+    const filteredItems = studyMaterials
+      .filter(({ status }) => status === 'published')
+      .filter(
+        (material) =>
+          (params.subjectId === undefined ||
+            material.subjectId === params.subjectId) &&
+          (params.topicId === undefined ||
+            material.topicId === params.topicId) &&
+          (params.materialType === undefined ||
+            material.materialType === params.materialType) &&
+          (params.language === undefined ||
+            material.language === params.language) &&
+          (search === undefined ||
+            search.length === 0 ||
+            material.title.toLocaleLowerCase().includes(search) ||
+            material.description.toLocaleLowerCase().includes(search)),
+      )
+      .map(toStudyMaterialListItem)
+      .sort(
+        (left, right) =>
+          right.createdAt.localeCompare(left.createdAt) ||
+          right.id.localeCompare(left.id),
+      )
+      .filter(
+        (material) =>
+          cursor === undefined ||
+          material.createdAt < cursor.createdAt ||
+          (material.createdAt === cursor.createdAt && material.id < cursor.id),
+      );
+
+    const items = filteredItems.slice(0, params.limit);
+    const hasMore = filteredItems.length > params.limit;
+    const lastItem = items.at(-1);
+    return {
+      items,
+      nextCursor:
+        hasMore && lastItem !== undefined
+          ? encodeStudyMaterialCursor(lastItem)
+          : null,
+      hasMore,
+    };
+  }
+
+  async getStudyMaterialById(materialId: string): Promise<StudyMaterial | null> {
+    const material = studyMaterials.find(
+      ({ id, status }) => id === materialId && status === 'published',
+    );
+    return material === undefined ? null : toPublicStudyMaterial(material);
   }
 
   async getQuestionsByQuestionSetId(

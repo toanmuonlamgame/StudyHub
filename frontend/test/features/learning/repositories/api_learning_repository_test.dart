@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 import 'package:frontend/features/learning/repositories/api_learning_repository.dart';
+import 'package:frontend/features/materials/models/study_material.dart';
 
 void main() {
   test('maps subjects from the subjects endpoint', () async {
@@ -145,6 +146,103 @@ void main() {
     expect(page.items, isEmpty);
     expect(page.nextCursor, isNull);
     expect(page.hasMore, isFalse);
+  });
+
+  test('maps paginated study material metadata and query filters', () async {
+    final repository = ApiLearningRepository(
+      baseUrl: 'http://studyhub.test',
+      client: MockClient((request) async {
+        expect(request.url.path, '/learning/materials');
+        expect(request.url.queryParameters, {
+          'limit': '10',
+          'subjectId': 'subject_database',
+          'materialType': 'notes',
+          'language': 'en',
+          'q': 'normalization',
+          'cursor': 'page-2',
+        });
+        return _jsonResponse({
+          'items': [
+            {
+              'id': 'material_database_normalization',
+              'subjectId': 'subject_database',
+              'topicId': 'topic_database_relations',
+              'title': 'Database normalization notes',
+              'description': 'Normal forms.',
+              'materialType': 'notes',
+              'language': 'en',
+              'createdAt': '2026-04-01T00:00:00.000Z',
+            },
+          ],
+          'nextCursor': null,
+          'hasMore': false,
+        });
+      }),
+    );
+
+    final page = await repository.listStudyMaterials(
+      subjectId: 'subject_database',
+      materialType: StudyMaterialType.notes,
+      language: 'en',
+      q: ' normalization ',
+      limit: 10,
+      cursor: 'page-2',
+    );
+
+    expect(page.items.single.materialType, StudyMaterialType.notes);
+    expect(page.items.single.sourceType, isNull);
+    expect(page.hasMore, isFalse);
+  });
+
+  test('maps safe study material detail metadata', () async {
+    final repository = ApiLearningRepository(
+      baseUrl: 'http://studyhub.test',
+      client: MockClient((request) async {
+        expect(request.url.path, '/learning/materials/material_js_functions');
+        return _jsonResponse({
+          'material': {
+            'id': 'material_js_functions',
+            'subjectId': 'subject_javascript',
+            'topicId': 'topic_js_functions',
+            'title': 'JavaScript functions reference',
+            'description': 'Functions reference.',
+            'materialType': 'link',
+            'sourceType': 'externalLink',
+            'sourceUrl': 'https://developer.mozilla.org/example',
+            'language': 'en',
+            'createdAt': '2026-04-02T00:00:00.000Z',
+            'updatedAt': '2026-04-02T00:00:00.000Z',
+          },
+        });
+      }),
+    );
+
+    final material = await repository.getStudyMaterialById(
+      'material_js_functions',
+    );
+
+    expect(material?.sourceType, StudyMaterialSourceType.externalLink);
+    expect(material?.sourceUrl, startsWith('https://'));
+  });
+
+  test('throws for a missing study material detail', () async {
+    final repository = ApiLearningRepository(
+      baseUrl: 'http://studyhub.test',
+      client: MockClient(
+        (_) async => _jsonResponse({'error': 'Study material not found.'}, 404),
+      ),
+    );
+
+    expect(
+      () => repository.getStudyMaterialById('missing'),
+      throwsA(
+        isA<LearningApiException>().having(
+          (error) => error.statusCode,
+          'statusCode',
+          404,
+        ),
+      ),
+    );
   });
 
   test('maps submit result and answer reviews', () async {

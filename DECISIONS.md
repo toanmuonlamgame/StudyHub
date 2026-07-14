@@ -2,6 +2,26 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-14 - Study Materials Metadata-First Boundary
+Decision:
+- Study Material is a first-class content type separate from Question Set.
+- Public list/detail APIs return only published material metadata.
+- List responses stay compact and omit source/file detail; detail is fetched on demand.
+- Uploaded-file records may expose safe file metadata after publication, but V1
+  does not store or deliver binary files.
+
+Reason:
+- Metadata browsing creates a useful end-to-end foundation without pretending
+  that authentication, ownership, moderation, or cloud storage already exist.
+- A shared `LearningService`/`LearningRepository` contract keeps memory, Prisma,
+  mock, and API modes behaviorally aligned.
+
+Rule:
+- Draft, pending-review, rejected, moderation, and private ownership data must
+  never appear in public material endpoints.
+- Real upload must be introduced later behind backend validation, authorization,
+  storage safety, and moderation boundaries.
+
 ## 2026-07-14 - Device-Local Learning Progress
 Decision:
 - StudyHub records completed Exam and Practice summaries locally through a

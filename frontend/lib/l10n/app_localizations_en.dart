@@ -621,4 +621,93 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get futurePreferenceDescription => 'Available in a later milestone';
+
+  @override
+  String get studyMaterialsTitle => 'Study Materials';
+
+  @override
+  String get studyMaterialsSubtitle =>
+      'Browse trusted learning resources by subject and format.';
+
+  @override
+  String get searchMaterialsHint => 'Search study materials';
+
+  @override
+  String get allSubjects => 'All subjects';
+
+  @override
+  String get allMaterialTypes => 'All types';
+
+  @override
+  String get allLanguages => 'All languages';
+
+  @override
+  String get materialTypePdf => 'PDF';
+
+  @override
+  String get materialTypeSlides => 'Slides';
+
+  @override
+  String get materialTypeNotes => 'Notes';
+
+  @override
+  String get materialTypeDocument => 'Document';
+
+  @override
+  String get materialTypeLink => 'Link';
+
+  @override
+  String get materialTypeOther => 'Other';
+
+  @override
+  String get loadingMaterials => 'Loading study materials';
+
+  @override
+  String get searchingMaterials => 'Searching study materials';
+
+  @override
+  String get materialsLoadErrorTitle => 'Study materials could not be loaded';
+
+  @override
+  String get noMaterialsTitle => 'No study materials yet';
+
+  @override
+  String get noMaterialsMessage =>
+      'Try another subject, type, language, or search term.';
+
+  @override
+  String get materialDetailTitle => 'Study material';
+
+  @override
+  String get materialSource => 'Source';
+
+  @override
+  String get externalResource => 'External resource';
+
+  @override
+  String get uploadedFile => 'Uploaded file';
+
+  @override
+  String get fileUnavailable =>
+      'This file is not available in the prototype yet.';
+
+  @override
+  String fileNameLabel(Object name) {
+    return 'File: $name';
+  }
+
+  @override
+  String fileSizeLabel(Object size) {
+    return 'Size: $size';
+  }
+
+  @override
+  String languageLabel(Object language) {
+    return 'Language: $language';
+  }
+
+  @override
+  String openMaterialSemantics(Object title) {
+    return 'Open study material $title';
+  }
 }

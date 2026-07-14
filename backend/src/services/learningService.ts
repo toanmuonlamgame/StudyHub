@@ -1,11 +1,14 @@
 import type {
   AnswerCheckResult,
+  ListStudyMaterialsParams,
   ListQuestionSetsParams,
   PaginatedQuestionSets,
+  PaginatedStudyMaterials,
   Question,
   QuestionSet,
   QuizResult,
   Subject,
+  StudyMaterial,
   Topic,
 } from '../types/learning.js';
 
@@ -16,6 +19,10 @@ export interface LearningService {
   listQuestionSets(
     params: ListQuestionSetsParams,
   ): Promise<PaginatedQuestionSets>;
+  listStudyMaterials(
+    params: ListStudyMaterialsParams,
+  ): Promise<PaginatedStudyMaterials>;
+  getStudyMaterialById(materialId: string): Promise<StudyMaterial | null>;
   getQuestionSetById(questionSetId: string): Promise<QuestionSet | null>;
   getQuestionsByQuestionSetId(questionSetId: string): Promise<Question[]>;
   checkAnswer(
