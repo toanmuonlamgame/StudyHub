@@ -20,12 +20,19 @@ import type {
   StudyMaterial,
   Topic,
 } from '../types/learning.js';
+import type {
+  QuestionSetSubmission,
+  QuestionSetSubmissionInput,
+} from '../types/questionSetSubmission.js';
 import {
   InvalidQuizSubmissionError,
   LearningDataIntegrityError,
   LearningResourceNotFoundError,
+  QuestionSetSubmissionStateError,
+  QuestionSetSubmissionValidationError,
   type LearningService,
 } from './learningService.js';
+import { validateQuestionSetSubmission } from './questionSetSubmissionValidation.js';
 import {
   createQuestionSetListItem,
   decodeQuestionSetCursor,
@@ -46,6 +53,9 @@ const questionSetCreatedAtById = new Map(
 );
 
 export class InMemoryLearningService implements LearningService {
+  private readonly submissions = new Map<string, QuestionSetSubmission>();
+  private nextSubmissionNumber = 1;
+
   async getSubjects(): Promise<Subject[]> {
     return subjects;
   }
@@ -308,6 +318,131 @@ export class InMemoryLearningService implements LearningService {
     };
   }
 
+  async createQuestionSetSubmission(
+    input: QuestionSetSubmissionInput,
+  ): Promise<QuestionSetSubmission> {
+    this.assertValidSubmission(input, false);
+    this.validateSubmissionReferences(input);
+    const now = new Date().toISOString();
+    const submission: QuestionSetSubmission = {
+      ...cloneSubmissionInput(input),
+      id: `submission_${this.nextSubmissionNumber++}`,
+      status: 'draft',
+      sourceType: 'community',
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.submissions.set(submission.id, submission);
+    return cloneSubmission(submission);
+  }
+
+  async createQuestionSetSubmissionForReview(
+    input: QuestionSetSubmissionInput,
+  ): Promise<QuestionSetSubmission> {
+    this.assertValidSubmission(input, true);
+    this.validateSubmissionReferences(input);
+    const now = new Date().toISOString();
+    const submission: QuestionSetSubmission = {
+      ...cloneSubmissionInput(input),
+      id: `submission_${this.nextSubmissionNumber++}`,
+      status: 'pendingReview',
+      sourceType: 'community',
+      submittedAt: now,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.submissions.set(submission.id, submission);
+    return cloneSubmission(submission);
+  }
+
+  async updateQuestionSetSubmission(
+    submissionId: string,
+    input: QuestionSetSubmissionInput,
+  ): Promise<QuestionSetSubmission> {
+    const current = this.requireSubmission(submissionId);
+    if (current.status !== 'draft') {
+      throw new QuestionSetSubmissionStateError(
+        'Only draft submissions can be edited.',
+      );
+    }
+    this.assertValidSubmission(input, false);
+    this.validateSubmissionReferences(input);
+    const updated: QuestionSetSubmission = {
+      ...current,
+      ...cloneSubmissionInput(input),
+      updatedAt: new Date().toISOString(),
+    };
+    this.submissions.set(submissionId, updated);
+    return cloneSubmission(updated);
+  }
+
+  async getQuestionSetSubmission(
+    submissionId: string,
+  ): Promise<QuestionSetSubmission | null> {
+    const submission = this.submissions.get(submissionId);
+    return submission === undefined ? null : cloneSubmission(submission);
+  }
+
+  async submitQuestionSetForReview(
+    submissionId: string,
+  ): Promise<QuestionSetSubmission> {
+    const current = this.requireSubmission(submissionId);
+    if (current.status !== 'draft') {
+      throw new QuestionSetSubmissionStateError(
+        'Only draft submissions can be submitted for review.',
+      );
+    }
+    this.validateSubmissionReferences(current);
+    this.assertValidSubmission(current, true);
+    const now = new Date().toISOString();
+    const submitted: QuestionSetSubmission = {
+      ...current,
+      status: 'pendingReview',
+      submittedAt: now,
+      updatedAt: now,
+    };
+    this.submissions.set(submissionId, submitted);
+    return cloneSubmission(submitted);
+  }
+
+  private assertValidSubmission(
+    input: QuestionSetSubmissionInput,
+    requireComplete: boolean,
+  ): void {
+    const fields = validateQuestionSetSubmission(input, { requireComplete });
+    if (fields.length > 0) {
+      throw new QuestionSetSubmissionValidationError(fields);
+    }
+  }
+
+  private validateSubmissionReferences(input: QuestionSetSubmissionInput): void {
+    const subject = subjects.find(({ id }) => id === input.subjectId);
+    if (subject === undefined) {
+      throw new QuestionSetSubmissionValidationError([
+        { path: 'subjectId', message: 'Subject does not exist.' },
+      ]);
+    }
+    if (input.topicId !== undefined) {
+      const topic = topics.find(({ id }) => id === input.topicId);
+      if (topic === undefined || topic.subjectId !== input.subjectId) {
+        throw new QuestionSetSubmissionValidationError([
+          {
+            path: 'topicId',
+            message: 'Topic must belong to the selected subject.',
+          },
+        ]);
+      }
+    }
+  }
+
+  private requireSubmission(submissionId: string): QuestionSetSubmission {
+    const submission = this.submissions.get(submissionId);
+    if (submission === undefined) {
+      throw new LearningResourceNotFoundError('Submission not found.');
+    }
+    return submission;
+  }
+
   private requireSubject(subjectId: string): Subject {
     const subject = subjects.find(({ id }) => id === subjectId);
     if (subject === undefined) {
@@ -323,4 +458,31 @@ export class InMemoryLearningService implements LearningService {
     }
     return questionSet;
   }
+}
+
+function cloneSubmissionInput(
+  input: QuestionSetSubmissionInput,
+): QuestionSetSubmissionInput {
+  return {
+    subjectId: input.subjectId,
+    ...(input.topicId === undefined ? {} : { topicId: input.topicId }),
+    title: input.title.trim(),
+    description: input.description.trim(),
+    questions: input.questions.map((question) => ({
+      text: question.text.trim(),
+      ...(question.explanation?.trim()
+        ? { explanation: question.explanation.trim() }
+        : {}),
+      answerOptions: question.answerOptions.map((option) => ({
+        text: option.text.trim(),
+        isCorrect: option.isCorrect,
+      })),
+    })),
+  };
+}
+
+function cloneSubmission(
+  submission: QuestionSetSubmission,
+): QuestionSetSubmission {
+  return { ...submission, ...cloneSubmissionInput(submission) };
 }

@@ -706,4 +706,169 @@ class AppLocalizationsVi extends AppLocalizations {
   String openMaterialSemantics(Object title) {
     return 'Mở tài liệu $title';
   }
+
+  @override
+  String get contributionTitle => 'Tạo bộ câu hỏi';
+
+  @override
+  String get contributionCreateSet => 'Tạo bộ câu hỏi';
+
+  @override
+  String get contributionIntroHeading => 'Chia sẻ bộ câu hỏi hữu ích';
+
+  @override
+  String get contributionIntroBody =>
+      'Soạn câu hỏi và đáp án trên thiết bị, sau đó gửi bộ hoàn chỉnh để duyệt.';
+
+  @override
+  String get contributionReviewGuideline =>
+      'Mọi nội dung đều được duyệt trước khi người học nhìn thấy.';
+
+  @override
+  String get contributionSafetyGuideline =>
+      'Đáp án đúng vẫn được bảo vệ trong chế độ học.';
+
+  @override
+  String get contributionLocalGuideline =>
+      'Chưa có tài khoản sở hữu hoặc đồng bộ bản nháp.';
+
+  @override
+  String get contributionDetails => 'Thông tin bộ câu hỏi';
+
+  @override
+  String get contributionDetailsIntro =>
+      'Chọn nơi phù hợp và đặt tiêu đề rõ ràng cho người học.';
+
+  @override
+  String get contributionSubject => 'Môn học';
+
+  @override
+  String get contributionTopicOptional => 'Chủ đề (không bắt buộc)';
+
+  @override
+  String get contributionSetTitle => 'Tiêu đề';
+
+  @override
+  String get contributionDescription => 'Mô tả';
+
+  @override
+  String get contributionQuestionBuilder => 'Soạn câu hỏi';
+
+  @override
+  String get contributionAddQuestion => 'Thêm câu hỏi';
+
+  @override
+  String get contributionQuestion => 'Câu hỏi';
+
+  @override
+  String get contributionQuestionText => 'Nội dung câu hỏi';
+
+  @override
+  String get contributionExplanationOptional => 'Giải thích (không bắt buộc)';
+
+  @override
+  String get contributionAnswerOptions => 'Các đáp án';
+
+  @override
+  String get contributionAnswer => 'Đáp án';
+
+  @override
+  String get contributionAddAnswer => 'Thêm đáp án';
+
+  @override
+  String get contributionCorrectAnswer => 'Đáp án đúng';
+
+  @override
+  String get contributionRemove => 'Xóa';
+
+  @override
+  String get contributionRemoveQuestion => 'Xóa câu hỏi';
+
+  @override
+  String get contributionRemoveQuestionConfirm =>
+      'Xóa câu hỏi này cùng các đáp án?';
+
+  @override
+  String get contributionRemoveAnswer => 'Xóa đáp án';
+
+  @override
+  String get contributionRemoveAnswerConfirm => 'Xóa lựa chọn đáp án này?';
+
+  @override
+  String contributionQuestionCount(Object count) {
+    return '$count câu hỏi';
+  }
+
+  @override
+  String get contributionReviewSubmission => 'Xem lại nội dung';
+
+  @override
+  String get contributionSubmitForReview => 'Gửi để duyệt';
+
+  @override
+  String get contributionSubmitConfirm =>
+      'Gửi bộ câu hỏi này để kiểm duyệt? Bạn không thể sửa sau khi gửi.';
+
+  @override
+  String get contributionPendingReview => 'Đang chờ duyệt';
+
+  @override
+  String get contributionPendingBody =>
+      'Bộ câu hỏi chưa được công khai. Nội dung phải được duyệt trước khi người học có thể tìm thấy.';
+
+  @override
+  String get contributionSubmissionSuccessful => 'Gửi thành công';
+
+  @override
+  String get contributionSubmissionFailed =>
+      'Gửi thất bại. Bản nháp vẫn còn; hãy thử lại.';
+
+  @override
+  String get contributionUnsavedTitle => 'Bỏ thay đổi chưa lưu?';
+
+  @override
+  String get contributionUnsavedBody => 'Bản nháp cục bộ này sẽ bị mất.';
+
+  @override
+  String get contributionDiscardDraft => 'Bỏ bản nháp';
+
+  @override
+  String get contributionContinueEditing => 'Tiếp tục chỉnh sửa';
+
+  @override
+  String get contributionValidationRequired => 'Vui lòng nhập trường này.';
+
+  @override
+  String get contributionValidationAddQuestion =>
+      'Hãy thêm ít nhất một câu hỏi.';
+
+  @override
+  String get contributionValidationQuestionText =>
+      'Vui lòng nhập nội dung câu hỏi.';
+
+  @override
+  String get contributionValidationAddAnswers => 'Hãy thêm ít nhất hai đáp án.';
+
+  @override
+  String get contributionValidationCorrectAnswer =>
+      'Hãy chọn đúng một đáp án đúng.';
+
+  @override
+  String get contributionValidationUniqueAnswers =>
+      'Các đáp án không được trùng nhau.';
+
+  @override
+  String get contributionValidationTooLong => 'Nội dung này quá dài.';
+
+  @override
+  String get contributionValidationMaxQuestions =>
+      'Một bộ có tối đa 50 câu hỏi.';
+
+  @override
+  String get contributionValidationMaxAnswers =>
+      'Một câu hỏi có tối đa 8 đáp án.';
+
+  @override
+  String get contributionValidationSubjectUnavailable =>
+      'Môn học đã chọn không còn khả dụng.';
 }

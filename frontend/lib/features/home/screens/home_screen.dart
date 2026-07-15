@@ -13,12 +13,14 @@ class HomeScreen extends StatelessWidget {
     required this.onOpenProgress,
     required this.onOpenSettings,
     required this.onOpenStudyMaterials,
+    required this.onOpenContribution,
   });
 
   final VoidCallback onStartLearning;
   final VoidCallback onOpenProgress;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenStudyMaterials;
+  final VoidCallback onOpenContribution;
 
   @override
   Widget build(BuildContext context) {
@@ -154,8 +156,10 @@ class HomeScreen extends StatelessWidget {
                         SizedBox(
                           width: width,
                           child: FeaturePreviewTile(
-                            icon: Icons.bookmark_outline,
-                            title: l10n.savedContent,
+                            key: const ValueKey('contribution-home-tile'),
+                            icon: Icons.post_add_outlined,
+                            title: l10n.contributionTitle,
+                            onTap: onOpenContribution,
                           ),
                         ),
                         SizedBox(

@@ -174,3 +174,14 @@ data-growth checklist in
 [SCALABILITY_AND_SEARCH.md](SCALABILITY_AND_SEARCH.md). In particular, verify
 bounded payloads, stable pagination, indexed filtering, visibility rules, and the
 absence of correctness/private-data leaks.
+
+## Creator Content Guardrail
+
+- Keep creator answer-key models separate from learner-safe models.
+- Validate locally for feedback and authoritatively on the backend.
+- Preserve local drafts after network or validation failure.
+- Never auto-publish community content; successful submission means
+  `pendingReview` only.
+- Filter public search and learning queries by `published` before DTO mapping.
+- Require authenticated ownership and moderator authorization before exposing
+  production editing or moderation actions.

@@ -322,6 +322,22 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Update TODO.md after finishing or changing a task.
 - [ ] Commit small working changes.
 
+## Community Question Bank Foundation (Commit 42)
+- [x] Add creator DTOs and centralized submission validation.
+- [x] Add memory/Prisma draft, update, get, submit, and atomic final-submit services.
+- [x] Keep non-published Question Sets hidden from all learner paths.
+- [x] Prepare Prisma moderation schema, indexes, and unapplied migration SQL.
+- [x] Add Flutter local-draft contribution flow with separate creator models.
+- [x] Add mock/API ContributionRepository parity and structured API errors.
+- [x] Add English/Vietnamese mobile creator UI and Home entry.
+- [x] Add backend and Flutter regression tests.
+- [ ] Manually review and apply the CM42 Prisma migration.
+- [ ] Run Prisma/database smoke tests after the CM42 migration is applied.
+- [ ] Test one real Flutter API-mode contribution against the local backend.
+- [ ] Add authentication-backed ownership and server draft recovery.
+- [ ] Build authorized moderation queue and approve/reject workflow.
+- [ ] Add duplicate detection and contributor quality signals in V2.
+
 ## Not Doing Yet
 - [ ] Do not create docs/ files until explicitly requested.
 - [ ] Do not write app code until the first milestone is approved.

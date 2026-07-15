@@ -7,6 +7,8 @@ import '../core/app_theme.dart';
 import '../core/locale_preference_store.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/repositories/mock_learning_repository.dart';
+import '../features/contribution/repositories/contribution_repository.dart';
+import '../features/contribution/repositories/mock_contribution_repository.dart';
 import '../features/progress/progress_store_scope.dart';
 import '../features/progress/repositories/progress_store.dart';
 import '../features/progress/repositories/shared_preferences_progress_store.dart';
@@ -17,12 +19,14 @@ class StudyHubApp extends StatefulWidget {
   const StudyHubApp({
     super.key,
     this.learningRepository = const MockLearningRepository(),
+    this.contributionRepository = const MockContributionRepository(),
     this.initialLocaleSelection,
     this.localePreferenceStore = const LocalePreferenceStore(),
     this.progressStore,
   });
 
   final LearningRepository learningRepository;
+  final ContributionRepository contributionRepository;
   final AppLocaleSelection? initialLocaleSelection;
   final LocalePreferenceStore localePreferenceStore;
   final ProgressStore? progressStore;
@@ -75,6 +79,7 @@ class _StudyHubAppState extends State<StudyHubApp> {
         progressStore: _progressStore,
         child: MainNavigationScreen(
           learningRepository: widget.learningRepository,
+          contributionRepository: widget.contributionRepository,
           localeSelection: _localeSelection,
           onLocaleSelected: _selectLocale,
         ),

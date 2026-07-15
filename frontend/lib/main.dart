@@ -5,7 +5,10 @@ import 'app/studyhub_app.dart';
 
 void main() {
   runApp(
-    StudyHubApp(learningRepository: createLearningRepositoryFromEnvironment()),
+    StudyHubApp(
+      learningRepository: createLearningRepositoryFromEnvironment(),
+      contributionRepository: createContributionRepositoryFromEnvironment(),
+    ),
   );
 }
 

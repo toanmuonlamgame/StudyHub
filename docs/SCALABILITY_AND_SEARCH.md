@@ -172,3 +172,8 @@ detail on demand. Flutter provides matching debounce, stale-response,
 deduplication, load-more, retry, empty, and error behavior. Prisma indexes cover
 publication ordering plus current subject, topic, and material-type filters.
 PostgreSQL full-text or trigram search remains deferred until usage justifies it.
+
+Community drafts, pending-review items, and rejected Question Sets are excluded
+before public search and pagination. Status/created-time, subject/status,
+topic/status, and source/status indexes prepare publication filtering and review
+ordering without adding creator content to learner payloads.

@@ -112,3 +112,20 @@ Only published metadata is presented. External URLs are displayed as selectable
 resource text; uploaded-file entries show honest metadata and an unavailable
 prototype state. There is no binary upload, cloud storage, authentication,
 ownership, or moderation UI yet.
+
+## Contribute Questions
+
+Home opens a mobile creator flow: introduction, details, question builder,
+creator-only review, submit for review, and pending confirmation. Creator draft
+models are separate from learner-safe models because they contain the selected
+correct answer.
+
+The draft stays in Flutter memory until final confirmation. Mock mode validates
+locally; API mode calls `POST /learning/question-set-submissions/submit`. A
+failed request keeps form state. Draft sync, authenticated ownership,
+moderation UI, and rewards are deferred.
+
+The creator contract currently allows at most 50 questions and 8 answer options
+per question. The prepared Prisma migration and a real Flutter API-mode
+submission still require manual verification before this flow is treated as
+database-ready.

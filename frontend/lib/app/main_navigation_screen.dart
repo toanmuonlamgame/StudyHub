@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../core/app_locale.dart';
 import '../features/home/screens/home_screen.dart';
+import '../features/contribution/repositories/contribution_repository.dart';
+import '../features/contribution/screens/contribution_intro_screen.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/screens/subject_list_screen.dart';
 import '../features/materials/screens/study_material_list_screen.dart';
@@ -13,11 +15,13 @@ class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({
     super.key,
     required this.learningRepository,
+    required this.contributionRepository,
     required this.localeSelection,
     required this.onLocaleSelected,
   });
 
   final LearningRepository learningRepository;
+  final ContributionRepository contributionRepository;
   final AppLocaleSelection localeSelection;
   final ValueChanged<AppLocaleSelection> onLocaleSelected;
 
@@ -117,6 +121,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         MaterialPageRoute<void>(
           builder: (_) => StudyMaterialListScreen(
             learningRepository: widget.learningRepository,
+          ),
+        ),
+      ),
+      onOpenContribution: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => ContributionIntroScreen(
+            learningRepository: widget.learningRepository,
+            contributionRepository: widget.contributionRepository,
           ),
         ),
       ),

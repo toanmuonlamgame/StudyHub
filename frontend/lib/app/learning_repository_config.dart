@@ -1,6 +1,9 @@
 import '../features/learning/repositories/api_learning_repository.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/repositories/mock_learning_repository.dart';
+import '../features/contribution/repositories/api_contribution_repository.dart';
+import '../features/contribution/repositories/contribution_repository.dart';
+import '../features/contribution/repositories/mock_contribution_repository.dart';
 
 const _learningSource = String.fromEnvironment(
   'STUDYHUB_LEARNING_SOURCE',
@@ -17,6 +20,19 @@ LearningRepository createLearningRepositoryFromEnvironment() {
       return const MockLearningRepository();
     case 'api':
       return ApiLearningRepository(baseUrl: _apiBaseUrl);
+    default:
+      throw StateError(
+        'Unsupported STUDYHUB_LEARNING_SOURCE: $_learningSource',
+      );
+  }
+}
+
+ContributionRepository createContributionRepositoryFromEnvironment() {
+  switch (_learningSource) {
+    case 'mock':
+      return const MockContributionRepository();
+    case 'api':
+      return ApiContributionRepository(baseUrl: _apiBaseUrl);
     default:
       throw StateError(
         'Unsupported STUDYHUB_LEARNING_SOURCE: $_learningSource',

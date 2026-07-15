@@ -331,3 +331,27 @@ and return only published compact items. Detail is fetched only when opened.
 Draft, pending-review, rejected, moderation, and ownership data remain internal.
 The current uploaded-file source is metadata only; no binary upload or cloud
 delivery is implemented.
+
+## Community Question Bank Boundary
+
+```text
+Flutter creator screens -> ContributionRepository
+  -> MockContributionRepository / ApiContributionRepository
+  -> Fastify submission routes -> LearningService
+  -> InMemoryLearningService / PrismaLearningService -> PostgreSQL
+```
+
+Creator DTOs are separate from learner DTOs. Flutter composes a bounded local
+draft and performs one final atomic submit-for-review request. The backend owns
+validation and lifecycle (`draft -> pendingReview -> published/rejected`). Only
+`published` sets can enter learner browse, search, detail, questions,
+`checkAnswer`, or `submitQuiz` paths.
+
+`createdByUserId` is nullable until real authentication exists. Submission
+endpoints are a development foundation, not proof of creator ownership. Public
+unauthenticated approve/reject routes are prohibited.
+
+Submission validation bounds each set to 50 questions and each question to 8
+answer options. Prisma edit and submit transitions conditionally lock the draft
+state inside a transaction so a concurrent state change cannot leave partial
+question data.

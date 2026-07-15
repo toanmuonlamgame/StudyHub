@@ -8,6 +8,8 @@ import {
   InvalidLearningListQueryError,
   LearningDataIntegrityError,
   LearningResourceNotFoundError,
+  QuestionSetSubmissionStateError,
+  QuestionSetSubmissionValidationError,
   type LearningService,
 } from '../services/learningService.js';
 import type {
@@ -15,6 +17,7 @@ import type {
   StudyMaterialType,
   SubmitQuizBody,
 } from '../types/learning.js';
+import type { QuestionSetSubmissionInput } from '../types/questionSetSubmission.js';
 
 interface SubjectParams {
   subjectId: string;
@@ -30,6 +33,10 @@ interface QuestionParams {
 
 interface MaterialParams {
   materialId: string;
+}
+
+interface SubmissionParams {
+  submissionId: string;
 }
 
 interface StudyMaterialListQuery extends QuestionSetListQuery {
@@ -77,6 +84,41 @@ const checkAnswerBodySchema = {
   },
 } as const;
 
+const answerOptionSubmissionSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['text', 'isCorrect'],
+  properties: {
+    text: { type: 'string' },
+    isCorrect: { type: 'boolean' },
+  },
+} as const;
+
+const questionSetSubmissionBodySchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['subjectId', 'title', 'description', 'questions'],
+  properties: {
+    subjectId: { type: 'string' },
+    topicId: { type: 'string' },
+    title: { type: 'string' },
+    description: { type: 'string' },
+    questions: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['text', 'answerOptions'],
+        properties: {
+          text: { type: 'string' },
+          explanation: { type: 'string' },
+          answerOptions: { type: 'array', items: answerOptionSubmissionSchema },
+        },
+      },
+    },
+  },
+} as const;
+
 function sendLearningError(error: unknown, reply: FastifyReply): FastifyReply {
   if (error instanceof LearningResourceNotFoundError) {
     return reply.code(404).send({ error: error.message });
@@ -90,6 +132,20 @@ function sendLearningError(error: unknown, reply: FastifyReply): FastifyReply {
   if (error instanceof LearningDataIntegrityError) {
     return reply.code(500).send({ error: error.message });
   }
+  if (error instanceof QuestionSetSubmissionValidationError) {
+    return reply.code(400).send({
+      error: {
+        code: 'SUBMISSION_VALIDATION_FAILED',
+        message: error.message,
+        fields: error.fields,
+      },
+    });
+  }
+  if (error instanceof QuestionSetSubmissionStateError) {
+    return reply.code(409).send({
+      error: { code: 'SUBMISSION_STATE_CONFLICT', message: error.message, fields: [] },
+    });
+  }
   throw error;
 }
 
@@ -97,6 +153,80 @@ export function createLearningRoutes(
   service: LearningService,
 ): FastifyPluginAsync {
   return async function learningRoutes(app): Promise<void> {
+    app.post<{ Body: QuestionSetSubmissionInput }>(
+      '/question-set-submissions',
+      { schema: { body: questionSetSubmissionBodySchema } },
+      async (request, reply) => {
+        try {
+          const submission = await service.createQuestionSetSubmission(request.body);
+          return reply.code(201).send({ submission });
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
+    app.post<{ Body: QuestionSetSubmissionInput }>(
+      '/question-set-submissions/submit',
+      { schema: { body: questionSetSubmissionBodySchema } },
+      async (request, reply) => {
+        try {
+          const submission =
+            await service.createQuestionSetSubmissionForReview(request.body);
+          return reply.code(201).send({ submission });
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
+    app.get<{ Params: SubmissionParams }>(
+      '/question-set-submissions/:submissionId',
+      async (request, reply) => {
+        try {
+          const submission = await service.getQuestionSetSubmission(
+            request.params.submissionId,
+          );
+          return submission === null
+            ? reply.code(404).send({ error: 'Submission not found.' })
+            : { submission };
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
+    app.put<{ Params: SubmissionParams; Body: QuestionSetSubmissionInput }>(
+      '/question-set-submissions/:submissionId',
+      { schema: { body: questionSetSubmissionBodySchema } },
+      async (request, reply) => {
+        try {
+          return {
+            submission: await service.updateQuestionSetSubmission(
+              request.params.submissionId,
+              request.body,
+            ),
+          };
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
+    app.post<{ Params: SubmissionParams }>(
+      '/question-set-submissions/:submissionId/submit',
+      async (request, reply) => {
+        try {
+          return {
+            submission: await service.submitQuestionSetForReview(
+              request.params.submissionId,
+            ),
+          };
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
     app.get<{ Querystring: StudyMaterialListQuery }>(
       '/materials',
       async (request, reply) => {

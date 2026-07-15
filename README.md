@@ -189,6 +189,8 @@ The complete review standard is documented in
 - Testable Fastify routes and Prisma-independent normal test suite.
 - PostgreSQL schema, migration, repeatable seed, and automated Prisma smoke test.
 - Explicit pre-submit/post-submit answer safety boundary.
+- Moderation-ready community Question Set submissions with local drafts,
+  structured validation, and published-only learner visibility.
 - Research-informed roadmap and a reusable UX/performance quality system.
 - Architecture prepared for growth without premature microservices or extra app
   stacks.

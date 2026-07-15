@@ -1339,6 +1339,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open study material {title}'**
   String openMaterialSemantics(Object title);
+
+  /// No description provided for @contributionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribute Questions'**
+  String get contributionTitle;
+
+  /// No description provided for @contributionCreateSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Question Set'**
+  String get contributionCreateSet;
+
+  /// No description provided for @contributionIntroHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a useful question set'**
+  String get contributionIntroHeading;
+
+  /// No description provided for @contributionIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare questions and answers on this device, then submit the complete set for review.'**
+  String get contributionIntroBody;
+
+  /// No description provided for @contributionReviewGuideline.
+  ///
+  /// In en, this message translates to:
+  /// **'Every submission is reviewed before learners can see it.'**
+  String get contributionReviewGuideline;
+
+  /// No description provided for @contributionSafetyGuideline.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct answers remain protected in learner mode.'**
+  String get contributionSafetyGuideline;
+
+  /// No description provided for @contributionLocalGuideline.
+  ///
+  /// In en, this message translates to:
+  /// **'Account ownership and draft sync are not available yet.'**
+  String get contributionLocalGuideline;
+
+  /// No description provided for @contributionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Set Details'**
+  String get contributionDetails;
+
+  /// No description provided for @contributionDetailsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where this set belongs and give learners a clear title.'**
+  String get contributionDetailsIntro;
+
+  /// No description provided for @contributionSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get contributionSubject;
+
+  /// No description provided for @contributionTopicOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Topic (optional)'**
+  String get contributionTopicOptional;
+
+  /// No description provided for @contributionSetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get contributionSetTitle;
+
+  /// No description provided for @contributionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get contributionDescription;
+
+  /// No description provided for @contributionQuestionBuilder.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Builder'**
+  String get contributionQuestionBuilder;
+
+  /// No description provided for @contributionAddQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Question'**
+  String get contributionAddQuestion;
+
+  /// No description provided for @contributionQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Question'**
+  String get contributionQuestion;
+
+  /// No description provided for @contributionQuestionText.
+  ///
+  /// In en, this message translates to:
+  /// **'Question text'**
+  String get contributionQuestionText;
+
+  /// No description provided for @contributionExplanationOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Explanation (optional)'**
+  String get contributionExplanationOptional;
+
+  /// No description provided for @contributionAnswerOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer Options'**
+  String get contributionAnswerOptions;
+
+  /// No description provided for @contributionAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get contributionAnswer;
+
+  /// No description provided for @contributionAddAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Answer'**
+  String get contributionAddAnswer;
+
+  /// No description provided for @contributionCorrectAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct Answer'**
+  String get contributionCorrectAnswer;
+
+  /// No description provided for @contributionRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get contributionRemove;
+
+  /// No description provided for @contributionRemoveQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove question'**
+  String get contributionRemoveQuestion;
+
+  /// No description provided for @contributionRemoveQuestionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this question and its answers?'**
+  String get contributionRemoveQuestionConfirm;
+
+  /// No description provided for @contributionRemoveAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove answer'**
+  String get contributionRemoveAnswer;
+
+  /// No description provided for @contributionRemoveAnswerConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this answer option?'**
+  String get contributionRemoveAnswerConfirm;
+
+  /// No description provided for @contributionQuestionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} questions'**
+  String contributionQuestionCount(Object count);
+
+  /// No description provided for @contributionReviewSubmission.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Submission'**
+  String get contributionReviewSubmission;
+
+  /// No description provided for @contributionSubmitForReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for Review'**
+  String get contributionSubmitForReview;
+
+  /// No description provided for @contributionSubmitConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit this question set for moderation? You cannot edit it after submission.'**
+  String get contributionSubmitConfirm;
+
+  /// No description provided for @contributionPendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Review'**
+  String get contributionPendingReview;
+
+  /// No description provided for @contributionPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This question set is not public. It must be reviewed before learners can find it.'**
+  String get contributionPendingBody;
+
+  /// No description provided for @contributionSubmissionSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Submission Successful'**
+  String get contributionSubmissionSuccessful;
+
+  /// No description provided for @contributionSubmissionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Submission failed. Your draft is still here; try again.'**
+  String get contributionSubmissionFailed;
+
+  /// No description provided for @contributionUnsavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard unsaved changes?'**
+  String get contributionUnsavedTitle;
+
+  /// No description provided for @contributionUnsavedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This local draft will be lost.'**
+  String get contributionUnsavedBody;
+
+  /// No description provided for @contributionDiscardDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard Draft'**
+  String get contributionDiscardDraft;
+
+  /// No description provided for @contributionContinueEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Editing'**
+  String get contributionContinueEditing;
+
+  /// No description provided for @contributionValidationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required.'**
+  String get contributionValidationRequired;
+
+  /// No description provided for @contributionValidationAddQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one question.'**
+  String get contributionValidationAddQuestion;
+
+  /// No description provided for @contributionValidationQuestionText.
+  ///
+  /// In en, this message translates to:
+  /// **'Question text is required.'**
+  String get contributionValidationQuestionText;
+
+  /// No description provided for @contributionValidationAddAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least two answers.'**
+  String get contributionValidationAddAnswers;
+
+  /// No description provided for @contributionValidationCorrectAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose exactly one correct answer.'**
+  String get contributionValidationCorrectAnswer;
+
+  /// No description provided for @contributionValidationUniqueAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers must be unique.'**
+  String get contributionValidationUniqueAnswers;
+
+  /// No description provided for @contributionValidationTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'This text is too long.'**
+  String get contributionValidationTooLong;
+
+  /// No description provided for @contributionValidationMaxQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'A question set can contain up to 50 questions.'**
+  String get contributionValidationMaxQuestions;
+
+  /// No description provided for @contributionValidationMaxAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'A question can contain up to 8 answers.'**
+  String get contributionValidationMaxAnswers;
+
+  /// No description provided for @contributionValidationSubjectUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected subject is unavailable.'**
+  String get contributionValidationSubjectUnavailable;
 }
 
 class _AppLocalizationsDelegate

@@ -244,3 +244,23 @@ Migration `20260714135447_study_material_foundation` adds the PostgreSQL model,
 relations, publication/filter indexes, and seeded development fixtures. Run
 `npm run prisma:seed` after migration. `npm run test:prisma-smoke` verifies the
 material list/detail contract in Prisma mode as well as the existing quiz flow.
+
+## Community Question Set Submissions
+
+The development contract supports draft create/read/update, submit-for-review,
+and atomic final submission at
+`POST /learning/question-set-submissions/submit`. Flutter uses the atomic route
+after composing its draft locally. Draft endpoints are not production-safe
+ownership APIs until authentication and authorization exist.
+
+Only `published` Question Sets are visible through learner list, search, detail,
+questions, check-answer, and quiz-submit APIs. Validation returns
+`SUBMISSION_VALIDATION_FAILED` with field paths. Client user IDs are not trusted,
+and no public approval/rejection route exists. A submission is bounded to 50
+questions and 8 answer options per question; Fastify rejects unknown request
+fields.
+
+Migration `20260715090000_question_set_submission_foundation` is prepared but
+must be reviewed and applied manually. Normal tests remain memory-only. Prisma
+submission smoke testing and a real Flutter-to-backend submission remain manual
+checks after that migration is applied.

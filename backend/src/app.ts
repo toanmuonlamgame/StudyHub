@@ -57,7 +57,10 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     'memory';
   const learningService =
     options.learningService ?? createConfiguredLearningService(dataSource);
-  const app = Fastify({ logger: true });
+  const app = Fastify({
+    logger: true,
+    ajv: { customOptions: { removeAdditional: false } },
+  });
 
   app.register(cors, {
     origin: (origin, callback) => {

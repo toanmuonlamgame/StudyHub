@@ -710,4 +710,166 @@ class AppLocalizationsEn extends AppLocalizations {
   String openMaterialSemantics(Object title) {
     return 'Open study material $title';
   }
+
+  @override
+  String get contributionTitle => 'Contribute Questions';
+
+  @override
+  String get contributionCreateSet => 'Create Question Set';
+
+  @override
+  String get contributionIntroHeading => 'Share a useful question set';
+
+  @override
+  String get contributionIntroBody =>
+      'Prepare questions and answers on this device, then submit the complete set for review.';
+
+  @override
+  String get contributionReviewGuideline =>
+      'Every submission is reviewed before learners can see it.';
+
+  @override
+  String get contributionSafetyGuideline =>
+      'Correct answers remain protected in learner mode.';
+
+  @override
+  String get contributionLocalGuideline =>
+      'Account ownership and draft sync are not available yet.';
+
+  @override
+  String get contributionDetails => 'Question Set Details';
+
+  @override
+  String get contributionDetailsIntro =>
+      'Choose where this set belongs and give learners a clear title.';
+
+  @override
+  String get contributionSubject => 'Subject';
+
+  @override
+  String get contributionTopicOptional => 'Topic (optional)';
+
+  @override
+  String get contributionSetTitle => 'Title';
+
+  @override
+  String get contributionDescription => 'Description';
+
+  @override
+  String get contributionQuestionBuilder => 'Question Builder';
+
+  @override
+  String get contributionAddQuestion => 'Add Question';
+
+  @override
+  String get contributionQuestion => 'Question';
+
+  @override
+  String get contributionQuestionText => 'Question text';
+
+  @override
+  String get contributionExplanationOptional => 'Explanation (optional)';
+
+  @override
+  String get contributionAnswerOptions => 'Answer Options';
+
+  @override
+  String get contributionAnswer => 'Answer';
+
+  @override
+  String get contributionAddAnswer => 'Add Answer';
+
+  @override
+  String get contributionCorrectAnswer => 'Correct Answer';
+
+  @override
+  String get contributionRemove => 'Remove';
+
+  @override
+  String get contributionRemoveQuestion => 'Remove question';
+
+  @override
+  String get contributionRemoveQuestionConfirm =>
+      'Remove this question and its answers?';
+
+  @override
+  String get contributionRemoveAnswer => 'Remove answer';
+
+  @override
+  String get contributionRemoveAnswerConfirm => 'Remove this answer option?';
+
+  @override
+  String contributionQuestionCount(Object count) {
+    return '$count questions';
+  }
+
+  @override
+  String get contributionReviewSubmission => 'Review Submission';
+
+  @override
+  String get contributionSubmitForReview => 'Submit for Review';
+
+  @override
+  String get contributionSubmitConfirm =>
+      'Submit this question set for moderation? You cannot edit it after submission.';
+
+  @override
+  String get contributionPendingReview => 'Pending Review';
+
+  @override
+  String get contributionPendingBody =>
+      'This question set is not public. It must be reviewed before learners can find it.';
+
+  @override
+  String get contributionSubmissionSuccessful => 'Submission Successful';
+
+  @override
+  String get contributionSubmissionFailed =>
+      'Submission failed. Your draft is still here; try again.';
+
+  @override
+  String get contributionUnsavedTitle => 'Discard unsaved changes?';
+
+  @override
+  String get contributionUnsavedBody => 'This local draft will be lost.';
+
+  @override
+  String get contributionDiscardDraft => 'Discard Draft';
+
+  @override
+  String get contributionContinueEditing => 'Continue Editing';
+
+  @override
+  String get contributionValidationRequired => 'This field is required.';
+
+  @override
+  String get contributionValidationAddQuestion => 'Add at least one question.';
+
+  @override
+  String get contributionValidationQuestionText => 'Question text is required.';
+
+  @override
+  String get contributionValidationAddAnswers => 'Add at least two answers.';
+
+  @override
+  String get contributionValidationCorrectAnswer =>
+      'Choose exactly one correct answer.';
+
+  @override
+  String get contributionValidationUniqueAnswers => 'Answers must be unique.';
+
+  @override
+  String get contributionValidationTooLong => 'This text is too long.';
+
+  @override
+  String get contributionValidationMaxQuestions =>
+      'A question set can contain up to 50 questions.';
+
+  @override
+  String get contributionValidationMaxAnswers =>
+      'A question can contain up to 8 answers.';
+
+  @override
+  String get contributionValidationSubjectUnavailable =>
+      'The selected subject is unavailable.';
 }

@@ -157,6 +157,8 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - Use `docs/QUALITY_SYSTEM.md` as the balanced UX, performance, security, and Definition of Done guardrail for future features.
 - Future AI study aids must come from user-provided sources, retain citations/provenance, and pass review before publication.
 - Plan for data growth with backend filtering, cursor pagination, PostgreSQL indexes, and later measured caching, external search, or analytics only when needed.
+- Community Question Sets use a moderation-ready lifecycle: local creator draft, backend `pendingReview`, then future authorized publish/reject. Learner APIs expose only `published` content.
+- Creator answer-key models remain separate from learner-safe quiz DTOs. Real ownership and draft sync begin only after authentication.
 
 ## AI Workflow
 - Codex app: main coding assistant.

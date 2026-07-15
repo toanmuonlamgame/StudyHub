@@ -563,3 +563,15 @@ Reason:
 ## Pending Decisions
 - Deployment target:
 - Moderation approach for uploaded content:
+
+## 2026-07-15 - Community Question Set Submission Boundary
+Decision: community Question Sets use `draft -> pendingReview -> published` or
+`rejected`, with learner visibility restricted to `published` at service/query
+level.
+
+- Flutter keeps the current draft locally and sends one atomic final submission.
+- Creator DTOs may contain `isCorrect`; learner GET DTOs never do.
+- `createdByUserId` stays nullable and untrusted until authentication exists.
+- No unauthenticated approve/reject routes are exposed.
+- Memory and Prisma implementations share centralized validation and lifecycle
+  behavior behind `LearningService`.

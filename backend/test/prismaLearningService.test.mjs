@@ -32,9 +32,12 @@ test('mapQuestion strips internal correctness metadata', () => {
 });
 
 test('PrismaLearningService submitQuiz returns score and answer reviews', async () => {
+  let findArgs;
   const fakePrisma = {
     questionSet: {
-      findUnique: async () => ({
+      findFirst: async (args) => {
+        findArgs = args;
+        return ({
         id: 'question_set_1',
         subjectId: 'subject_1',
         topicId: null,
@@ -72,7 +75,8 @@ test('PrismaLearningService submitQuiz returns score and answer reviews', async 
             ],
           },
         ],
-      }),
+        });
+      },
     },
   };
   const service = createPrismaLearningService(fakePrisma);
@@ -85,6 +89,7 @@ test('PrismaLearningService submitQuiz returns score and answer reviews', async 
   assert.equal(result.correctAnswers, 0);
   assert.equal(result.wrongAnswers, 1);
   assert.equal(result.percentageScore, 0);
+  assert.equal(findArgs.where.status, 'published');
   assert.deepEqual(result.answerReviews, [
     {
       questionId: 'question_1',
@@ -99,9 +104,12 @@ test('PrismaLearningService submitQuiz returns score and answer reviews', async 
 });
 
 test('PrismaLearningService checkAnswer uses internal correctness data', async () => {
+  let findArgs;
   const fakePrisma = {
     question: {
-      findUnique: async () => ({
+      findFirst: async (args) => {
+        findArgs = args;
+        return ({
         id: 'question_1',
         questionSetId: 'question_set_1',
         text: 'First question?',
@@ -128,7 +136,8 @@ test('PrismaLearningService checkAnswer uses internal correctness data', async (
             updatedAt: new Date(),
           },
         ],
-      }),
+        });
+      },
     },
   };
   const service = createPrismaLearningService(fakePrisma);
@@ -143,6 +152,7 @@ test('PrismaLearningService checkAnswer uses internal correctness data', async (
     correctAnswerText: 'Correct answer',
     isCorrect: false,
   });
+  assert.equal(findArgs.where.questionSet.status, 'published');
 });
 
 test('PrismaLearningService lists compact paginated question sets', async () => {
@@ -186,6 +196,7 @@ test('PrismaLearningService lists compact paginated question sets', async () => 
   });
 
   assert.equal(calls[0].take, 2);
+  assert.equal(calls[0].where.status, 'published');
   assert.deepEqual(calls[0].orderBy, [
     { createdAt: 'desc' },
     { id: 'desc' },
@@ -259,4 +270,128 @@ test('PrismaLearningService lists only compact material metadata', async () => {
   assert.equal(typeof page.nextCursor, 'string');
   assert.equal(JSON.stringify(page).includes('sourceUrl'), false);
   assert.equal(JSON.stringify(page).includes('status'), false);
+});
+
+test('PrismaLearningService creates a nested pending-review submission transaction', async () => {
+  let createArgs;
+  const createdAt = new Date('2026-07-15T00:00:00.000Z');
+  const row = {
+    id: 'submission_1',
+    subjectId: 'subject_1',
+    topicId: null,
+    title: 'Community set',
+    description: 'Description',
+    status: 'pendingReview',
+    sourceType: 'community',
+    createdByUserId: null,
+    submittedAt: createdAt,
+    reviewedAt: null,
+    publishedAt: null,
+    rejectionReason: null,
+    createdAt,
+    updatedAt: createdAt,
+    questions: [
+      {
+        text: 'Question?',
+        explanation: null,
+        answerOptions: [
+          { text: 'Wrong', isCorrect: false },
+          { text: 'Correct', isCorrect: true },
+        ],
+      },
+    ],
+  };
+  const transaction = {
+    questionSet: {
+      create: async (args) => {
+        createArgs = args;
+        return row;
+      },
+    },
+  };
+  const fakePrisma = {
+    subject: { findUnique: async () => ({ id: 'subject_1' }) },
+    $transaction: async (callback) => callback(transaction),
+  };
+  const service = createPrismaLearningService(fakePrisma);
+
+  const result = await service.createQuestionSetSubmissionForReview({
+    subjectId: 'subject_1',
+    title: 'Community set',
+    description: 'Description',
+    questions: [
+      {
+        text: 'Question?',
+        answerOptions: [
+          { text: 'Wrong', isCorrect: false },
+          { text: 'Correct', isCorrect: true },
+        ],
+      },
+    ],
+  });
+
+  assert.equal(createArgs.data.status, 'pendingReview');
+  assert.equal(createArgs.data.sourceType, 'community');
+  assert.equal(createArgs.data.questions.create[0].position, 1);
+  assert.equal(
+    createArgs.data.questions.create[0].answerOptions.create[1].position,
+    2,
+  );
+  assert.equal(result.status, 'pendingReview');
+  assert.equal(result.questions[0].answerOptions[1].isCorrect, true);
+});
+
+test('PrismaLearningService atomically guards draft submit transition', async () => {
+  const createdAt = new Date('2026-07-15T00:00:00.000Z');
+  const draft = {
+    id: 'submission_1',
+    subjectId: 'subject_1',
+    topicId: null,
+    title: 'Community set',
+    description: 'Description',
+    status: 'draft',
+    sourceType: 'community',
+    createdByUserId: null,
+    submittedAt: null,
+    reviewedAt: null,
+    publishedAt: null,
+    rejectionReason: null,
+    createdAt,
+    updatedAt: createdAt,
+    questions: [{
+      text: 'Question?',
+      explanation: null,
+      answerOptions: [
+        { text: 'Wrong', isCorrect: false },
+        { text: 'Correct', isCorrect: true },
+      ],
+    }],
+  };
+  let transitionArgs;
+  const fakePrisma = {
+    questionSet: { findFirst: async () => draft },
+    $transaction: async (callback) => callback({
+      questionSet: {
+        updateMany: async (args) => {
+          transitionArgs = args;
+          return { count: 1 };
+        },
+        findUniqueOrThrow: async () => ({
+          ...draft,
+          status: 'pendingReview',
+          submittedAt: createdAt,
+        }),
+      },
+    }),
+  };
+  const service = createPrismaLearningService(fakePrisma);
+
+  const result = await service.submitQuestionSetForReview('submission_1');
+
+  assert.deepEqual(transitionArgs.where, {
+    id: 'submission_1',
+    sourceType: 'community',
+    status: 'draft',
+  });
+  assert.equal(result.status, 'pendingReview');
 });
