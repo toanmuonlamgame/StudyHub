@@ -1,29 +1,35 @@
 import 'package:flutter/material.dart';
 
+import 'app_design_tokens.dart';
+
 class AppTheme {
   const AppTheme._();
 
   static ThemeData get light {
-    const primary = Color(0xFF4F46E5);
-    const success = Color(0xFF15803D);
-    const surface = Color(0xFFFFFFFF);
-    const background = Color(0xFFF7F8FC);
-    const outline = Color(0xFFDDE1EA);
+    const primary = AppColors.brand;
+    const success = AppColors.teal;
+    const surface = AppColors.surface;
+    const background = AppColors.canvas;
+    const outline = AppColors.outline;
     const colorScheme = ColorScheme.light(
       primary: primary,
       onPrimary: Colors.white,
-      primaryContainer: Color(0xFFE7E7FF),
-      onPrimaryContainer: Color(0xFF25206B),
+      primaryContainer: AppColors.brandContainer,
+      onPrimaryContainer: AppColors.brandDark,
       secondary: success,
       onSecondary: Colors.white,
-      secondaryContainer: Color(0xFFDCFCE7),
-      onSecondaryContainer: Color(0xFF14532D),
-      error: Color(0xFFB42318),
+      secondaryContainer: AppColors.tealContainer,
+      onSecondaryContainer: Color(0xFF134E4A),
+      tertiary: AppColors.warm,
+      onTertiary: Colors.white,
+      tertiaryContainer: AppColors.warmContainer,
+      onTertiaryContainer: Color(0xFF7C2D12),
+      error: AppColors.error,
       errorContainer: Color(0xFFFEE4E2),
       onErrorContainer: Color(0xFF7A271A),
       surface: surface,
-      onSurface: Color(0xFF171A21),
-      onSurfaceVariant: Color(0xFF5B6170),
+      onSurface: AppColors.ink,
+      onSurfaceVariant: AppColors.mutedInk,
       outline: outline,
       outlineVariant: Color(0xFFE9EBF1),
     );
@@ -75,7 +81,7 @@ class AppTheme {
         margin: EdgeInsets.zero,
         color: surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppRadii.card),
           side: const BorderSide(color: outline),
         ),
       ),
@@ -84,7 +90,7 @@ class AppTheme {
           minimumSize: const Size.fromHeight(52),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadii.control),
           ),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
@@ -94,7 +100,7 @@ class AppTheme {
           minimumSize: const Size.fromHeight(52),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadii.control),
           ),
           side: const BorderSide(color: outline),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
@@ -106,6 +112,26 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         labelStyle: const TextStyle(fontWeight: FontWeight.w600),
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.control),
+          borderSide: const BorderSide(color: outline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.control),
+          borderSide: const BorderSide(color: outline),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.control),
+          borderSide: const BorderSide(color: primary, width: 2),
+        ),
+      ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: primary,
         linearTrackColor: Color(0xFFE7E7FF),
@@ -113,7 +139,9 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.control),
+        ),
       ),
       navigationBarTheme: NavigationBarThemeData(
         height: 72,

@@ -872,4 +872,141 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get contributionValidationSubjectUnavailable =>
       'The selected subject is unavailable.';
+
+  @override
+  String get contributionCreateQuickly => 'Create exam quickly';
+
+  @override
+  String get contributionPasteFullExam => 'Paste full exam';
+
+  @override
+  String get contributionContinue => 'Continue';
+
+  @override
+  String get contributionAddNextQuestion => 'Add next question';
+
+  @override
+  String get contributionReviewAndFinish => 'Review and finish';
+
+  @override
+  String get contributionDuplicateQuestion => 'Duplicate question';
+
+  @override
+  String get contributionResetDraft => 'Reset draft';
+
+  @override
+  String get contributionResetDraftConfirm =>
+      'Clear the title, description, and questions? Your selected subject and topic will be kept.';
+
+  @override
+  String get contributionReset => 'Reset';
+
+  @override
+  String get contributionReplaceQuestionsTitle => 'Replace current questions?';
+
+  @override
+  String get contributionReplaceQuestionsBody =>
+      'Importing a pasted exam will replace the questions currently in this draft.';
+
+  @override
+  String get contributionReplaceQuestions => 'Replace questions';
+
+  @override
+  String get pasteExamTitle => 'Paste full exam';
+
+  @override
+  String get pasteExamIntro =>
+      'Paste the complete exam using /question, /answer1, /correct, and optional /explanation tags. Review every recognized question before importing.';
+
+  @override
+  String get pasteExamInputLabel => 'Structured exam text';
+
+  @override
+  String get copyFormatTemplate => 'Copy format template';
+
+  @override
+  String get formatTemplateCopied => 'Format template copied.';
+
+  @override
+  String get parseExamPreview => 'Check and preview';
+
+  @override
+  String get pasteExamPreviewTitle => 'Recognition summary';
+
+  @override
+  String recognizedQuestions(Object count) {
+    return '$count recognized';
+  }
+
+  @override
+  String validQuestions(Object count) {
+    return '$count valid';
+  }
+
+  @override
+  String invalidQuestions(Object count) {
+    return '$count invalid';
+  }
+
+  @override
+  String get pasteExamFixErrors =>
+      'Fix the marked errors in the pasted text, then check it again. Nothing has been imported yet.';
+
+  @override
+  String get pasteExamUseQuestions => 'Edit recognized questions';
+
+  @override
+  String pasteExamQuestionAtLine(Object lineNumber, Object questionNumber) {
+    return 'Question $questionNumber · line $lineNumber';
+  }
+
+  @override
+  String pasteExamIgnoredText(Object lineNumber) {
+    return 'Text at line $lineNumber was ignored because it is outside a recognized field.';
+  }
+
+  @override
+  String pasteExamUnknownTag(Object lineNumber, Object tag) {
+    return 'Unknown tag $tag at line $lineNumber was ignored.';
+  }
+
+  @override
+  String pasteExamAliasUsed(Object lineNumber, Object tag) {
+    return 'Compatibility alias $tag was accepted at line $lineNumber; use the canonical format when possible.';
+  }
+
+  @override
+  String pasteExamDuplicateTag(Object lineNumber, Object tag) {
+    return 'Duplicate tag $tag at line $lineNumber.';
+  }
+
+  @override
+  String get pasteExamMissingQuestion => 'Question text is missing.';
+
+  @override
+  String get pasteExamMissingAnswers => 'At least two answers are required.';
+
+  @override
+  String get pasteExamMissingCorrect => 'The /correct tag is missing.';
+
+  @override
+  String pasteExamInvalidCorrect(Object value) {
+    return 'Correct-answer index $value does not match an answer.';
+  }
+
+  @override
+  String get pasteExamDuplicateAnswers =>
+      'Answer text must be unique within a question.';
+
+  @override
+  String get pasteExamContentTooLong =>
+      'Question, answer, or explanation content exceeds the allowed length.';
+
+  @override
+  String pasteExamTooManyQuestions(Object max) {
+    return 'A pasted exam can contain at most $max questions.';
+  }
+
+  @override
+  String get pasteExamFixInSource => 'Fix this question in the source';
 }

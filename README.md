@@ -191,6 +191,8 @@ The complete review standard is documented in
 - Explicit pre-submit/post-submit answer safety boundary.
 - Moderation-ready community Question Set submissions with local drafts,
   structured validation, and published-only learner visibility.
+- Fast manual Question Set creation plus a validated full-exam paste workflow
+  with preview, line-aware errors, and canonical structured tags.
 - Research-informed roadmap and a reusable UX/performance quality system.
 - Architecture prepared for growth without premature microservices or extra app
   stacks.

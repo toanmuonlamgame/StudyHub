@@ -13,6 +13,10 @@ small app size, API efficiency, security, and maintainability.
   should eliminate waste without eliminating learning value.
 - Make the core browse, study, quiz, result, and contribution flows feel clear,
   motivating, trustworthy, and polished.
+- Bulk creator inputs must be previewed and validated as one unit. Never hide
+  malformed blocks or silently submit only the valid subset.
+- Canonical user-facing import formats must remain documented and stable;
+  compatibility aliases stay isolated from widgets and recommended templates.
 - Prefer evidence from learners and measurements over assumptions about what is
   engaging or slow.
 

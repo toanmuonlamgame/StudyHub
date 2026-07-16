@@ -5,10 +5,12 @@ import '../../../l10n/app_localizations_x.dart';
 import '../../learning/models/subject.dart';
 import '../../learning/models/topic.dart';
 import '../../learning/repositories/learning_repository.dart';
+import '../models/answer_option_draft.dart';
 import '../models/question_draft.dart';
 import '../models/question_set_draft.dart';
 import '../repositories/contribution_repository.dart';
 import '../widgets/question_editor_card.dart';
+import 'paste_exam_screen.dart';
 import 'submission_confirmation_screen.dart';
 
 enum _EditorStep { details, questions, review }
@@ -18,10 +20,14 @@ class ContributionEditorScreen extends StatefulWidget {
     super.key,
     required this.learningRepository,
     required this.contributionRepository,
+    this.initialDraft = const QuestionSetDraft(),
+    this.startWithQuestions = false,
   });
 
   final LearningRepository learningRepository;
   final ContributionRepository contributionRepository;
+  final QuestionSetDraft initialDraft;
+  final bool startWithQuestions;
 
   @override
   State<ContributionEditorScreen> createState() =>
@@ -31,8 +37,9 @@ class ContributionEditorScreen extends StatefulWidget {
 class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _questionsScrollController = ScrollController();
   _EditorStep _step = _EditorStep.details;
-  QuestionSetDraft _draft = const QuestionSetDraft();
+  late QuestionSetDraft _draft;
   List<Subject> _subjects = const [];
   List<Topic> _topics = const [];
   bool _loadingTaxonomy = true;
@@ -43,6 +50,12 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   @override
   void initState() {
     super.initState();
+    _draft = widget.initialDraft;
+    _titleController.text = _draft.title;
+    _descriptionController.text = _draft.description;
+    if (widget.startWithQuestions && _draft.questions.isNotEmpty) {
+      _step = _EditorStep.questions;
+    }
     _loadSubjects();
   }
 
@@ -50,6 +63,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _questionsScrollController.dispose();
     super.dispose();
   }
 
@@ -67,6 +81,29 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
             onPressed: _submitting ? null : _handleAppBarBack,
           ),
           title: Text(_stepTitle(l10n)),
+          actions: [
+            IconButton(
+              tooltip: l10n.contributionPasteFullExam,
+              onPressed: _submitting ? null : _openPasteExam,
+              icon: const Icon(Icons.content_paste_go_outlined),
+            ),
+            PopupMenuButton<_EditorAction>(
+              enabled: !_submitting,
+              onSelected: (action) {
+                if (action == _EditorAction.reset) _confirmResetDraft();
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: _EditorAction.reset,
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.restart_alt_rounded),
+                    title: Text(l10n.contributionResetDraft),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
         body: SafeArea(
           child: Center(
@@ -79,9 +116,20 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
                   _BottomActions(
                     showBack: _step != _EditorStep.details,
                     busy: _submitting,
-                    primaryLabel: _step == _EditorStep.review
-                        ? l10n.contributionSubmitForReview
-                        : l10n.nextQuestion,
+                    primaryLabel: switch (_step) {
+                      _EditorStep.details => l10n.contributionContinue,
+                      _EditorStep.questions => l10n.contributionReviewAndFinish,
+                      _EditorStep.review => l10n.contributionSubmitForReview,
+                    },
+                    secondaryLabel: _step == _EditorStep.questions
+                        ? l10n.contributionAddNextQuestion
+                        : null,
+                    onSecondary: _step == _EditorStep.questions
+                        ? (_draft.questions.length >=
+                                  contributionQuestionCountMax
+                              ? null
+                              : _addQuestion)
+                        : null,
                     onBack: _goBack,
                     onPrimary: _step == _EditorStep.review
                         ? _confirmSubmit
@@ -218,6 +266,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   Widget _buildQuestions() {
     final l10n = context.l10n;
     return ListView(
+      controller: _questionsScrollController,
       padding: const EdgeInsets.all(16),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       children: [
@@ -241,6 +290,9 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
             question: _draft.questions[index],
             errorFor: _issueFor,
             onChanged: (question) => _replaceQuestion(index, question),
+            onDuplicate: _draft.questions.length >= contributionQuestionCountMax
+                ? null
+                : () => _duplicateQuestion(index),
             onRemove: () => _removeQuestion(index),
           ),
         ),
@@ -404,14 +456,49 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
 
   void _goBack() => setState(() => _step = _EditorStep.values[_step.index - 1]);
 
-  void _addQuestion() => setState(
-    () => _draft = _draft.copyWith(
-      questions: [
-        ..._draft.questions,
-        QuestionSetDraft.newQuestion(DateTime.now().microsecondsSinceEpoch),
-      ],
-    ),
-  );
+  void _addQuestion() {
+    if (_draft.questions.length >= contributionQuestionCountMax) return;
+    setState(
+      () => _draft = _draft.copyWith(
+        questions: [
+          ..._draft.questions,
+          QuestionSetDraft.newQuestion(DateTime.now().microsecondsSinceEpoch),
+        ],
+      ),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_questionsScrollController.hasClients) {
+        _questionsScrollController.animateTo(
+          _questionsScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
+  }
+
+  void _duplicateQuestion(int index) {
+    if (_draft.questions.length >= contributionQuestionCountMax) return;
+    final source = _draft.questions[index];
+    final seed = DateTime.now().microsecondsSinceEpoch;
+    final duplicate = QuestionDraft(
+      id: 'question-draft-$seed',
+      text: source.text,
+      explanation: source.explanation,
+      answerOptions: List.generate(source.answerOptions.length, (optionIndex) {
+        final option = source.answerOptions[optionIndex];
+        return AnswerOptionDraft(
+          id: 'answer-draft-$seed-${optionIndex + 1}',
+          text: option.text,
+          isCorrect: option.isCorrect,
+        );
+      }),
+    );
+    setState(() {
+      final questions = [..._draft.questions]..insert(index + 1, duplicate);
+      _draft = _draft.copyWith(questions: questions);
+    });
+  }
 
   void _replaceQuestion(int index, QuestionDraft question) => setState(() {
     final questions = [..._draft.questions];
@@ -525,6 +612,76 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
     if (discard == true && mounted) Navigator.of(context).pop();
   }
 
+  Future<void> _confirmResetDraft() async {
+    final reset = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.contributionResetDraft),
+        content: Text(context.l10n.contributionResetDraftConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n.progressCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(context.l10n.contributionReset),
+          ),
+        ],
+      ),
+    );
+    if (reset != true || !mounted) return;
+    final preservedSubject = _draft.subjectId;
+    final preservedTopic = _draft.topicId;
+    setState(() {
+      _draft = QuestionSetDraft(
+        subjectId: preservedSubject,
+        topicId: preservedTopic,
+      );
+      _titleController.clear();
+      _descriptionController.clear();
+      _issues = const [];
+      _step = _EditorStep.details;
+    });
+  }
+
+  Future<void> _openPasteExam() async {
+    if (_draft.questions.isNotEmpty) {
+      final replace = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(context.l10n.contributionReplaceQuestionsTitle),
+          content: Text(context.l10n.contributionReplaceQuestionsBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(context.l10n.progressCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(context.l10n.contributionReplaceQuestions),
+            ),
+          ],
+        ),
+      );
+      if (replace != true || !mounted) return;
+    }
+    final imported = await Navigator.of(context).push<QuestionSetDraft>(
+      MaterialPageRoute<QuestionSetDraft>(
+        builder: (_) =>
+            PasteExamScreen(baseDraft: _draft.copyWith(questions: const [])),
+      ),
+    );
+    if (imported == null || !mounted) return;
+    setState(() {
+      _draft = imported;
+      _issues = const [];
+      _step = imported.subjectId.isEmpty || imported.title.trim().isEmpty
+          ? _EditorStep.details
+          : _EditorStep.questions;
+    });
+  }
+
   void _handleAppBarBack() {
     if (_draft.isEmpty) {
       Navigator.of(context).pop();
@@ -588,6 +745,8 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   };
 }
 
+enum _EditorAction { reset }
+
 class _ValidationSummary extends StatelessWidget {
   const _ValidationSummary({required this.messages});
   final List<String> messages;
@@ -614,38 +773,58 @@ class _BottomActions extends StatelessWidget {
     required this.primaryLabel,
     required this.onBack,
     required this.onPrimary,
+    this.secondaryLabel,
+    this.onSecondary,
   });
   final bool showBack;
   final bool busy;
   final String primaryLabel;
   final VoidCallback onBack;
   final VoidCallback onPrimary;
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
   @override
   Widget build(BuildContext context) => SafeArea(
     top: false,
     child: Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          if (showBack) ...[
-            Expanded(
-              child: OutlinedButton(
-                onPressed: busy ? null : onBack,
-                child: Text(context.l10n.previous),
+          if (secondaryLabel != null) ...[
+            SizedBox(
+              width: double.infinity,
+              child: TextButton.icon(
+                onPressed: busy ? null : onSecondary,
+                icon: const Icon(Icons.add_circle_outline),
+                label: Text(secondaryLabel!),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(height: 4),
           ],
-          Expanded(
-            child: FilledButton(
-              onPressed: busy ? null : onPrimary,
-              child: busy
-                  ? const SizedBox.square(
-                      dimension: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(primaryLabel),
-            ),
+          Row(
+            children: [
+              if (showBack) ...[
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: busy ? null : onBack,
+                    child: Text(context.l10n.previous),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              Expanded(
+                child: FilledButton(
+                  onPressed: busy ? null : onPrimary,
+                  child: busy
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(primaryLabel),
+                ),
+              ),
+            ],
           ),
         ],
       ),

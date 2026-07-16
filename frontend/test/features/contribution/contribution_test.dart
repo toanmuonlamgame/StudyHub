@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ import 'package:frontend/features/contribution/repositories/api_contribution_rep
 import 'package:frontend/features/contribution/repositories/contribution_repository.dart';
 import 'package:frontend/features/contribution/repositories/mock_contribution_repository.dart';
 import 'package:frontend/features/contribution/screens/contribution_editor_screen.dart';
+import 'package:frontend/features/contribution/screens/paste_exam_screen.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
 import 'package:frontend/l10n/app_localizations.dart';
 
@@ -202,7 +204,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Share a useful question set'), findsOneWidget);
-    expect(find.text('Create Question Set'), findsOneWidget);
+    expect(find.text('Create exam quickly'), findsOneWidget);
+    expect(find.text('Paste full exam'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
   });
 
@@ -281,7 +284,7 @@ void main() {
     await _openContributionEditor(tester);
     await _fillValidContribution(tester);
 
-    await tester.tap(find.text('Next Question'));
+    await tester.tap(find.text('Review and finish'));
     await tester.pumpAndSettle();
     expect(find.text('Review Submission'), findsOneWidget);
     expect(find.text('Correct Answer'), findsOneWidget);
@@ -304,7 +307,7 @@ void main() {
     );
     await _openContributionEditor(tester);
     await _fillValidContribution(tester);
-    await tester.tap(find.text('Next Question'));
+    await tester.tap(find.text('Review and finish'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Submit for Review'));
     await tester.pumpAndSettle();
@@ -332,6 +335,170 @@ void main() {
     expect(find.text('Discard unsaved changes?'), findsOneWidget);
     expect(find.text('Continue Editing'), findsOneWidget);
   });
+
+  testWidgets(
+    'manual creator can duplicate a question without leaving editor',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: ContributionEditorScreen(
+            learningRepository: const MockLearningRepository(),
+            contributionRepository: const MockContributionRepository(),
+            initialDraft: _validDraft(),
+            startWithQuestions: true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Duplicate question'));
+      await tester.pump();
+
+      expect(find.text('2 questions'), findsOneWidget);
+    },
+  );
+
+  testWidgets('paste exam previews valid questions before importing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const PasteExamScreen(baseDraft: QuestionSetDraft()),
+      ),
+    );
+
+    await tester.enterText(
+      find.byKey(const Key('paste-exam-input')),
+      '/question: 2 + 2?\n/answer1: 3\n/answer2: 4\n/correct: 2\n/explanation: Basic addition.',
+    );
+    await tester.tap(find.text('Check and preview'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 recognized'), findsOneWidget);
+    expect(find.text('1 valid'), findsOneWidget);
+    expect(find.text('0 invalid'), findsOneWidget);
+    expect(find.text('2. 4'), findsOneWidget);
+    expect(find.text('Basic addition.'), findsOneWidget);
+    final importButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Edit recognized questions'),
+    );
+    expect(importButton.onPressed, isNotNull);
+  });
+
+  testWidgets('paste exam blocks import while severe errors remain', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const PasteExamScreen(baseDraft: QuestionSetDraft()),
+      ),
+    );
+
+    await tester.enterText(
+      find.byKey(const Key('paste-exam-input')),
+      '/question: Broken\n/answer1: One\n/correct: 4',
+    );
+    await tester.tap(find.text('Check and preview'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 invalid'), findsOneWidget);
+    final importButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Edit recognized questions'),
+    );
+    expect(importButton.onPressed, isNull);
+    final fixButton = find.text('Fix this question in the source');
+    await tester.ensureVisible(fixButton);
+    await tester.pumpAndSettle();
+    await tester.tap(fixButton);
+    await tester.pumpAndSettle();
+    final input = tester.widget<TextField>(
+      find.byKey(const Key('paste-exam-input')),
+    );
+    expect(input.focusNode?.hasFocus, isTrue);
+  });
+
+  testWidgets('paste exam remains usable with keyboard on a compact phone', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
+        child: MaterialApp(
+          locale: const Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const PasteExamScreen(baseDraft: QuestionSetDraft()),
+        ),
+      ),
+    );
+
+    final input = find.byKey(const Key('paste-exam-input'));
+    await tester.showKeyboard(input);
+    await tester.enterText(input, '/question: Compact');
+    await tester.scrollUntilVisible(
+      find.text('Check and preview'),
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byType(ListView),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pump();
+
+    expect(find.text('Check and preview'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('pending submission disables repeat submission', (tester) async {
+    final repository = _DelayedContributionRepository();
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: ContributionEditorScreen(
+          learningRepository: const MockLearningRepository(),
+          contributionRepository: repository,
+          initialDraft: _validDraft(),
+          startWithQuestions: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Review and finish'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit for Review'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit for Review').last);
+    await tester.pump();
+
+    expect(repository.calls, 1);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is FilledButton && widget.onPressed == null,
+      ),
+      findsWidgets,
+    );
+
+    repository.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('Pending Review'), findsOneWidget);
+  });
 }
 
 Finder _homeScrollable() => find
@@ -348,7 +515,7 @@ Future<void> _openContributionEditor(WidgetTester tester) async {
   await tester.pumpAndSettle();
   await tester.tap(tile);
   await tester.pumpAndSettle();
-  await tester.tap(find.text('Create Question Set'));
+  await tester.tap(find.text('Create exam quickly'));
   await tester.pumpAndSettle();
 }
 
@@ -361,7 +528,7 @@ Future<void> _fillValidContribution(WidgetTester tester) async {
     find.widgetWithText(TextField, 'Title'),
     'Community set',
   );
-  await tester.tap(find.text('Next Question'));
+  await tester.tap(find.text('Continue'));
   await tester.pumpAndSettle();
 
   await tester.enterText(
@@ -389,6 +556,27 @@ class _FailingContributionRepository implements ContributionRepository {
   @override
   Future<SubmissionConfirmation> submitForReview(QuestionSetDraft draft) {
     throw const ContributionSubmissionException('Network unavailable.');
+  }
+}
+
+class _DelayedContributionRepository implements ContributionRepository {
+  final _completer = Completer<SubmissionConfirmation>();
+  int calls = 0;
+
+  @override
+  Future<SubmissionConfirmation> submitForReview(QuestionSetDraft draft) {
+    calls++;
+    return _completer.future;
+  }
+
+  void complete() {
+    _completer.complete(
+      const SubmissionConfirmation(
+        id: 'submission-delayed',
+        status: 'pendingReview',
+        title: 'Community set',
+      ),
+    );
   }
 }
 

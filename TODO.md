@@ -338,6 +338,21 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Build authorized moderation queue and approve/reject workflow.
 - [ ] Add duplicate detection and contributor quality signals in V2.
 
+## 2026-07-16 Work Package - Exam Creation And Visual System
+- [x] Reduce manual creation friction with persistent mobile actions and clearer labels.
+- [x] Add next-question, duplicate-question, and safe reset actions.
+- [x] Preserve selected subject/topic when resetting the current draft.
+- [x] Add a visible full-exam paste entry from intro and editor flows.
+- [x] Parse canonical tags, multiline text, aliases, warnings, and per-question errors.
+- [x] Preview recognized/valid/invalid counts before importing any questions.
+- [x] Block partial import while severe parser errors remain.
+- [x] Return valid parsed questions to the normal editor and existing submission API.
+- [x] Add centralized visual color, spacing, and radius tokens.
+- [x] Apply indigo, teal, and warm accents through the shared Material theme.
+- [x] Add parser and contribution widget tests.
+- [ ] Manually verify the editor with a real mobile keyboard on compact Android.
+- [ ] Manually verify a full pasted Vietnamese exam in mock and API modes.
+
 ## Not Doing Yet
 - [ ] Do not create docs/ files until explicitly requested.
 - [ ] Do not write app code until the first milestone is approved.

@@ -1633,6 +1633,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The selected subject is unavailable.'**
   String get contributionValidationSubjectUnavailable;
+
+  /// No description provided for @contributionCreateQuickly.
+  ///
+  /// In en, this message translates to:
+  /// **'Create exam quickly'**
+  String get contributionCreateQuickly;
+
+  /// No description provided for @contributionPasteFullExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste full exam'**
+  String get contributionPasteFullExam;
+
+  /// No description provided for @contributionContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get contributionContinue;
+
+  /// No description provided for @contributionAddNextQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add next question'**
+  String get contributionAddNextQuestion;
+
+  /// No description provided for @contributionReviewAndFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and finish'**
+  String get contributionReviewAndFinish;
+
+  /// No description provided for @contributionDuplicateQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate question'**
+  String get contributionDuplicateQuestion;
+
+  /// No description provided for @contributionResetDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset draft'**
+  String get contributionResetDraft;
+
+  /// No description provided for @contributionResetDraftConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the title, description, and questions? Your selected subject and topic will be kept.'**
+  String get contributionResetDraftConfirm;
+
+  /// No description provided for @contributionReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get contributionReset;
+
+  /// No description provided for @contributionReplaceQuestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace current questions?'**
+  String get contributionReplaceQuestionsTitle;
+
+  /// No description provided for @contributionReplaceQuestionsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing a pasted exam will replace the questions currently in this draft.'**
+  String get contributionReplaceQuestionsBody;
+
+  /// No description provided for @contributionReplaceQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace questions'**
+  String get contributionReplaceQuestions;
+
+  /// No description provided for @pasteExamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste full exam'**
+  String get pasteExamTitle;
+
+  /// No description provided for @pasteExamIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the complete exam using /question, /answer1, /correct, and optional /explanation tags. Review every recognized question before importing.'**
+  String get pasteExamIntro;
+
+  /// No description provided for @pasteExamInputLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Structured exam text'**
+  String get pasteExamInputLabel;
+
+  /// No description provided for @copyFormatTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy format template'**
+  String get copyFormatTemplate;
+
+  /// No description provided for @formatTemplateCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Format template copied.'**
+  String get formatTemplateCopied;
+
+  /// No description provided for @parseExamPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Check and preview'**
+  String get parseExamPreview;
+
+  /// No description provided for @pasteExamPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognition summary'**
+  String get pasteExamPreviewTitle;
+
+  /// No description provided for @recognizedQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recognized'**
+  String recognizedQuestions(Object count);
+
+  /// No description provided for @validQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} valid'**
+  String validQuestions(Object count);
+
+  /// No description provided for @invalidQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} invalid'**
+  String invalidQuestions(Object count);
+
+  /// No description provided for @pasteExamFixErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the marked errors in the pasted text, then check it again. Nothing has been imported yet.'**
+  String get pasteExamFixErrors;
+
+  /// No description provided for @pasteExamUseQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit recognized questions'**
+  String get pasteExamUseQuestions;
+
+  /// No description provided for @pasteExamQuestionAtLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {questionNumber} · line {lineNumber}'**
+  String pasteExamQuestionAtLine(Object lineNumber, Object questionNumber);
+
+  /// No description provided for @pasteExamIgnoredText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text at line {lineNumber} was ignored because it is outside a recognized field.'**
+  String pasteExamIgnoredText(Object lineNumber);
+
+  /// No description provided for @pasteExamUnknownTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown tag {tag} at line {lineNumber} was ignored.'**
+  String pasteExamUnknownTag(Object lineNumber, Object tag);
+
+  /// No description provided for @pasteExamAliasUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatibility alias {tag} was accepted at line {lineNumber}; use the canonical format when possible.'**
+  String pasteExamAliasUsed(Object lineNumber, Object tag);
+
+  /// No description provided for @pasteExamDuplicateTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate tag {tag} at line {lineNumber}.'**
+  String pasteExamDuplicateTag(Object lineNumber, Object tag);
+
+  /// No description provided for @pasteExamMissingQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Question text is missing.'**
+  String get pasteExamMissingQuestion;
+
+  /// No description provided for @pasteExamMissingAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'At least two answers are required.'**
+  String get pasteExamMissingAnswers;
+
+  /// No description provided for @pasteExamMissingCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'The /correct tag is missing.'**
+  String get pasteExamMissingCorrect;
+
+  /// No description provided for @pasteExamInvalidCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct-answer index {value} does not match an answer.'**
+  String pasteExamInvalidCorrect(Object value);
+
+  /// No description provided for @pasteExamDuplicateAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer text must be unique within a question.'**
+  String get pasteExamDuplicateAnswers;
+
+  /// No description provided for @pasteExamContentTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Question, answer, or explanation content exceeds the allowed length.'**
+  String get pasteExamContentTooLong;
+
+  /// No description provided for @pasteExamTooManyQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'A pasted exam can contain at most {max} questions.'**
+  String pasteExamTooManyQuestions(Object max);
+
+  /// No description provided for @pasteExamFixInSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix this question in the source'**
+  String get pasteExamFixInSource;
 }
 
 class _AppLocalizationsDelegate

@@ -77,6 +77,26 @@ uses the compact backend endpoint; mock mode implements the same filters and
 stable cursor behavior for local development. Load-more failures keep existing
 items visible and can be retried without duplicating cards.
 
+## Question Set contribution
+
+Creators can build a Question Set manually or paste a complete structured exam.
+The canonical paste format is:
+
+```text
+/question: What is 2 + 2?
+/answer1: 3
+/answer2: 4
+/correct: 2
+/explanation: 2 + 2 equals 4.
+```
+
+The local typed parser reports recognized, valid, and invalid questions with
+source-line guidance. Severe errors block the complete import; valid content
+returns to the normal editor and uses the existing contribution API. The manual
+editor supports add-next, duplicate, and safe reset actions. Compatibility
+aliases may be read for migration convenience, but templates only advertise the
+canonical tags above.
+
 Run with local mock data:
 
 ```bash

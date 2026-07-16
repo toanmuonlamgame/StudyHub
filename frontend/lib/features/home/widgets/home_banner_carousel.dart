@@ -117,9 +117,9 @@ class _HomeBannerCard extends StatelessWidget {
         colors.secondary,
       ),
       HomeBannerTone.neutral => (
-        colors.surfaceContainerHighest,
-        colors.onSurface,
-        colors.onSurfaceVariant,
+        colors.tertiaryContainer,
+        colors.onTertiaryContainer,
+        colors.tertiary,
       ),
     };
 

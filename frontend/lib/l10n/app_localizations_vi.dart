@@ -871,4 +871,141 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get contributionValidationSubjectUnavailable =>
       'Môn học đã chọn không còn khả dụng.';
+
+  @override
+  String get contributionCreateQuickly => 'Tạo đề nhanh';
+
+  @override
+  String get contributionPasteFullExam => 'Dán toàn bộ đề';
+
+  @override
+  String get contributionContinue => 'Tiếp tục';
+
+  @override
+  String get contributionAddNextQuestion => 'Thêm câu tiếp theo';
+
+  @override
+  String get contributionReviewAndFinish => 'Xem lại và hoàn tất';
+
+  @override
+  String get contributionDuplicateQuestion => 'Nhân bản câu hỏi';
+
+  @override
+  String get contributionResetDraft => 'Đặt lại bản nháp';
+
+  @override
+  String get contributionResetDraftConfirm =>
+      'Xóa tiêu đề, mô tả và các câu hỏi? Môn học và chủ đề đã chọn sẽ được giữ lại.';
+
+  @override
+  String get contributionReset => 'Đặt lại';
+
+  @override
+  String get contributionReplaceQuestionsTitle => 'Thay các câu hỏi hiện tại?';
+
+  @override
+  String get contributionReplaceQuestionsBody =>
+      'Nhập đề đã dán sẽ thay thế các câu hỏi đang có trong bản nháp này.';
+
+  @override
+  String get contributionReplaceQuestions => 'Thay câu hỏi';
+
+  @override
+  String get pasteExamTitle => 'Dán toàn bộ đề';
+
+  @override
+  String get pasteExamIntro =>
+      'Dán toàn bộ đề bằng các thẻ /question, /answer1, /correct và /explanation không bắt buộc. Hãy xem lại mọi câu được nhận diện trước khi nhập.';
+
+  @override
+  String get pasteExamInputLabel => 'Nội dung đề có cấu trúc';
+
+  @override
+  String get copyFormatTemplate => 'Sao chép mẫu định dạng';
+
+  @override
+  String get formatTemplateCopied => 'Đã sao chép mẫu định dạng.';
+
+  @override
+  String get parseExamPreview => 'Kiểm tra và xem trước';
+
+  @override
+  String get pasteExamPreviewTitle => 'Tóm tắt nhận diện';
+
+  @override
+  String recognizedQuestions(Object count) {
+    return 'Nhận diện $count câu';
+  }
+
+  @override
+  String validQuestions(Object count) {
+    return '$count câu hợp lệ';
+  }
+
+  @override
+  String invalidQuestions(Object count) {
+    return '$count câu chưa hợp lệ';
+  }
+
+  @override
+  String get pasteExamFixErrors =>
+      'Sửa các lỗi được đánh dấu trong nội dung đã dán rồi kiểm tra lại. Chưa có câu hỏi nào được nhập.';
+
+  @override
+  String get pasteExamUseQuestions => 'Chỉnh sửa các câu đã nhận diện';
+
+  @override
+  String pasteExamQuestionAtLine(Object lineNumber, Object questionNumber) {
+    return 'Câu $questionNumber · dòng $lineNumber';
+  }
+
+  @override
+  String pasteExamIgnoredText(Object lineNumber) {
+    return 'Nội dung ở dòng $lineNumber bị bỏ qua vì nằm ngoài trường được nhận diện.';
+  }
+
+  @override
+  String pasteExamUnknownTag(Object lineNumber, Object tag) {
+    return 'Thẻ không xác định $tag ở dòng $lineNumber đã bị bỏ qua.';
+  }
+
+  @override
+  String pasteExamAliasUsed(Object lineNumber, Object tag) {
+    return 'Bí danh tương thích $tag được chấp nhận ở dòng $lineNumber; nên dùng định dạng chuẩn khi có thể.';
+  }
+
+  @override
+  String pasteExamDuplicateTag(Object lineNumber, Object tag) {
+    return 'Thẻ $tag bị lặp ở dòng $lineNumber.';
+  }
+
+  @override
+  String get pasteExamMissingQuestion => 'Thiếu nội dung câu hỏi.';
+
+  @override
+  String get pasteExamMissingAnswers => 'Cần ít nhất hai đáp án.';
+
+  @override
+  String get pasteExamMissingCorrect => 'Thiếu thẻ /correct.';
+
+  @override
+  String pasteExamInvalidCorrect(Object value) {
+    return 'Chỉ số đáp án đúng $value không khớp với đáp án nào.';
+  }
+
+  @override
+  String get pasteExamDuplicateAnswers =>
+      'Nội dung đáp án trong một câu không được trùng nhau.';
+
+  @override
+  String get pasteExamContentTooLong =>
+      'Nội dung câu hỏi, đáp án hoặc giải thích vượt quá độ dài cho phép.';
+
+  @override
+  String pasteExamTooManyQuestions(Object max) {
+    return 'Một đề được dán có tối đa $max câu hỏi.';
+  }
+
+  @override
+  String get pasteExamFixInSource => 'Sửa câu này trong nội dung nguồn';
 }

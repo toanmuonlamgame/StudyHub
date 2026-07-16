@@ -564,6 +564,31 @@ Reason:
 - Deployment target:
 - Moderation approach for uploaded content:
 
+## 2026-07-16 - Structured Full-Exam Paste Boundary
+Decision: Question Set creators may either use the manual editor or paste a full
+exam using the canonical `/question`, `/answerN`, `/correct`, and optional
+`/explanation` format.
+
+Rules:
+- Parser logic is deterministic, typed, and separate from Flutter widgets.
+- Compatibility aliases such as `/quest` and `/awserN` may be accepted with a
+  warning, but documentation and templates only show canonical tags.
+- Severe errors block the complete import; StudyHub does not silently save or
+  submit only the valid subset.
+- Parsed questions return to the normal editor for structured changes and use
+  the existing `ContributionRepository` and backend submission contract.
+- The frontend never bypasses backend validation or moderation lifecycle rules.
+
+Reason: bulk paste reduces repetitive mobile input while one submission contract
+keeps validation, transactions, moderation, and API behavior consistent.
+
+## 2026-07-16 - Centralized Visual Tokens
+Decision: Shared brand, supportive, motivational, semantic, spacing, and radius
+values belong in centralized Flutter design tokens and `AppTheme`.
+
+Reason: a controlled indigo/teal/warm palette gives StudyHub a more motivating
+educational identity while preserving contrast, performance, and maintainability.
+
 ## 2026-07-15 - Community Question Set Submission Boundary
 Decision: community Question Sets use `draft -> pendingReview -> published` or
 `rejected`, with learner visibility restricted to `published` at service/query

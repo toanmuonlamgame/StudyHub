@@ -159,6 +159,13 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - Plan for data growth with backend filtering, cursor pagination, PostgreSQL indexes, and later measured caching, external search, or analytics only when needed.
 - Community Question Sets use a moderation-ready lifecycle: local creator draft, backend `pendingReview`, then future authorized publish/reject. Learner APIs expose only `published` content.
 - Creator answer-key models remain separate from learner-safe quiz DTOs. Real ownership and draft sync begin only after authentication.
+- Question Set creation supports a fast manual editor and a canonical structured
+  paste format (`/question`, `/answerN`, `/correct`, optional `/explanation`).
+  Parsing stays local and typed; severe parse errors block the whole import, and
+  both creation methods reuse the same validated contribution submission API.
+- StudyHub's visual system uses centralized indigo, teal, warm accent, semantic
+  state, spacing, and radius tokens so polished UI does not scatter hard-coded
+  styling across features.
 
 ## AI Workflow
 - Codex app: main coding assistant.

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations_x.dart';
 import '../../learning/repositories/learning_repository.dart';
+import '../models/question_set_draft.dart';
 import '../repositories/contribution_repository.dart';
 import 'contribution_editor_screen.dart';
+import 'paste_exam_screen.dart';
 
 class ContributionIntroScreen extends StatelessWidget {
   const ContributionIntroScreen({
@@ -62,12 +64,37 @@ class ContributionIntroScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n.contributionCreateSet),
+                  icon: const Icon(Icons.edit_note_rounded),
+                  label: Text(l10n.contributionCreateQuickly),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => _openPasteFlow(context),
+                  icon: const Icon(Icons.content_paste_go_rounded),
+                  label: Text(l10n.contributionPasteFullExam),
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openPasteFlow(BuildContext context) async {
+    final draft = await Navigator.of(context).push<QuestionSetDraft>(
+      MaterialPageRoute<QuestionSetDraft>(
+        builder: (_) => const PasteExamScreen(baseDraft: QuestionSetDraft()),
+      ),
+    );
+    if (draft == null || !context.mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ContributionEditorScreen(
+          learningRepository: learningRepository,
+          contributionRepository: contributionRepository,
+          initialDraft: draft,
+          startWithQuestions: false,
         ),
       ),
     );

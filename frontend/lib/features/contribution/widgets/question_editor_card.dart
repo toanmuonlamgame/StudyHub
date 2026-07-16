@@ -12,6 +12,7 @@ class QuestionEditorCard extends StatelessWidget {
     required this.question,
     required this.errorFor,
     required this.onChanged,
+    required this.onDuplicate,
     required this.onRemove,
   });
 
@@ -19,6 +20,7 @@ class QuestionEditorCard extends StatelessWidget {
   final QuestionDraft question;
   final String? Function(String path) errorFor;
   final ValueChanged<QuestionDraft> onChanged;
+  final VoidCallback? onDuplicate;
   final VoidCallback onRemove;
 
   @override
@@ -41,6 +43,11 @@ class QuestionEditorCard extends StatelessWidget {
                     '${l10n.contributionQuestion} ${index + 1}',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
+                ),
+                IconButton(
+                  tooltip: l10n.contributionDuplicateQuestion,
+                  onPressed: onDuplicate,
+                  icon: const Icon(Icons.copy_outlined),
                 ),
                 IconButton(
                   tooltip: l10n.contributionRemoveQuestion,
