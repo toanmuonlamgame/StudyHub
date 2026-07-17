@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { buildApp } from '../dist/app.js';
+import { InMemoryLearningService } from '../dist/services/inMemoryLearningService.js';
 
 function createTestApp(t) {
   const app = buildApp({ learningDataSource: 'memory' });
@@ -531,4 +532,159 @@ test('POST submit rejects an invalid selected answer', async (t) => {
   });
 
   assert.equal(response.statusCode, 400);
+});
+
+test('exam attempts are scored by the server and can be reopened', async (t) => {
+  const app = createTestApp(t);
+  const saveResponse = await app.inject({
+    method: 'POST',
+    url: '/learning/question-sets/question_set_js_basics/attempts',
+    payload: {
+      submissionId: 'attempt-request-1',
+      startedAt: '2026-07-17T01:00:00.000Z',
+      selectedAnswerOptionIdsByQuestionId: {
+        question_js_basics_1: 'js_b1_c',
+        question_js_basics_2: 'js_b2_a',
+      },
+    },
+  });
+
+  assert.equal(saveResponse.statusCode, 201);
+  const saved = saveResponse.json().attempt;
+  assert.equal(saved.correctAnswers, 1);
+  assert.equal(saved.wrongAnswers, 1);
+  assert.equal(saved.unansweredAnswers, 1);
+  assert.equal(saved.percentageScore, 33);
+  assert.equal(saved.result.answerReviews.length, 3);
+
+  const listResponse = await app.inject({
+    method: 'GET',
+    url: '/learning/attempts',
+  });
+  assert.equal(listResponse.statusCode, 200);
+  assert.equal(listResponse.json().attempts.length, 1);
+  assert.equal(
+    JSON.stringify(listResponse.json()).includes('answerReviews'),
+    false,
+  );
+
+  const detailResponse = await app.inject({
+    method: 'GET',
+    url: `/learning/attempts/${saved.id}`,
+  });
+  assert.equal(detailResponse.statusCode, 200);
+  assert.deepEqual(detailResponse.json().attempt.result, saved.result);
+});
+
+test('exam attempt submission is idempotent and history is newest first', async (t) => {
+  const app = createTestApp(t);
+  const payload = {
+    submissionId: 'stable-retry-key',
+    selectedAnswerOptionIdsByQuestionId: {
+      question_js_basics_1: 'js_b1_c',
+    },
+  };
+  const first = await app.inject({
+    method: 'POST',
+    url: '/learning/question-sets/question_set_js_basics/attempts',
+    payload,
+  });
+  const retry = await app.inject({
+    method: 'POST',
+    url: '/learning/question-sets/question_set_js_basics/attempts',
+    payload,
+  });
+  assert.equal(first.statusCode, 201);
+  assert.equal(retry.statusCode, 200);
+  assert.equal(first.json().attempt.id, retry.json().attempt.id);
+
+  await app.inject({
+    method: 'POST',
+    url: '/learning/question-sets/question_set_js_basics/attempts',
+    payload: { ...payload, submissionId: 'newer-request-key' },
+  });
+  const history = (
+    await app.inject({ method: 'GET', url: '/learning/attempts' })
+  ).json().attempts;
+  assert.equal(history.length, 2);
+  assert.equal(history[0].id, 'attempt_2');
+});
+
+test('exam attempt rejects a reused idempotency key with different data', async (t) => {
+  const app = createTestApp(t);
+  const first = await app.inject({
+    method: 'POST',
+    url: '/learning/question-sets/question_set_js_basics/attempts',
+    payload: {
+      submissionId: 'conflicting-retry-key',
+      selectedAnswerOptionIdsByQuestionId: {
+        question_js_basics_1: 'js_b1_c',
+      },
+    },
+  });
+  const conflict = await app.inject({
+    method: 'POST',
+    url: '/learning/question-sets/question_set_js_basics/attempts',
+    payload: {
+      submissionId: 'conflicting-retry-key',
+      selectedAnswerOptionIdsByQuestionId: {
+        question_js_basics_1: 'js_b1_a',
+      },
+    },
+  });
+
+  assert.equal(first.statusCode, 201);
+  assert.equal(conflict.statusCode, 409);
+});
+
+test('exam attempt endpoints reject invalid references and malformed input', async (t) => {
+  const app = createTestApp(t);
+  const invalidQuestionSet = await app.inject({
+    method: 'POST',
+    url: '/learning/question-sets/missing/attempts',
+    payload: {
+      submissionId: 'missing-set',
+      selectedAnswerOptionIdsByQuestionId: {},
+    },
+  });
+  assert.equal(invalidQuestionSet.statusCode, 404);
+
+  const invalidAnswer = await app.inject({
+    method: 'POST',
+    url: '/learning/question-sets/question_set_js_basics/attempts',
+    payload: {
+      submissionId: 'invalid-answer',
+      selectedAnswerOptionIdsByQuestionId: {
+        question_js_basics_1: 'not-an-option',
+      },
+    },
+  });
+  assert.equal(invalidAnswer.statusCode, 400);
+
+  const malformed = await app.inject({
+    method: 'POST',
+    url: '/learning/question-sets/question_set_js_basics/attempts',
+    payload: {
+      submissionId: '',
+      selectedAnswerOptionIdsByQuestionId: {},
+      score: 100,
+    },
+  });
+  assert.equal(malformed.statusCode, 400);
+});
+
+test('in-memory attempt detail enforces owner identity', async () => {
+  const service = new InMemoryLearningService();
+  const { attempt } = await service.saveExamAttempt(
+    'owner-a',
+    'question_set_js_basics',
+    {
+      submissionId: 'owner-test',
+      selectedAnswerOptionIdsByQuestionId: {},
+    },
+  );
+
+  assert.equal(await service.getExamAttempt('owner-b', attempt.id), null);
+  assert.equal((await service.listExamAttempts('owner-b')).length, 0);
+  assert.equal((await service.listExamAttempts('owner-a')).length, 1);
 });

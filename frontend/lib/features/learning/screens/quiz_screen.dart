@@ -13,6 +13,7 @@ import '../repositories/learning_repository.dart';
 import '../widgets/answer_option_card.dart';
 import '../widgets/learning_state_view.dart';
 import 'quiz_result_screen.dart';
+import '../../attempts/models/exam_attempt.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({
@@ -38,6 +39,8 @@ class _QuizScreenState extends State<QuizScreen> {
   bool _isConfirmingDiscard = false;
   bool _allowPop = false;
   int _examQuestionIndex = 0;
+  late final DateTime _examStartedAt;
+  late final String _examSubmissionId;
 
   int _practiceQuestionIndex = 0;
   String? _practiceSelectedAnswerId;
@@ -56,6 +59,9 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
+    _examStartedAt = DateTime.now();
+    _examSubmissionId =
+        '${widget.questionSet.id}-${_examStartedAt.microsecondsSinceEpoch}';
     _questionsFuture = _loadQuestions();
   }
 
@@ -552,7 +558,15 @@ class _QuizScreenState extends State<QuizScreen> {
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
-          builder: (context) => QuizResultScreen(result: result),
+          builder: (context) => QuizResultScreen(
+            result: result,
+            attemptSaveRequest: ExamAttemptSaveRequest(
+              submissionId: _examSubmissionId,
+              questionSetId: widget.questionSet.id,
+              startedAt: _examStartedAt,
+              selectedAnswerOptionIdsByQuestionId: examSelectedAnswerIds,
+            ),
+          ),
         ),
       );
     } catch (_) {

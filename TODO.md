@@ -1,8 +1,8 @@
 # StudyHub TODO
 
 ## Current Phase
-Accelerated MVP delivery is active. Checkpoint 1 exam session and result review
-is complete; Checkpoint 2 will add attempt persistence and history.
+Accelerated MVP delivery is active. Checkpoints 1 and 2 now provide a complete
+Exam session, trusted result review, attempt persistence, and history flow.
 
 ## Accelerated MVP Checkpoints
 - [x] Checkpoint 1: Complete mobile Exam Session navigation, answer retention,
@@ -10,8 +10,13 @@ is complete; Checkpoint 2 will add attempt persistence and history.
 - [x] Keep correct answers hidden until Exam submit or Practice check-answer.
 - [x] Show correct, incorrect, and unanswered counts with answer options and
   optional explanations after submission.
-- [ ] Checkpoint 2: Persist quiz attempts and add attempt-history/result-history
-  experiences without weakening the current local Progress boundary.
+- [x] Checkpoint 2: Persist completed Exam attempts with server-verified scoring,
+  idempotent retry, snapshot review data, ownership filtering, and history detail.
+- [x] Add Flutter attempt save loading/failure/retry states and an Attempt History
+  entry from Progress without weakening device-local Practice summaries.
+- [ ] Review and apply migration `20260717120000_exam_attempt_history` manually.
+- [ ] Smoke-test save/list/detail in Prisma mode and one real Flutter API Exam.
+- [ ] Replace the temporary backend demo identity boundary with authenticated ownership.
 
 ## Phase 1 Checkpoint
 - [x] Complete the Flutter learner flow from Home through Result/Review.

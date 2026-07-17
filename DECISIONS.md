@@ -2,6 +2,30 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-17 - Exam Attempt Persistence Boundary
+Decision:
+- Completed Exam attempts are persisted by the backend after authoritative
+  scoring. Flutter sends selected option IDs, a start time, and a stable
+  submission ID; it never sends a trusted score or user ID.
+- Until authentication exists, routes obtain `demo-user` from one replaceable
+  backend identity boundary. Service reads always filter by that identity.
+- `(userId, submissionId)` is unique. A retry with the same canonical request
+  returns the existing attempt; reusing the key with different Question Set,
+  start time, or selected answers is a conflict.
+- Attempt answers store review snapshots, while an optional safe foreign key to
+  the source Question Set uses `SET NULL` on deletion.
+
+Reason:
+- The MVP needs reliable history without pretending real accounts exist.
+- Idempotency protects timeout/retry and repeated-request cases at the backend.
+- Snapshots keep old results understandable when community content changes.
+
+Rule:
+- Save attempt and answer snapshots in one transaction.
+- List/detail endpoints expose only attempts owned by the current identity.
+- Practice summaries remain device-local for now; advanced analytics, deletion,
+  sync, and history editing remain out of scope.
+
 ## 2026-07-14 - Study Materials Metadata-First Boundary
 Decision:
 - Study Material is a first-class content type separate from Question Set.

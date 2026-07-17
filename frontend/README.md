@@ -30,6 +30,18 @@ This history is device-local until real authentication and backend progress sync
 are implemented. Clearing it requires confirmation and cannot currently be undone
 or recovered from another device.
 
+## Exam attempt history
+
+Completed Exam results are also saved through `AttemptRepository`. Mock mode
+keeps an in-memory history; API mode calls the backend save/list/detail endpoints.
+The result remains visible while saving, reports failure honestly, and retries
+with the same submission ID so the backend does not create duplicates.
+
+The History action in Progress opens a newest-first Exam list and reuses the
+normal result-review screen for detail. Backend history currently belongs to a
+temporary demo identity until authentication exists. Practice remains in the
+device-local Progress store and is not presented as server-synced history.
+
 ## Home hub architecture
 
 Home is a repository-lazy mobile hub. It does not fetch Subjects or other remote
@@ -109,8 +121,10 @@ Results separate correct, incorrect, and unanswered counts. Percentages are
 rounded to the nearest whole percent in mock and backend modes. Post-submit
 review can show every answer option, the learner choice, correct choice, and an
 optional explanation without exposing correctness in pre-submit question data.
-Attempt persistence and history are deferred to the next accelerated MVP
-checkpoint.
+Completed Exam attempts now save through an injected attempt repository with
+loading, failure, and same-key retry states. Attempt History lists newest-first
+summaries and reopens the trusted snapshot review. Prisma mode still requires
+the prepared attempt migration and real API smoke test before database use.
 
 Run with local mock data:
 

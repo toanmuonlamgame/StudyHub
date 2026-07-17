@@ -3,7 +3,10 @@ import type {
   FastifyReply,
 } from 'fastify';
 
+import { getCurrentIdentity } from '../identity/currentIdentity.js';
+
 import {
+  ExamAttemptIdempotencyConflictError,
   InvalidQuizSubmissionError,
   InvalidLearningListQueryError,
   LearningDataIntegrityError,
@@ -14,6 +17,7 @@ import {
 } from '../services/learningService.js';
 import type {
   CheckAnswerBody,
+  SaveExamAttemptInput,
   StudyMaterialType,
   SubmitQuizBody,
 } from '../types/learning.js';
@@ -37,6 +41,10 @@ interface MaterialParams {
 
 interface SubmissionParams {
   submissionId: string;
+}
+
+interface AttemptParams {
+  attemptId: string;
 }
 
 interface StudyMaterialListQuery extends QuestionSetListQuery {
@@ -84,6 +92,20 @@ const checkAnswerBodySchema = {
   },
 } as const;
 
+const saveExamAttemptBodySchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['submissionId', 'selectedAnswerOptionIdsByQuestionId'],
+  properties: {
+    submissionId: { type: 'string', minLength: 1, maxLength: 128 },
+    startedAt: { type: 'string', format: 'date-time' },
+    selectedAnswerOptionIdsByQuestionId: {
+      type: 'object',
+      additionalProperties: { type: 'string', minLength: 1 },
+    },
+  },
+} as const;
+
 const answerOptionSubmissionSchema = {
   type: 'object',
   additionalProperties: false,
@@ -128,6 +150,9 @@ function sendLearningError(error: unknown, reply: FastifyReply): FastifyReply {
   }
   if (error instanceof InvalidLearningListQueryError) {
     return reply.code(400).send({ error: error.message });
+  }
+  if (error instanceof ExamAttemptIdempotencyConflictError) {
+    return reply.code(409).send({ error: error.message });
   }
   if (error instanceof LearningDataIntegrityError) {
     return reply.code(500).send({ error: error.message });
@@ -415,6 +440,65 @@ export function createLearningRoutes(
           return { result };
         } catch (error) {
           return sendLearningError(error, reply);
+        }
+      },
+    );
+
+    app.post<{ Params: QuestionSetParams; Body: SaveExamAttemptInput }>(
+      '/question-sets/:questionSetId/attempts',
+      { schema: { body: saveExamAttemptBodySchema } },
+      async (request, reply) => {
+        try {
+          const outcome = await service.saveExamAttempt(
+            getCurrentIdentity().userId,
+            request.params.questionSetId,
+            request.body,
+          );
+          return reply
+            .code(outcome.created ? 201 : 200)
+            .send({ attempt: outcome.attempt });
+        } catch (error) {
+          if (
+            error instanceof LearningResourceNotFoundError ||
+            error instanceof InvalidQuizSubmissionError ||
+            error instanceof LearningDataIntegrityError ||
+            error instanceof ExamAttemptIdempotencyConflictError
+          ) {
+            return sendLearningError(error, reply);
+          }
+          request.log.error(error, 'Unable to save exam attempt.');
+          return reply.code(500).send({ error: 'Unable to save exam attempt.' });
+        }
+      },
+    );
+
+    app.get('/attempts', async (request, reply) => {
+      try {
+        return {
+          attempts: await service.listExamAttempts(
+            getCurrentIdentity().userId,
+          ),
+        };
+      } catch (error) {
+        request.log.error(error, 'Unable to load exam attempts.');
+        return reply.code(500).send({ error: 'Unable to load exam attempts.' });
+      }
+    });
+
+    app.get<{ Params: AttemptParams }>(
+      '/attempts/:attemptId',
+      async (request, reply) => {
+        try {
+          const attempt = await service.getExamAttempt(
+            getCurrentIdentity().userId,
+            request.params.attemptId,
+          );
+          return attempt === null
+            ? reply.code(404).send({ error: 'Exam attempt not found.' })
+            : { attempt };
+        } catch (error) {
+          request.log.error(error, 'Unable to load exam attempt.');
+          return reply.code(500).send({ error: 'Unable to load exam attempt.' });
         }
       },
     );

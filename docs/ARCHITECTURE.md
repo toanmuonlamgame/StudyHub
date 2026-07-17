@@ -44,6 +44,24 @@ The frontend should only render UI from backend responses and call approved back
 - Database secrets, JWT secrets, admin keys, service keys, and production secrets must not be stored in the Flutter app or committed to GitHub.
 - Credit and reward logic must be controlled by backend transactions and audit logs.
 
+## Exam Attempt History Boundary
+
+After Exam scoring succeeds, Flutter sends selected option IDs and a stable
+submission ID to the attempt endpoint. The backend recalculates the score and
+persists the attempt plus review snapshots in one transaction. The API never
+accepts a trusted client score or user ID.
+
+Until authentication exists, one backend identity provider returns the temporary
+`demo-user`. Attempt service methods always receive that identity and filter
+list/detail reads by owner. `(userId, submissionId)` provides idempotent retry,
+and a canonical request fingerprint rejects reuse of a key with changed data.
+Question and answer snapshots preserve historical meaning if published community
+content changes; the optional source Question Set relation uses `SET NULL`.
+
+Flutter keeps this backend Exam history separate from device-local Progress
+summaries. Practice sessions remain local until an authenticated persistence
+contract is designed.
+
 ## V1 Architecture
 V1 should support:
 

@@ -1933,6 +1933,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fix this question in the source'**
   String get pasteExamFixInSource;
+
+  /// No description provided for @history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get history;
+
+  /// No description provided for @attemptHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Attempt history'**
+  String get attemptHistory;
+
+  /// No description provided for @attemptHistoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen completed exams and review trusted results.'**
+  String get attemptHistoryDescription;
+
+  /// No description provided for @noAttemptsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No attempts yet'**
+  String get noAttemptsYet;
+
+  /// No description provided for @tryYourFirstExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your first Exam Mode session to build history.'**
+  String get tryYourFirstExam;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// No description provided for @score.
+  ///
+  /// In en, this message translates to:
+  /// **'Score'**
+  String get score;
+
+  /// No description provided for @viewResult.
+  ///
+  /// In en, this message translates to:
+  /// **'View result'**
+  String get viewResult;
+
+  /// No description provided for @unableToSaveResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to save result'**
+  String get unableToSaveResult;
+
+  /// No description provided for @retrySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry save'**
+  String get retrySave;
+
+  /// No description provided for @unableToLoadHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load attempt history'**
+  String get unableToLoadHistory;
+
+  /// No description provided for @resultSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Result saved'**
+  String get resultSaved;
+
+  /// No description provided for @resultNotYetSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Result not yet saved'**
+  String get resultNotYetSaved;
+
+  /// No description provided for @savingResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving result...'**
+  String get savingResult;
+
+  /// No description provided for @attemptCorrectSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{correct} of {total} correct'**
+  String attemptCorrectSummary(Object correct, Object total);
+
+  /// No description provided for @attemptHistoryLocalIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'History currently belongs to this temporary demo identity. Account ownership will replace it when authentication is added.'**
+  String get attemptHistoryLocalIdentity;
 }
 
 class _AppLocalizationsDelegate

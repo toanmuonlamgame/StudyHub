@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { mapQuestion } from '../dist/services/learningMappers.js';
+import { createExamAttemptFingerprint } from '../dist/services/examAttemptValidation.js';
 import { createPrismaLearningService } from '../dist/services/prismaLearningService.js';
 
 test('mapQuestion strips internal correctness metadata', () => {
@@ -409,4 +410,216 @@ test('PrismaLearningService atomically guards draft submit transition', async ()
     status: 'draft',
   });
   assert.equal(result.status, 'pendingReview');
+});
+
+test('PrismaLearningService saves attempt and answer snapshots in one transaction', async () => {
+  const now = new Date('2026-07-17T02:00:00.000Z');
+  let createArgs;
+  let transactionCalls = 0;
+  const questionSet = {
+    id: 'question_set_1',
+    subjectId: 'subject_1',
+    topicId: null,
+    title: 'Snapshot title',
+    description: 'Description',
+    status: 'published',
+    createdAt: now,
+    updatedAt: now,
+    questions: [{
+      id: 'question_1',
+      questionSetId: 'question_set_1',
+      text: 'Snapshot question?',
+      explanation: 'Snapshot explanation.',
+      position: 1,
+      createdAt: now,
+      updatedAt: now,
+      answerOptions: [
+        { id: 'answer_1', questionId: 'question_1', text: 'Correct', position: 1, isCorrect: true, createdAt: now, updatedAt: now },
+        { id: 'answer_2', questionId: 'question_1', text: 'Wrong', position: 2, isCorrect: false, createdAt: now, updatedAt: now },
+      ],
+    }],
+  };
+  const fakePrisma = {
+    questionSet: { findFirst: async () => questionSet },
+    examAttempt: { findUnique: async () => null },
+    $transaction: async (callback) => {
+      transactionCalls++;
+      return callback({
+        examAttempt: {
+          create: async (args) => {
+            createArgs = args;
+            const answer = args.data.answers.create[0];
+            return {
+              id: 'attempt_1',
+              userId: args.data.userId,
+              submissionId: args.data.submissionId,
+              requestFingerprint: args.data.requestFingerprint,
+              questionSetId: args.data.questionSetId,
+              sourceQuestionSetId: args.data.sourceQuestionSetId,
+              questionSetTitle: args.data.questionSetTitle,
+              startedAt: args.data.startedAt,
+              completedAt: now,
+              totalQuestions: args.data.totalQuestions,
+              correctAnswers: args.data.correctAnswers,
+              wrongAnswers: args.data.wrongAnswers,
+              unansweredAnswers: args.data.unansweredAnswers,
+              percentageScore: args.data.percentageScore,
+              createdAt: now,
+              answers: [{ id: 'attempt_answer_1', attemptId: 'attempt_1', createdAt: now, ...answer }],
+            };
+          },
+        },
+      });
+    },
+  };
+  const service = createPrismaLearningService(fakePrisma);
+
+  const outcome = await service.saveExamAttempt('demo-user', 'question_set_1', {
+    submissionId: 'stable-key',
+    startedAt: '2026-07-17T01:55:00.000Z',
+    selectedAnswerOptionIdsByQuestionId: { question_1: 'answer_1' },
+  });
+
+  assert.equal(outcome.created, true);
+  assert.equal(outcome.attempt.correctAnswers, 1);
+  assert.equal(outcome.attempt.result.answerReviews[0].questionText, 'Snapshot question?');
+  assert.equal(transactionCalls, 1);
+  assert.equal(createArgs.data.answers.create.length, 1);
+  assert.equal(createArgs.data.sourceQuestionSetId, 'question_set_1');
+  assert.match(createArgs.data.requestFingerprint, /^[a-f0-9]{64}$/);
+});
+
+test('PrismaLearningService scopes history by owner and reuses idempotent attempts', async () => {
+  const now = new Date('2026-07-17T02:00:00.000Z');
+  const row = {
+    id: 'attempt_1',
+    userId: 'owner-a',
+    submissionId: 'stable-key',
+    requestFingerprint: createExamAttemptFingerprint(
+      'question_set_1',
+      {
+        submissionId: 'stable-key',
+        selectedAnswerOptionIdsByQuestionId: {},
+      },
+      null,
+    ),
+    questionSetId: 'question_set_1',
+    sourceQuestionSetId: 'question_set_1',
+    questionSetTitle: 'Snapshot title',
+    startedAt: null,
+    completedAt: now,
+    totalQuestions: 1,
+    correctAnswers: 1,
+    wrongAnswers: 0,
+    unansweredAnswers: 0,
+    percentageScore: 100,
+    createdAt: now,
+    answers: [{
+      id: 'answer_snapshot_1',
+      attemptId: 'attempt_1',
+      questionId: 'question_1',
+      questionText: 'Question?',
+      answerOptions: [{ id: 'answer_1', text: 'Correct' }],
+      selectedAnswerOptionId: 'answer_1',
+      selectedAnswerText: 'Correct',
+      correctAnswerOptionId: 'answer_1',
+      correctAnswerText: 'Correct',
+      isCorrect: true,
+      explanation: null,
+      position: 1,
+      createdAt: now,
+    }],
+  };
+  let listArgs;
+  let detailArgs;
+  let transactionCalled = false;
+  const fakePrisma = {
+    examAttempt: {
+      findUnique: async () => row,
+      findMany: async (args) => {
+        listArgs = args;
+        return [row];
+      },
+      findFirst: async (args) => {
+        detailArgs = args;
+        return args.where.userId === 'owner-a' ? row : null;
+      },
+    },
+    $transaction: async () => {
+      transactionCalled = true;
+    },
+  };
+  const service = createPrismaLearningService(fakePrisma);
+
+  const duplicate = await service.saveExamAttempt('owner-a', 'question_set_1', {
+    submissionId: 'stable-key',
+    selectedAnswerOptionIdsByQuestionId: {},
+  });
+  const history = await service.listExamAttempts('owner-a');
+  const detail = await service.getExamAttempt('owner-a', 'attempt_1');
+  const hidden = await service.getExamAttempt('owner-b', 'attempt_1');
+
+  assert.equal(duplicate.created, false);
+  assert.equal(transactionCalled, false);
+  assert.deepEqual(listArgs.where, { userId: 'owner-a' });
+  assert.deepEqual(listArgs.orderBy, [
+    { completedAt: 'desc' },
+    { id: 'desc' },
+  ]);
+  assert.equal(listArgs.take, 100);
+  assert.deepEqual(detailArgs.where, { id: 'attempt_1', userId: 'owner-b' });
+  assert.equal(history.length, 1);
+  assert.equal(detail.id, 'attempt_1');
+  assert.equal(hidden, null);
+});
+
+test('PrismaLearningService surfaces a failed transactional attempt write', async () => {
+  const now = new Date('2026-07-17T02:00:00.000Z');
+  const questionSet = {
+    id: 'question_set_1',
+    subjectId: 'subject_1',
+    topicId: null,
+    title: 'Transactional set',
+    description: 'Description',
+    status: 'published',
+    createdAt: now,
+    updatedAt: now,
+    questions: [{
+      id: 'question_1',
+      questionSetId: 'question_set_1',
+      text: 'Question?',
+      explanation: null,
+      position: 1,
+      createdAt: now,
+      updatedAt: now,
+      answerOptions: [
+        { id: 'answer_1', questionId: 'question_1', text: 'Correct', position: 1, isCorrect: true, createdAt: now, updatedAt: now },
+      ],
+    }],
+  };
+  let transactionCalls = 0;
+  const fakePrisma = {
+    questionSet: { findFirst: async () => questionSet },
+    examAttempt: { findUnique: async () => null },
+    $transaction: async (callback) => {
+      transactionCalls++;
+      return callback({
+        examAttempt: {
+          create: async () => {
+            throw new Error('snapshot write failed');
+          },
+        },
+      });
+    },
+  };
+  const service = createPrismaLearningService(fakePrisma);
+
+  await assert.rejects(
+    service.saveExamAttempt('demo-user', 'question_set_1', {
+      submissionId: 'failed-write',
+      selectedAnswerOptionIdsByQuestionId: { question_1: 'answer_1' },
+    }),
+    /snapshot write failed/,
+  );
+  assert.equal(transactionCalls, 1);
 });

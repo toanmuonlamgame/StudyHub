@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 
 import '../models/answer_check_result.dart';
 import '../models/answer_option.dart';
-import '../models/answer_review.dart';
 import '../models/question.dart';
 import '../models/question_set.dart';
 import '../models/paginated_result.dart';
@@ -12,6 +11,7 @@ import '../models/quiz_result.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
 import 'learning_repository.dart';
+import 'learning_result_json_mapper.dart';
 import '../../materials/models/study_material.dart';
 
 class ApiLearningRepository implements LearningRepository {
@@ -184,7 +184,7 @@ class ApiLearningRepository implements LearningRepository {
       }),
     );
     final body = _decodeResponse(response, 'submitQuiz');
-    return _quizResultFromJson(_readObject(body, 'result'));
+    return quizResultFromJson(_readObject(body, 'result'));
   }
 
   Future<Map<String, dynamic>> _get(String path) async {
@@ -289,39 +289,6 @@ AnswerOption _answerOptionFromJson(Map<String, dynamic> json) {
   return AnswerOption(
     id: _readString(json, 'id'),
     text: _readString(json, 'text'),
-  );
-}
-
-QuizResult _quizResultFromJson(Map<String, dynamic> json) {
-  return QuizResult(
-    questionSetId: _readString(json, 'questionSetId'),
-    questionSetTitle: _readString(json, 'questionSetTitle'),
-    totalCount: _readInt(json, 'totalQuestions'),
-    correctCount: _readInt(json, 'correctAnswers'),
-    wrongCount: _readInt(json, 'wrongAnswers'),
-    unansweredCount: _readInt(json, 'unansweredAnswers'),
-    percentageScore: _readDouble(json, 'percentageScore'),
-    answerReviews: _readObjectList(
-      json,
-      'answerReviews',
-    ).map(_answerReviewFromJson).toList(growable: false),
-  );
-}
-
-AnswerReview _answerReviewFromJson(Map<String, dynamic> json) {
-  return AnswerReview(
-    questionId: _readString(json, 'questionId'),
-    questionText: _readString(json, 'questionText'),
-    answerOptions: _readObjectList(
-      json,
-      'answerOptions',
-    ).map(_answerOptionFromJson).toList(growable: false),
-    selectedAnswerOptionId: _readNullableString(json, 'selectedAnswerOptionId'),
-    selectedAnswerText: _readNullableString(json, 'selectedAnswerText'),
-    correctAnswerOptionId: _readString(json, 'correctAnswerOptionId'),
-    correctAnswerText: _readString(json, 'correctAnswerText'),
-    isCorrect: _readBool(json, 'isCorrect'),
-    explanation: _readNullableString(json, 'explanation'),
   );
 }
 
@@ -457,14 +424,6 @@ DateTime? _readOptionalDateTime(Map<String, dynamic> json, String key) {
     throw FormatException('Expected "$key" to contain a valid date.');
   }
   return parsed;
-}
-
-double _readDouble(Map<String, dynamic> json, String key) {
-  final value = json[key];
-  if (value is! num) {
-    throw FormatException('Expected "$key" to be a number.');
-  }
-  return value.toDouble();
 }
 
 bool _readBool(Map<String, dynamic> json, String key) {

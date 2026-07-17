@@ -8,6 +8,7 @@ void main() {
     StudyHubApp(
       learningRepository: createLearningRepositoryFromEnvironment(),
       contributionRepository: createContributionRepositoryFromEnvironment(),
+      attemptRepository: createAttemptRepositoryFromEnvironment(),
     ),
   );
 }

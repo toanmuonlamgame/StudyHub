@@ -1,5 +1,7 @@
 import type {
   AnswerCheckResult,
+  ExamAttemptDetail,
+  ExamAttemptSummary,
   ListStudyMaterialsParams,
   ListQuestionSetsParams,
   PaginatedQuestionSets,
@@ -7,6 +9,8 @@ import type {
   Question,
   QuestionSet,
   QuizResult,
+  SaveExamAttemptInput,
+  SaveExamAttemptOutcome,
   Subject,
   StudyMaterial,
   Topic,
@@ -38,6 +42,16 @@ export interface LearningService {
     questionSetId: string,
     selectedAnswerOptionIdsByQuestionId: Record<string, string>,
   ): Promise<QuizResult>;
+  saveExamAttempt(
+    userId: string,
+    questionSetId: string,
+    input: SaveExamAttemptInput,
+  ): Promise<SaveExamAttemptOutcome>;
+  listExamAttempts(userId: string): Promise<ExamAttemptSummary[]>;
+  getExamAttempt(
+    userId: string,
+    attemptId: string,
+  ): Promise<ExamAttemptDetail | null>;
   createQuestionSetSubmission(
     input: QuestionSetSubmissionInput,
   ): Promise<QuestionSetSubmission>;
@@ -63,6 +77,8 @@ export class InvalidQuizSubmissionError extends Error {}
 export class LearningDataIntegrityError extends Error {}
 
 export class InvalidLearningListQueryError extends Error {}
+
+export class ExamAttemptIdempotencyConflictError extends Error {}
 
 export class QuestionSetSubmissionValidationError extends Error {
   constructor(public readonly fields: SubmissionValidationFieldError[]) {

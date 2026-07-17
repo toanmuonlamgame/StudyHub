@@ -305,5 +305,21 @@
   "pasteExamDuplicateAnswers": "Nội dung đáp án trong một câu không được trùng nhau.",
   "pasteExamContentTooLong": "Nội dung câu hỏi, đáp án hoặc giải thích vượt quá độ dài cho phép.",
   "pasteExamTooManyQuestions": "Một đề được dán có tối đa {max} câu hỏi.",
-  "pasteExamFixInSource": "Sửa câu này trong nội dung nguồn"
+  "pasteExamFixInSource": "Sửa câu này trong nội dung nguồn",
+  "history": "Lịch sử",
+  "attemptHistory": "Lịch sử làm đề",
+  "attemptHistoryDescription": "Mở lại các bài thi đã hoàn thành và xem kết quả đáng tin cậy.",
+  "noAttemptsYet": "Chưa có lượt làm đề",
+  "tryYourFirstExam": "Hoàn thành bài đầu tiên ở Chế độ thi để tạo lịch sử.",
+  "completed": "Đã hoàn thành",
+  "score": "Điểm",
+  "viewResult": "Xem kết quả",
+  "unableToSaveResult": "Không thể lưu kết quả",
+  "retrySave": "Thử lưu lại",
+  "unableToLoadHistory": "Không thể tải lịch sử làm đề",
+  "resultSaved": "Đã lưu kết quả",
+  "resultNotYetSaved": "Kết quả chưa được lưu",
+  "savingResult": "Đang lưu kết quả...",
+  "attemptCorrectSummary": "Đúng {correct}/{total} câu",
+  "attemptHistoryLocalIdentity": "Lịch sử hiện thuộc về danh tính demo tạm thời trên backend. Tài khoản thật sẽ thay thế ranh giới này khi thêm xác thực."
 }

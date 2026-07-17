@@ -37,6 +37,8 @@ safety guarantees, limitations, and Phase 2 entry criteria.
   protected exit, and clear unanswered-question submission.
 - View rounded score, correct/wrong/unanswered counts, answer options, correct
   answers, and optional explanations after submission.
+- Persist completed Exam attempts with server-verified scoring and idempotent retry.
+- Browse newest-first Exam history and reopen full snapshot-based answer review.
 - Navigate the full Home -> Subjects -> Question Sets -> Quiz -> Result flow.
 
 ### Frontend Architecture
@@ -44,12 +46,15 @@ safety guarantees, limitations, and Phase 2 entry criteria.
 - `LearningRepository` abstraction between Flutter screens and data sources.
 - `MockLearningRepository` for the default local prototype.
 - `ApiLearningRepository` for the Fastify Learning API.
+- `AttemptRepository` with mock/API adapters for save, history, and result detail.
 - Compile-time mock/API selection through non-secret `dart-define` values.
 
 ### Backend And Persistence
 
 - Fastify Learning API for Subjects, Topics, Question Sets, Questions, and quiz
   submission.
+- Backend-owned Exam attempt persistence with temporary demo identity ownership,
+  transaction-safe answer snapshots, and duplicate-request protection.
 - `LearningService` abstraction with `InMemoryLearningService` and
   `PrismaLearningService` implementations.
 - PostgreSQL models for Subjects, Topics, Question Sets, Questions, and Answer

@@ -10,6 +10,8 @@ import { studyMaterials } from '../data/mockStudyMaterials.js';
 import type {
   AnswerCheckResult,
   AnswerReview,
+  ExamAttemptDetail,
+  ExamAttemptSummary,
   ListQuestionSetsParams,
   ListStudyMaterialsParams,
   PaginatedQuestionSets,
@@ -17,6 +19,8 @@ import type {
   Question,
   QuestionSet,
   QuizResult,
+  SaveExamAttemptInput,
+  SaveExamAttemptOutcome,
   Subject,
   StudyMaterial,
   Topic,
@@ -27,6 +31,7 @@ import type {
 } from '../types/questionSetSubmission.js';
 import {
   InvalidQuizSubmissionError,
+  ExamAttemptIdempotencyConflictError,
   LearningDataIntegrityError,
   LearningResourceNotFoundError,
   QuestionSetSubmissionStateError,
@@ -46,6 +51,10 @@ import {
   toStudyMaterialListItem,
 } from './studyMaterialPagination.js';
 import { calculateRoundedPercentage } from './quizScoring.js';
+import {
+  createExamAttemptFingerprint,
+  validateExamAttemptInput,
+} from './examAttemptValidation.js';
 
 const questionSetCreatedAtById = new Map(
   questionSets.map((questionSet, index) => [
@@ -56,7 +65,9 @@ const questionSetCreatedAtById = new Map(
 
 export class InMemoryLearningService implements LearningService {
   private readonly submissions = new Map<string, QuestionSetSubmission>();
+  private readonly examAttempts = new Map<string, StoredExamAttempt>();
   private nextSubmissionNumber = 1;
+  private nextAttemptNumber = 1;
 
   async getSubjects(): Promise<Subject[]> {
     return subjects;
@@ -326,6 +337,78 @@ export class InMemoryLearningService implements LearningService {
     };
   }
 
+  async saveExamAttempt(
+    userId: string,
+    questionSetId: string,
+    input: SaveExamAttemptInput,
+  ): Promise<SaveExamAttemptOutcome> {
+    const parsedStartedAt = validateExamAttemptInput(input);
+    const requestFingerprint = createExamAttemptFingerprint(
+      questionSetId,
+      input,
+      parsedStartedAt,
+    );
+    const idempotencyKey = `${userId}\u0000${input.submissionId}`;
+    const existing = this.examAttempts.get(idempotencyKey);
+    if (existing !== undefined) {
+      if (existing.requestFingerprint !== requestFingerprint) {
+        throw new ExamAttemptIdempotencyConflictError(
+          'Submission ID was already used with different attempt data.',
+        );
+      }
+      return { attempt: cloneExamAttempt(existing.attempt), created: false };
+    }
+
+    const result = await this.submitQuiz(
+      questionSetId,
+      input.selectedAnswerOptionIdsByQuestionId,
+    );
+    const completedAt = new Date().toISOString();
+    const startedAt = parsedStartedAt?.toISOString() ?? null;
+    const attempt: ExamAttemptDetail = {
+      id: `attempt_${this.nextAttemptNumber++}`,
+      questionSetId: result.questionSetId,
+      questionSetTitle: result.questionSetTitle,
+      startedAt,
+      completedAt,
+      totalQuestions: result.totalQuestions,
+      correctAnswers: result.correctAnswers,
+      wrongAnswers: result.wrongAnswers,
+      unansweredAnswers: result.unansweredAnswers,
+      percentageScore: result.percentageScore,
+      result: cloneQuizResult(result),
+    };
+    this.examAttempts.set(idempotencyKey, {
+      userId,
+      requestFingerprint,
+      attempt,
+    });
+    return { attempt: cloneExamAttempt(attempt), created: true };
+  }
+
+  async listExamAttempts(userId: string): Promise<ExamAttemptSummary[]> {
+    return [...this.examAttempts.values()]
+      .filter((stored) => stored.userId === userId)
+      .map(({ attempt }) => toAttemptSummary(attempt))
+      .sort(
+        (left, right) =>
+          right.completedAt.localeCompare(left.completedAt) ||
+          right.id.localeCompare(left.id),
+      )
+      .slice(0, 100);
+  }
+
+  async getExamAttempt(
+    userId: string,
+    attemptId: string,
+  ): Promise<ExamAttemptDetail | null> {
+    const stored = [...this.examAttempts.values()].find(
+      ({ userId: ownerId, attempt }) =>
+        ownerId === userId && attempt.id === attemptId,
+    );
+    return stored === undefined ? null : cloneExamAttempt(stored.attempt);
+  }
+
   async createQuestionSetSubmission(
     input: QuestionSetSubmissionInput,
   ): Promise<QuestionSetSubmission> {
@@ -466,6 +549,31 @@ export class InMemoryLearningService implements LearningService {
     }
     return questionSet;
   }
+}
+
+interface StoredExamAttempt {
+  userId: string;
+  requestFingerprint: string;
+  attempt: ExamAttemptDetail;
+}
+
+function toAttemptSummary(attempt: ExamAttemptDetail): ExamAttemptSummary {
+  const { result: _result, ...summary } = attempt;
+  return { ...summary };
+}
+
+function cloneQuizResult(result: QuizResult): QuizResult {
+  return {
+    ...result,
+    answerReviews: result.answerReviews.map((review) => ({
+      ...review,
+      answerOptions: review.answerOptions.map((option) => ({ ...option })),
+    })),
+  };
+}
+
+function cloneExamAttempt(attempt: ExamAttemptDetail): ExamAttemptDetail {
+  return { ...attempt, result: cloneQuizResult(attempt.result) };
 }
 
 function cloneSubmissionInput(

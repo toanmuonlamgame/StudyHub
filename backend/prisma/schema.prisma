@@ -108,6 +108,7 @@ model QuestionSet {
   subject         Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   topic           Topic?                @relation(fields: [topicId], references: [id], onDelete: SetNull)
   questions       Question[]
+  examAttempts    ExamAttempt[]
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
 
@@ -115,6 +116,50 @@ model QuestionSet {
   @@index([sourceType, status, createdAt, id])
   @@index([subjectId, status, createdAt, id])
   @@index([topicId, status, createdAt, id])
+}
+
+model ExamAttempt {
+  id                  String              @id @default(cuid())
+  userId              String
+  submissionId        String
+  requestFingerprint  String
+  questionSetId       String
+  sourceQuestionSetId String?
+  questionSetTitle    String
+  startedAt           DateTime?
+  completedAt         DateTime            @default(now())
+  totalQuestions      Int
+  correctAnswers      Int
+  wrongAnswers        Int
+  unansweredAnswers   Int
+  percentageScore     Float
+  questionSet         QuestionSet?        @relation(fields: [sourceQuestionSetId], references: [id], onDelete: SetNull)
+  answers             ExamAttemptAnswer[]
+  createdAt           DateTime            @default(now())
+
+  @@unique([userId, submissionId])
+  @@index([userId, completedAt, id])
+  @@index([sourceQuestionSetId])
+}
+
+model ExamAttemptAnswer {
+  id                     String      @id @default(cuid())
+  attemptId              String
+  questionId             String
+  questionText           String
+  answerOptions          Json
+  selectedAnswerOptionId String?
+  selectedAnswerText     String?
+  correctAnswerOptionId  String
+  correctAnswerText      String
+  isCorrect              Boolean
+  explanation            String?
+  position               Int
+  attempt                ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  createdAt              DateTime    @default(now())
+
+  @@unique([attemptId, position])
+  @@index([attemptId])
 }
 
 model Question {

@@ -152,3 +152,31 @@ export interface SubmitQuizBody {
 export interface CheckAnswerBody {
   selectedAnswerOptionId: string;
 }
+
+export interface SaveExamAttemptInput {
+  submissionId: string;
+  startedAt?: string;
+  selectedAnswerOptionIdsByQuestionId: Record<string, string>;
+}
+
+export interface ExamAttemptSummary {
+  id: string;
+  questionSetId: string;
+  questionSetTitle: string;
+  startedAt: string | null;
+  completedAt: string;
+  totalQuestions: number;
+  correctAnswers: number;
+  wrongAnswers: number;
+  unansweredAnswers: number;
+  percentageScore: number;
+}
+
+export interface ExamAttemptDetail extends ExamAttemptSummary {
+  result: QuizResult;
+}
+
+export interface SaveExamAttemptOutcome {
+  attempt: ExamAttemptDetail;
+  created: boolean;
+}

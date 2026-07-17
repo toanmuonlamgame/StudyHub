@@ -13,45 +13,111 @@ import '../models/answer_option.dart';
 import '../models/answer_review.dart';
 import '../models/quiz_mode.dart';
 import '../models/quiz_result.dart';
+import '../../attempts/attempt_repository_scope.dart';
+import '../../attempts/controllers/exam_attempt_save_controller.dart';
+import '../../attempts/models/exam_attempt.dart';
 
 class QuizResultScreen extends StatefulWidget {
-  const QuizResultScreen({super.key, required this.result});
+  const QuizResultScreen({
+    super.key,
+    required this.result,
+    this.attemptSaveRequest,
+    this.recordLocalProgress = true,
+  });
 
   final QuizResult result;
+  final ExamAttemptSaveRequest? attemptSaveRequest;
+  final bool recordLocalProgress;
 
   @override
   State<QuizResultScreen> createState() => _QuizResultScreenState();
 }
 
 class _QuizResultScreenState extends State<QuizResultScreen> {
-  bool _saveStarted = false;
+  bool _localSaveStarted = false;
+  bool _attemptSaveStarted = false;
+  ExamAttemptSaveController? _attemptSaveController;
 
-  QuizResult get result => widget.result;
+  QuizResult get result =>
+      _attemptSaveController?.savedAttempt?.result ?? widget.result;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_saveStarted) {
+    final shouldSaveLocalImmediately =
+        widget.recordLocalProgress &&
+        (widget.attemptSaveRequest == null ||
+            widget.result.quizMode == QuizMode.practice);
+    if (shouldSaveLocalImmediately && !_localSaveStarted) {
+      final progressStore = ProgressStoreScope.maybeOf(context);
+      if (progressStore != null) {
+        _localSaveStarted = true;
+        final completedAt = DateTime.now();
+        final session = CompletedLearningSession.fromQuizResult(
+          id:
+              '${result.questionSetId}-${result.quizMode.name}-'
+              '${completedAt.microsecondsSinceEpoch}',
+          result: result,
+          completedAt: completedAt,
+        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            unawaited(_saveProgress(progressStore, session));
+          }
+        });
+      }
+    }
+
+    final attemptRequest = widget.attemptSaveRequest;
+    if (!_attemptSaveStarted &&
+        attemptRequest != null &&
+        result.quizMode == QuizMode.exam) {
+      final attemptRepository = AttemptRepositoryScope.maybeOf(context);
+      if (attemptRepository != null) {
+        _attemptSaveStarted = true;
+        _attemptSaveController = ExamAttemptSaveController(
+          repository: attemptRepository,
+          request: attemptRequest,
+        )..addListener(_handleAttemptSaveChanged);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            unawaited(_attemptSaveController!.start());
+          }
+        });
+      }
+    }
+  }
+
+  void _handleAttemptSaveChanged() {
+    if (!mounted) {
       return;
     }
-    final progressStore = ProgressStoreScope.maybeOf(context);
-    if (progressStore == null) {
-      return;
-    }
-    _saveStarted = true;
-    final completedAt = DateTime.now();
-    final session = CompletedLearningSession.fromQuizResult(
-      id:
-          '${result.questionSetId}-${result.quizMode.name}-'
-          '${completedAt.microsecondsSinceEpoch}',
-      result: result,
-      completedAt: completedAt,
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
+    final controller = _attemptSaveController;
+    if (controller?.status == ExamAttemptSaveStatus.saved &&
+        widget.recordLocalProgress &&
+        !_localSaveStarted &&
+        controller?.savedAttempt != null) {
+      final progressStore = ProgressStoreScope.maybeOf(context);
+      if (progressStore != null) {
+        _localSaveStarted = true;
+        final savedResult = controller!.savedAttempt!.result;
+        final completedAt = controller.savedAttempt!.completedAt;
+        final session = CompletedLearningSession.fromQuizResult(
+          id: controller.savedAttempt!.id,
+          result: savedResult,
+          completedAt: completedAt,
+        );
         unawaited(_saveProgress(progressStore, session));
       }
-    });
+    }
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _attemptSaveController?.removeListener(_handleAttemptSaveChanged);
+    _attemptSaveController?.dispose();
+    super.dispose();
   }
 
   Future<void> _saveProgress(
@@ -116,6 +182,17 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
             ),
             const SizedBox(height: 10),
             Text(result.questionSetTitle, style: theme.textTheme.headlineSmall),
+            if (widget.attemptSaveRequest != null) ...[
+              const SizedBox(height: 12),
+              _AttemptSaveStatus(
+                state: _attemptSaveController?.status,
+                onRetry:
+                    _attemptSaveController?.status ==
+                        ExamAttemptSaveStatus.failed
+                    ? () => unawaited(_attemptSaveController!.retry())
+                    : null,
+              ),
+            ],
             const SizedBox(height: 18),
             Card(
               child: Padding(
@@ -246,6 +323,65 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AttemptSaveStatus extends StatelessWidget {
+  const _AttemptSaveStatus({required this.state, required this.onRetry});
+
+  final ExamAttemptSaveStatus? state;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final (icon, label, color) = switch (state) {
+      ExamAttemptSaveStatus.saving => (
+        Icons.sync,
+        l10n.savingResult,
+        theme.colorScheme.primary,
+      ),
+      ExamAttemptSaveStatus.saved => (
+        Icons.cloud_done_outlined,
+        l10n.resultSaved,
+        theme.colorScheme.secondary,
+      ),
+      ExamAttemptSaveStatus.failed => (
+        Icons.cloud_off_outlined,
+        l10n.unableToSaveResult,
+        theme.colorScheme.error,
+      ),
+      null => (
+        Icons.cloud_queue_outlined,
+        l10n.resultNotYetSaved,
+        theme.colorScheme.onSurfaceVariant,
+      ),
+    };
+    return Container(
+      key: const ValueKey('attempt-save-status'),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(AppRadii.control),
+      ),
+      child: Row(
+        children: [
+          if (state == ExamAttemptSaveStatus.saving)
+            SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(strokeWidth: 2, color: color),
+            )
+          else
+            Icon(icon, size: 20, color: color),
+          const SizedBox(width: 10),
+          Expanded(child: Text(label)),
+          if (onRetry != null)
+            TextButton(onPressed: onRetry, child: Text(l10n.retrySave)),
+        ],
       ),
     );
   }

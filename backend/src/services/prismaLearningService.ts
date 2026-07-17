@@ -1,9 +1,11 @@
-import type { PrismaClient } from '@prisma/client';
+import type { Prisma, PrismaClient } from '@prisma/client';
 
 import { getPrismaClient } from '../db/prisma.js';
 import type {
   AnswerCheckResult,
   AnswerReview,
+  ExamAttemptDetail,
+  ExamAttemptSummary,
   ListQuestionSetsParams,
   ListStudyMaterialsParams,
   PaginatedQuestionSets,
@@ -11,6 +13,8 @@ import type {
   Question,
   QuestionSet,
   QuizResult,
+  SaveExamAttemptInput,
+  SaveExamAttemptOutcome,
   Subject,
   StudyMaterial,
   Topic,
@@ -28,6 +32,7 @@ import {
   mapTopic,
 } from './learningMappers.js';
 import {
+  ExamAttemptIdempotencyConflictError,
   InvalidQuizSubmissionError,
   LearningDataIntegrityError,
   LearningResourceNotFoundError,
@@ -46,6 +51,10 @@ import {
   encodeStudyMaterialCursor,
 } from './studyMaterialPagination.js';
 import { calculateRoundedPercentage } from './quizScoring.js';
+import {
+  createExamAttemptFingerprint,
+  validateExamAttemptInput,
+} from './examAttemptValidation.js';
 
 export class PrismaLearningService implements LearningService {
   constructor(private readonly prisma: PrismaClient) {}
@@ -357,6 +366,122 @@ export class PrismaLearningService implements LearningService {
     };
   }
 
+  async saveExamAttempt(
+    userId: string,
+    questionSetId: string,
+    input: SaveExamAttemptInput,
+  ): Promise<SaveExamAttemptOutcome> {
+    const startedAt = validateExamAttemptInput(input);
+    const requestFingerprint = createExamAttemptFingerprint(
+      questionSetId,
+      input,
+      startedAt,
+    );
+    const existing = await this.findExamAttemptBySubmissionId(
+      userId,
+      input.submissionId,
+    );
+    if (existing !== null) {
+      if (existing.requestFingerprint !== requestFingerprint) {
+        throw new ExamAttemptIdempotencyConflictError(
+          'Submission ID was already used with different attempt data.',
+        );
+      }
+      return { attempt: mapExamAttemptDetail(existing), created: false };
+    }
+
+    const result = await this.submitQuiz(
+      questionSetId,
+      input.selectedAnswerOptionIdsByQuestionId,
+    );
+    try {
+      const row = await this.prisma.$transaction((transaction) =>
+        transaction.examAttempt.create({
+          data: {
+            userId,
+            submissionId: input.submissionId,
+            requestFingerprint,
+            questionSetId: result.questionSetId,
+            sourceQuestionSetId: result.questionSetId,
+            questionSetTitle: result.questionSetTitle,
+            startedAt,
+            totalQuestions: result.totalQuestions,
+            correctAnswers: result.correctAnswers,
+            wrongAnswers: result.wrongAnswers,
+            unansweredAnswers: result.unansweredAnswers,
+            percentageScore: result.percentageScore,
+            answers: {
+              create: result.answerReviews.map((review, index) => ({
+                questionId: review.questionId,
+                questionText: review.questionText,
+                answerOptions: review.answerOptions.map(({ id, text }) => ({
+                  id,
+                  text,
+                })) as Prisma.InputJsonValue,
+                selectedAnswerOptionId: review.selectedAnswerOptionId,
+                selectedAnswerText: review.selectedAnswerText,
+                correctAnswerOptionId: review.correctAnswerOptionId,
+                correctAnswerText: review.correctAnswerText,
+                isCorrect: review.isCorrect,
+                explanation: review.explanation,
+                position: index + 1,
+              })),
+            },
+          },
+          include: attemptAnswersInclude,
+        }),
+      );
+      return { attempt: mapExamAttemptDetail(row), created: true };
+    } catch (error) {
+      if (!isUniqueConstraintError(error)) {
+        throw error;
+      }
+      const duplicate = await this.findExamAttemptBySubmissionId(
+        userId,
+        input.submissionId,
+      );
+      if (
+        duplicate === null ||
+        duplicate.requestFingerprint !== requestFingerprint
+      ) {
+        throw new ExamAttemptIdempotencyConflictError(
+          'Submission ID conflicts with another attempt.',
+        );
+      }
+      return { attempt: mapExamAttemptDetail(duplicate), created: false };
+    }
+  }
+
+  async listExamAttempts(userId: string): Promise<ExamAttemptSummary[]> {
+    const rows = await this.prisma.examAttempt.findMany({
+      where: { userId },
+      orderBy: [{ completedAt: 'desc' }, { id: 'desc' }],
+      take: 100,
+    });
+    return rows.map(mapExamAttemptSummary);
+  }
+
+  async getExamAttempt(
+    userId: string,
+    attemptId: string,
+  ): Promise<ExamAttemptDetail | null> {
+    const row = await this.prisma.examAttempt.findFirst({
+      where: { id: attemptId, userId },
+      include: attemptAnswersInclude,
+    });
+    return row === null ? null : mapExamAttemptDetail(row);
+  }
+
+  private findExamAttemptBySubmissionId(
+    userId: string,
+    submissionId: string,
+  ): Promise<ExamAttemptWithAnswers | null> {
+    return this.prisma.examAttempt.findUnique({
+      where: { userId_submissionId: { userId, submissionId } },
+      include: attemptAnswersInclude,
+    });
+  }
+
   async createQuestionSetSubmission(
     input: QuestionSetSubmissionInput,
   ): Promise<QuestionSetSubmission> {
@@ -553,6 +678,86 @@ export class PrismaLearningService implements LearningService {
       throw new LearningResourceNotFoundError('Question set not found.');
     }
   }
+}
+
+type ExamAttemptWithAnswers = Prisma.ExamAttemptGetPayload<{
+  include: { answers: { orderBy: { position: 'asc' } } };
+}>;
+
+const attemptAnswersInclude = {
+  answers: { orderBy: { position: 'asc' as const } },
+} satisfies Prisma.ExamAttemptInclude;
+
+function mapExamAttemptSummary(
+  row: Omit<ExamAttemptWithAnswers, 'answers'> | ExamAttemptWithAnswers,
+): ExamAttemptSummary {
+  return {
+    id: row.id,
+    questionSetId: row.questionSetId,
+    questionSetTitle: row.questionSetTitle,
+    startedAt: row.startedAt?.toISOString() ?? null,
+    completedAt: row.completedAt.toISOString(),
+    totalQuestions: row.totalQuestions,
+    correctAnswers: row.correctAnswers,
+    wrongAnswers: row.wrongAnswers,
+    unansweredAnswers: row.unansweredAnswers,
+    percentageScore: row.percentageScore,
+  };
+}
+
+function mapExamAttemptDetail(row: ExamAttemptWithAnswers): ExamAttemptDetail {
+  const summary = mapExamAttemptSummary(row);
+  const answerReviews: AnswerReview[] = row.answers.map((answer) => ({
+    questionId: answer.questionId,
+    questionText: answer.questionText,
+    answerOptions: readStoredAnswerOptions(answer.answerOptions),
+    selectedAnswerOptionId: answer.selectedAnswerOptionId,
+    selectedAnswerText: answer.selectedAnswerText,
+    correctAnswerOptionId: answer.correctAnswerOptionId,
+    correctAnswerText: answer.correctAnswerText,
+    isCorrect: answer.isCorrect,
+    explanation: answer.explanation,
+  }));
+  return {
+    ...summary,
+    result: {
+      questionSetId: summary.questionSetId,
+      questionSetTitle: summary.questionSetTitle,
+      totalQuestions: summary.totalQuestions,
+      correctAnswers: summary.correctAnswers,
+      wrongAnswers: summary.wrongAnswers,
+      unansweredAnswers: summary.unansweredAnswers,
+      percentageScore: summary.percentageScore,
+      answerReviews,
+    },
+  };
+}
+
+function readStoredAnswerOptions(value: Prisma.JsonValue): AnswerReview['answerOptions'] {
+  if (!Array.isArray(value)) {
+    throw new LearningDataIntegrityError('Stored answer options are invalid.');
+  }
+  return value.map((option) => {
+    if (
+      option === null ||
+      Array.isArray(option) ||
+      typeof option !== 'object' ||
+      typeof option.id !== 'string' ||
+      typeof option.text !== 'string'
+    ) {
+      throw new LearningDataIntegrityError('Stored answer options are invalid.');
+    }
+    return { id: option.id, text: option.text };
+  });
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === 'P2002'
+  );
 }
 
 const submissionInclude = {

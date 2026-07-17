@@ -135,12 +135,22 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
   submission with unanswered questions. Backend scoring separates incorrect
   from unanswered answers and rounds percentage to the nearest whole percent.
 - Post-submit review may include all safe answer options and an optional
-  explanation. Attempt persistence and attempt-history UI are intentionally
-  deferred to accelerated MVP Checkpoint 2.
+  explanation. Accelerated MVP Checkpoint 2 adds backend Exam attempt
+  persistence, newest-first history, and reusable result-detail review.
+- Exam attempts use a centralized temporary `demo-user` backend identity until
+  authentication exists. Flutter never sends a trusted user ID.
+- Attempt retries use a client-generated submission ID unique per current user.
+  The backend fingerprints the canonical request and returns the existing
+  attempt only when retry content matches; changed content returns a conflict.
+- Historical review stores question, option, selected-answer, correct-answer,
+  and explanation snapshots so published content changes cannot corrupt history.
 - Local Progress persists only post-result metadata from Exam and Practice. It
   keeps the newest 100 sessions in `shared_preferences`, stores no answer keys or
   full question payloads, and will remain device-only until authentication and
   backend sync are deliberately implemented.
+- Backend Attempt History is separate from local Progress: it currently persists
+  completed Exam details only; Practice remains device-local until a future
+  authenticated contract is deliberately added.
 
 ## Roadmap Summary
 - V1: basic taxonomy, browse question sets, take quiz, view results, upload documents/exams.

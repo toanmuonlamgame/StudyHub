@@ -305,5 +305,21 @@
   "pasteExamDuplicateAnswers": "Answer text must be unique within a question.",
   "pasteExamContentTooLong": "Question, answer, or explanation content exceeds the allowed length.",
   "pasteExamTooManyQuestions": "A pasted exam can contain at most {max} questions.",
-  "pasteExamFixInSource": "Fix this question in the source"
+  "pasteExamFixInSource": "Fix this question in the source",
+  "history": "History",
+  "attemptHistory": "Attempt history",
+  "attemptHistoryDescription": "Reopen completed exams and review trusted results.",
+  "noAttemptsYet": "No attempts yet",
+  "tryYourFirstExam": "Complete your first Exam Mode session to build history.",
+  "completed": "Completed",
+  "score": "Score",
+  "viewResult": "View result",
+  "unableToSaveResult": "Unable to save result",
+  "retrySave": "Retry save",
+  "unableToLoadHistory": "Unable to load attempt history",
+  "resultSaved": "Result saved",
+  "resultNotYetSaved": "Result not yet saved",
+  "savingResult": "Saving result...",
+  "attemptCorrectSummary": "{correct} of {total} correct",
+  "attemptHistoryLocalIdentity": "History currently belongs to this temporary demo identity. Account ownership will replace it when authentication is added."
 }

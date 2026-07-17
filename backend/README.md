@@ -43,6 +43,9 @@ GET  /learning/question-sets/:questionSetId
 GET  /learning/question-sets/:questionSetId/questions
 POST /learning/questions/:questionId/check-answer
 POST /learning/question-sets/:questionSetId/submit
+POST /learning/question-sets/:questionSetId/attempts
+GET  /learning/attempts
+GET  /learning/attempts/:attemptId
 ```
 
 Question responses omit correctness metadata. Submit scoring stays inside the
@@ -50,6 +53,19 @@ selected backend service. Missing answer-map keys are scored as unanswered;
 incorrect and unanswered counts stay separate, and percentages are rounded to
 the nearest whole percent. Post-submit review may include safe answer options
 and an optional explanation.
+
+Completed Exam attempts can be saved after scoring. The save request contains a
+stable `submissionId`, optional `startedAt`, and selected option IDs only. The
+backend recalculates the result, stores attempt/answer snapshots atomically, and
+uses `(userId, submissionId)` plus a canonical request fingerprint for safe
+idempotent retry. Reusing a key with changed request data returns `409`. List
+and detail reads are
+scoped to the centralized temporary `demo-user` identity boundary; Flutter does
+not provide a trusted user ID. Real authentication will replace that boundary.
+
+Migration `20260717120000_exam_attempt_history` creates the attempt tables and
+indexes. It is intentionally not applied by automated tests and must be reviewed
+and applied manually before Prisma-mode attempt smoke testing.
 
 The paginated Question Set endpoint defaults to 20 items, accepts at most 50,
 and returns `{ items, nextCursor, hasMore }`. Its opaque cursor uses stable

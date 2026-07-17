@@ -1053,4 +1053,57 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pasteExamFixInSource => 'Fix this question in the source';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get attemptHistory => 'Attempt history';
+
+  @override
+  String get attemptHistoryDescription =>
+      'Reopen completed exams and review trusted results.';
+
+  @override
+  String get noAttemptsYet => 'No attempts yet';
+
+  @override
+  String get tryYourFirstExam =>
+      'Complete your first Exam Mode session to build history.';
+
+  @override
+  String get completed => 'Completed';
+
+  @override
+  String get score => 'Score';
+
+  @override
+  String get viewResult => 'View result';
+
+  @override
+  String get unableToSaveResult => 'Unable to save result';
+
+  @override
+  String get retrySave => 'Retry save';
+
+  @override
+  String get unableToLoadHistory => 'Unable to load attempt history';
+
+  @override
+  String get resultSaved => 'Result saved';
+
+  @override
+  String get resultNotYetSaved => 'Result not yet saved';
+
+  @override
+  String get savingResult => 'Saving result...';
+
+  @override
+  String attemptCorrectSummary(Object correct, Object total) {
+    return '$correct of $total correct';
+  }
+
+  @override
+  String get attemptHistoryLocalIdentity =>
+      'History currently belongs to this temporary demo identity. Account ownership will replace it when authentication is added.';
 }

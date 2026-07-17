@@ -1051,4 +1051,57 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get pasteExamFixInSource => 'Sửa câu này trong nội dung nguồn';
+
+  @override
+  String get history => 'Lịch sử';
+
+  @override
+  String get attemptHistory => 'Lịch sử làm đề';
+
+  @override
+  String get attemptHistoryDescription =>
+      'Mở lại các bài thi đã hoàn thành và xem kết quả đáng tin cậy.';
+
+  @override
+  String get noAttemptsYet => 'Chưa có lượt làm đề';
+
+  @override
+  String get tryYourFirstExam =>
+      'Hoàn thành bài đầu tiên ở Chế độ thi để tạo lịch sử.';
+
+  @override
+  String get completed => 'Đã hoàn thành';
+
+  @override
+  String get score => 'Điểm';
+
+  @override
+  String get viewResult => 'Xem kết quả';
+
+  @override
+  String get unableToSaveResult => 'Không thể lưu kết quả';
+
+  @override
+  String get retrySave => 'Thử lưu lại';
+
+  @override
+  String get unableToLoadHistory => 'Không thể tải lịch sử làm đề';
+
+  @override
+  String get resultSaved => 'Đã lưu kết quả';
+
+  @override
+  String get resultNotYetSaved => 'Kết quả chưa được lưu';
+
+  @override
+  String get savingResult => 'Đang lưu kết quả...';
+
+  @override
+  String attemptCorrectSummary(Object correct, Object total) {
+    return 'Đúng $correct/$total câu';
+  }
+
+  @override
+  String get attemptHistoryLocalIdentity =>
+      'Lịch sử hiện thuộc về danh tính demo tạm thời trên backend. Tài khoản thật sẽ thay thế ranh giới này khi thêm xác thực.';
 }

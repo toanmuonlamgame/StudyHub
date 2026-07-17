@@ -9,6 +9,9 @@ import 'package:frontend/features/learning/repositories/learning_repository.dart
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
 import 'package:frontend/features/learning/screens/quiz_screen.dart';
 import 'package:frontend/l10n/app_localizations.dart';
+import 'package:frontend/features/attempts/attempt_repository_scope.dart';
+import 'package:frontend/features/attempts/models/exam_attempt.dart';
+import 'package:frontend/features/attempts/repositories/attempt_repository.dart';
 
 const _questionSet = QuestionSet(
   id: 'question_set_js_basics',
@@ -118,6 +121,40 @@ void main() {
     await repository.complete();
     await tester.pumpAndSettle();
     expect(find.text('100%'), findsOneWidget);
+  });
+
+  testWidgets('successful exam result triggers attempt persistence once', (
+    tester,
+  ) async {
+    final attemptRepository = _RecordingAttemptRepository();
+    await tester.pumpWidget(
+      AttemptRepositoryScope(
+        repository: attemptRepository,
+        child: _localizedApp(
+          const QuizScreen(
+            questionSet: _questionSet,
+            learningRepository: MockLearningRepository(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _selectAnswer(tester, 'let');
+    await _tapVisible(tester, 'Next Question');
+    await _selectAnswer(tester, '===');
+    await _tapVisible(tester, 'Next Question');
+    await _selectAnswer(tester, 'push');
+    await _tapVisible(tester, 'Submit Quiz');
+    await tester.pumpAndSettle();
+
+    expect(attemptRepository.saveCalls, 1);
+    expect(attemptRepository.lastRequest?.selectedAnswerOptionIdsByQuestionId, {
+      'question_js_basics_1': 'js_b1_c',
+      'question_js_basics_2': 'js_b2_b',
+      'question_js_basics_3': 'js_b3_c',
+    });
+    expect(find.text('Result saved'), findsOneWidget);
   });
 
   testWidgets('asks before leaving progress but not an untouched exam', (
@@ -249,4 +286,41 @@ class _DelayedSubmitRepository extends MockLearningRepository {
     );
     _completer.complete(result);
   }
+}
+
+class _RecordingAttemptRepository extends AttemptRepository {
+  int saveCalls = 0;
+  ExamAttemptSaveRequest? lastRequest;
+
+  @override
+  Future<ExamAttemptDetail> saveExamAttempt(
+    ExamAttemptSaveRequest request,
+  ) async {
+    saveCalls++;
+    lastRequest = request;
+    final result = await const MockLearningRepository().submitQuiz(
+      questionSetId: request.questionSetId,
+      selectedAnswerOptionIdsByQuestionId:
+          request.selectedAnswerOptionIdsByQuestionId,
+    );
+    return ExamAttemptDetail(
+      id: 'attempt_1',
+      questionSetId: result.questionSetId,
+      questionSetTitle: result.questionSetTitle,
+      startedAt: request.startedAt,
+      completedAt: DateTime.utc(2026, 7, 17),
+      totalQuestions: result.totalCount,
+      correctAnswers: result.correctCount,
+      wrongAnswers: result.wrongCount,
+      unansweredAnswers: result.unansweredCount,
+      percentageScore: result.percentageScore,
+      result: result,
+    );
+  }
+
+  @override
+  Future<ExamAttemptDetail?> getExamAttempt(String attemptId) async => null;
+
+  @override
+  Future<List<ExamAttemptSummary>> listExamAttempts() async => const [];
 }

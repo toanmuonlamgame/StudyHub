@@ -7,6 +7,8 @@ import 'models/completed_learning_session.dart';
 import 'progress_store_scope.dart';
 import 'repositories/progress_store.dart';
 import 'widgets/progress_widgets.dart';
+import '../attempts/attempt_repository_scope.dart';
+import '../attempts/screens/exam_attempt_history_screen.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key, required this.onStartLearning});
@@ -43,7 +45,17 @@ class _ProgressScreenState extends State<ProgressScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.progressTab)),
+      appBar: AppBar(
+        title: Text(context.l10n.progressTab),
+        actions: [
+          IconButton(
+            key: const ValueKey('open-attempt-history'),
+            onPressed: _openAttemptHistory,
+            tooltip: context.l10n.attemptHistory,
+            icon: const Icon(Icons.history),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -124,6 +136,21 @@ class _ProgressScreenState extends State<ProgressScreen> {
         );
       }
     }
+  }
+
+  void _openAttemptHistory() {
+    final repository = AttemptRepositoryScope.of(context);
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ExamAttemptHistoryScreen(
+          repository: repository,
+          onStartLearning: () {
+            Navigator.of(context).pop();
+            widget.onStartLearning();
+          },
+        ),
+      ),
+    );
   }
 }
 
