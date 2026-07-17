@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../app/app_navigation.dart';
 import '../../../core/app_motion.dart';
 import '../../../core/app_design_tokens.dart';
 import '../../progress/models/completed_learning_session.dart';
@@ -23,11 +24,13 @@ class QuizResultScreen extends StatefulWidget {
     required this.result,
     this.attemptSaveRequest,
     this.recordLocalProgress = true,
+    this.showTakeAnotherExam = true,
   });
 
   final QuizResult result;
   final ExamAttemptSaveRequest? attemptSaveRequest;
   final bool recordLocalProgress;
+  final bool showTakeAnotherExam;
 
   @override
   State<QuizResultScreen> createState() => _QuizResultScreenState();
@@ -316,10 +319,23 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
               ),
             ),
             const SizedBox(height: 16),
+            FilledButton.icon(
+              key: const ValueKey('result-back-to-home'),
+              onPressed: () => returnToStudyHubHome(context),
+              icon: const Icon(Icons.home_outlined),
+              label: Text(l10n.backToHome),
+            ),
+            const SizedBox(height: 10),
             OutlinedButton.icon(
               onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.arrow_back),
-              label: Text(l10n.backToQuestionSet),
+              icon: Icon(
+                widget.showTakeAnotherExam
+                    ? Icons.replay_outlined
+                    : Icons.check,
+              ),
+              label: Text(
+                widget.showTakeAnotherExam ? l10n.takeAnotherExam : l10n.done,
+              ),
             ),
           ],
         ),

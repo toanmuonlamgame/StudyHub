@@ -2,24 +2,32 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../../core/api_request.dart';
 import '../models/question_set_draft.dart';
 import '../models/submission_confirmation.dart';
 import 'contribution_repository.dart';
 
 class ApiContributionRepository implements ContributionRepository {
-  ApiContributionRepository({required String baseUrl, http.Client? client})
-    : _baseUri = _parseBaseUrl(baseUrl),
-      _client = client ?? http.Client();
+  ApiContributionRepository({
+    required String baseUrl,
+    http.Client? client,
+    this.requestTimeout = defaultApiRequestTimeout,
+  }) : _baseUri = _parseBaseUrl(baseUrl),
+       _client = client ?? http.Client();
 
   final Uri _baseUri;
   final http.Client _client;
+  final Duration requestTimeout;
 
   @override
   Future<SubmissionConfirmation> submitForReview(QuestionSetDraft draft) async {
-    final response = await _client.post(
-      _baseUri.resolve('learning/question-set-submissions/submit'),
-      headers: const {'content-type': 'application/json'},
-      body: jsonEncode(draft.toJson()),
+    final response = await withApiTimeout(
+      _client.post(
+        _baseUri.resolve('learning/question-set-submissions/submit'),
+        headers: const {'content-type': 'application/json'},
+        body: jsonEncode(draft.toJson()),
+      ),
+      requestTimeout,
     );
     final decoded = _decodeObject(response.body);
     if (response.statusCode < 200 || response.statusCode >= 300) {

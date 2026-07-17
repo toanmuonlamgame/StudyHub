@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_navigation.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../models/submission_confirmation.dart';
 
@@ -48,11 +49,10 @@ class SubmissionConfirmationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 28),
                   FilledButton.icon(
-                    onPressed: () => Navigator.of(
-                      context,
-                    ).popUntil((route) => route.isFirst),
+                    key: const ValueKey('submission-back-to-home'),
+                    onPressed: () => returnToStudyHubHome(context),
                     icon: const Icon(Icons.home_outlined),
-                    label: Text(l10n.homeTab),
+                    label: Text(l10n.backToHome),
                   ),
                 ],
               ),

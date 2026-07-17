@@ -81,6 +81,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTab => 'Home';
 
   @override
+  String get backToHome => 'Back to Home';
+
+  @override
+  String get takeAnotherExam => 'Take another exam';
+
+  @override
+  String get done => 'Done';
+
+  @override
   String get learnTab => 'Learn';
 
   @override

@@ -151,6 +151,13 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - Backend Attempt History is separate from local Progress: it currently persists
   completed Exam details only; Practice remains device-local until a future
   authenticated contract is deliberately added.
+- Completed result, attempt-detail, and contribution-success flows share one
+  return-to-Home operation: select shell tab 0 and pop the root Navigator to its
+  first route. It does not push another Home route; ordinary Back remains intact.
+- Navigation, AttemptRepository, and ProgressStore scopes wrap `MaterialApp` so
+  focused routes above the shell inherit the same app-level dependencies.
+- Flutter API adapters use bounded requests (15 seconds by default). Timeout and
+  other transport failures remain retryable and must not discard learner drafts.
 
 ## Roadmap Summary
 - V1: basic taxonomy, browse question sets, take quiz, view results, upload documents/exams.

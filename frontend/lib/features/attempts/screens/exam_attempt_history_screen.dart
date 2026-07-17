@@ -152,6 +152,7 @@ class _ExamAttemptDetailScreenState extends State<ExamAttemptDetailScreen> {
         return QuizResultScreen(
           result: attempt.result,
           recordLocalProgress: false,
+          showTakeAnotherExam: false,
         );
       },
     );

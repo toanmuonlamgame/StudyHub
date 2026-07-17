@@ -13,6 +13,11 @@ Progress shows real completed Exam and Practice summaries stored on the current
 device without invented history, charts, or streaks. Settings exposes only the
 functional language preference plus app/safety information.
 
+Completed Result/Review, Attempt detail, and contribution confirmation screens
+offer a direct Back to Home action. It selects the existing Home tab and clears
+obsolete deep routes instead of stacking another shell; normal Back navigation
+still follows the browsing hierarchy, and active Exams keep discard protection.
+
 ## Device-local progress
 
 `ProgressStore` separates Progress UI from persistence. The default
@@ -142,6 +147,10 @@ flutter run \
 
 These values select a development data source and URL only. Do not place API
 keys, tokens, passwords, or other secrets in `dart-define` values.
+
+Learning, contribution, and attempt API adapters apply a 15-second request
+timeout by default. Existing loading/error/retry surfaces handle an unavailable
+backend without silently losing a creator draft or hiding a completed result.
 
 Run checks with:
 

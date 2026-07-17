@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../../core/api_request.dart';
 import '../models/answer_check_result.dart';
 import '../models/answer_option.dart';
 import '../models/question.dart';
@@ -15,12 +16,16 @@ import 'learning_result_json_mapper.dart';
 import '../../materials/models/study_material.dart';
 
 class ApiLearningRepository implements LearningRepository {
-  ApiLearningRepository({required String baseUrl, http.Client? client})
-    : _baseUri = _parseBaseUrl(baseUrl),
-      _client = client ?? http.Client();
+  ApiLearningRepository({
+    required String baseUrl,
+    http.Client? client,
+    this.requestTimeout = defaultApiRequestTimeout,
+  }) : _baseUri = _parseBaseUrl(baseUrl),
+       _client = client ?? http.Client();
 
   final Uri _baseUri;
   final http.Client _client;
+  final Duration requestTimeout;
 
   @override
   Future<List<Subject>> getSubjects() async {
@@ -74,7 +79,7 @@ class ApiLearningRepository implements LearningRepository {
     final uri = _endpoint(
       'learning/question-sets',
     ).replace(queryParameters: queryParameters);
-    final response = await _client.get(uri);
+    final response = await withApiTimeout(_client.get(uri), requestTimeout);
     final body = _decodeResponse(response, 'listQuestionSets');
     final parsedNextCursor = _readNullableString(body, 'nextCursor');
 
@@ -120,8 +125,13 @@ class ApiLearningRepository implements LearningRepository {
     if (normalizedQuery != null && normalizedQuery.isNotEmpty) {
       queryParameters['q'] = normalizedQuery;
     }
-    final response = await _client.get(
-      _endpoint('learning/materials').replace(queryParameters: queryParameters),
+    final response = await withApiTimeout(
+      _client.get(
+        _endpoint(
+          'learning/materials',
+        ).replace(queryParameters: queryParameters),
+      ),
+      requestTimeout,
     );
     final body = _decodeResponse(response, 'listStudyMaterials');
     final nextCursor = _readNullableString(body, 'nextCursor');
@@ -157,12 +167,15 @@ class ApiLearningRepository implements LearningRepository {
     required String questionId,
     required String selectedAnswerOptionId,
   }) async {
-    final response = await _client.post(
-      _endpoint(
-        'learning/questions/${Uri.encodeComponent(questionId)}/check-answer',
+    final response = await withApiTimeout(
+      _client.post(
+        _endpoint(
+          'learning/questions/${Uri.encodeComponent(questionId)}/check-answer',
+        ),
+        headers: const {'content-type': 'application/json'},
+        body: jsonEncode({'selectedAnswerOptionId': selectedAnswerOptionId}),
       ),
-      headers: const {'content-type': 'application/json'},
-      body: jsonEncode({'selectedAnswerOptionId': selectedAnswerOptionId}),
+      requestTimeout,
     );
     final body = _decodeResponse(response, 'checkAnswer');
     return _answerCheckResultFromJson(_readObject(body, 'result'));
@@ -173,22 +186,28 @@ class ApiLearningRepository implements LearningRepository {
     required String questionSetId,
     required Map<String, String> selectedAnswerOptionIdsByQuestionId,
   }) async {
-    final response = await _client.post(
-      _endpoint(
-        'learning/question-sets/${Uri.encodeComponent(questionSetId)}/submit',
+    final response = await withApiTimeout(
+      _client.post(
+        _endpoint(
+          'learning/question-sets/${Uri.encodeComponent(questionSetId)}/submit',
+        ),
+        headers: const {'content-type': 'application/json'},
+        body: jsonEncode({
+          'selectedAnswerOptionIdsByQuestionId':
+              selectedAnswerOptionIdsByQuestionId,
+        }),
       ),
-      headers: const {'content-type': 'application/json'},
-      body: jsonEncode({
-        'selectedAnswerOptionIdsByQuestionId':
-            selectedAnswerOptionIdsByQuestionId,
-      }),
+      requestTimeout,
     );
     final body = _decodeResponse(response, 'submitQuiz');
     return quizResultFromJson(_readObject(body, 'result'));
   }
 
   Future<Map<String, dynamic>> _get(String path) async {
-    final response = await _client.get(_endpoint(path));
+    final response = await withApiTimeout(
+      _client.get(_endpoint(path)),
+      requestTimeout,
+    );
     return _decodeResponse(response, 'GET /$path');
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:frontend/app/app_navigation.dart';
 import 'package:frontend/features/attempts/attempt_repository_scope.dart';
 import 'package:frontend/features/attempts/models/exam_attempt.dart';
 import 'package:frontend/features/attempts/repositories/attempt_repository.dart';
@@ -18,6 +19,21 @@ import 'package:frontend/features/progress/progress_store_scope.dart';
 import 'package:frontend/features/progress/repositories/progress_store.dart';
 
 void main() {
+  test('reselecting a navigation tab does not emit duplicate changes', () {
+    final controller = AppNavigationController();
+    addTearDown(controller.dispose);
+    var changes = 0;
+    controller.addListener(() => changes++);
+
+    controller.selectTab(2);
+    controller.selectTab(2);
+    controller.selectTab(0);
+    controller.selectTab(0);
+
+    expect(changes, 2);
+    expect(controller.selectedTab, 0);
+  });
+
   testWidgets('Exam result shows save loading then saved state exactly once', (
     tester,
   ) async {
@@ -157,6 +173,63 @@ void main() {
     expect(find.text('Correct answer: Answer'), findsOneWidget);
     expect(progressStore.saveCalls, 0);
   });
+
+  testWidgets(
+    'attempt detail returns directly to Home and clears deep routes',
+    (tester) async {
+      final repository = _FakeAttemptRepository(attempt: _attempt);
+      final navigationController = AppNavigationController()..selectTab(2);
+      addTearDown(navigationController.dispose);
+      await tester.pumpWidget(
+        AppNavigationScope(
+          controller: navigationController,
+          child: MaterialApp(
+            locale: const Locale('en'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: Center(
+                  child: FilledButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ExamAttemptDetailScreen(
+                          repository: repository,
+                          attemptId: _attempt.id,
+                        ),
+                      ),
+                    ),
+                    child: const Text('Open attempt detail'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open attempt detail'));
+      await tester.pumpAndSettle();
+      expect(find.text('Exam Result'), findsOneWidget);
+
+      final homeAction = find.byKey(const ValueKey('result-back-to-home'));
+      await tester.scrollUntilVisible(homeAction, 250);
+      await tester.tap(homeAction);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Open attempt detail'), findsOneWidget);
+      expect(find.text('Exam Result'), findsNothing);
+      expect(navigationController.selectedTab, 0);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.text('Exam Result'), findsNothing);
+    },
+  );
 
   testWidgets('history uses Vietnamese interface strings', (tester) async {
     final repository = _FakeAttemptRepository(attempt: _attempt);

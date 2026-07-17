@@ -624,3 +624,20 @@ level.
 - No unauthenticated approve/reject routes are exposed.
 - Memory and Prisma implementations share centralized validation and lifecycle
   behavior behind `LearningService`.
+
+## 2026-07-17 - Completion Navigation And App Scope Boundary
+Decision: completed flows use one app navigation operation that selects the Home
+tab and removes obsolete focused routes back to the existing shell root.
+
+Rules:
+- Do not push a second Home or shell route.
+- Ordinary browsing Back behavior remains unchanged.
+- An active Exam still requires explicit discard confirmation before leaving.
+- App navigation, attempt history, and local progress dependencies wrap
+  `MaterialApp` so every root-Navigator route inherits the same instances.
+- Flutter API requests are bounded to avoid an indefinite loading state; a
+  transport timeout is reported through the existing retry/error UI without
+  erasing drafts or trusted completed results.
+
+Reason: completion actions should return learners to a predictable top-level
+state, while unfinished work and repository ownership remain protected.

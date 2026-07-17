@@ -2,17 +2,22 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../../core/api_request.dart';
 import '../../learning/repositories/learning_result_json_mapper.dart';
 import '../models/exam_attempt.dart';
 import 'attempt_repository.dart';
 
 class ApiAttemptRepository extends AttemptRepository {
-  ApiAttemptRepository({required String baseUrl, http.Client? client})
-    : _baseUri = _parseBaseUrl(baseUrl),
-      _client = client ?? http.Client();
+  ApiAttemptRepository({
+    required String baseUrl,
+    http.Client? client,
+    this.requestTimeout = defaultApiRequestTimeout,
+  }) : _baseUri = _parseBaseUrl(baseUrl),
+       _client = client ?? http.Client();
 
   final Uri _baseUri;
   final http.Client _client;
+  final Duration requestTimeout;
 
   @override
   void dispose() {
@@ -24,17 +29,20 @@ class ApiAttemptRepository extends AttemptRepository {
   Future<ExamAttemptDetail> saveExamAttempt(
     ExamAttemptSaveRequest request,
   ) async {
-    final response = await _client.post(
-      _endpoint(
-        'learning/question-sets/${Uri.encodeComponent(request.questionSetId)}/attempts',
+    final response = await withApiTimeout(
+      _client.post(
+        _endpoint(
+          'learning/question-sets/${Uri.encodeComponent(request.questionSetId)}/attempts',
+        ),
+        headers: const {'content-type': 'application/json'},
+        body: jsonEncode({
+          'submissionId': request.submissionId,
+          'startedAt': request.startedAt.toUtc().toIso8601String(),
+          'selectedAnswerOptionIdsByQuestionId':
+              request.selectedAnswerOptionIdsByQuestionId,
+        }),
       ),
-      headers: const {'content-type': 'application/json'},
-      body: jsonEncode({
-        'submissionId': request.submissionId,
-        'startedAt': request.startedAt.toUtc().toIso8601String(),
-        'selectedAnswerOptionIdsByQuestionId':
-            request.selectedAnswerOptionIdsByQuestionId,
-      }),
+      requestTimeout,
     );
     final body = _decodeResponse(response, 'saveExamAttempt');
     final attempt = _attemptDetailFromJson(_readObject(body, 'attempt'));
@@ -44,7 +52,10 @@ class ApiAttemptRepository extends AttemptRepository {
 
   @override
   Future<List<ExamAttemptSummary>> listExamAttempts() async {
-    final response = await _client.get(_endpoint('learning/attempts'));
+    final response = await withApiTimeout(
+      _client.get(_endpoint('learning/attempts')),
+      requestTimeout,
+    );
     final body = _decodeResponse(response, 'listExamAttempts');
     return _readObjectList(
       body,
@@ -54,8 +65,11 @@ class ApiAttemptRepository extends AttemptRepository {
 
   @override
   Future<ExamAttemptDetail?> getExamAttempt(String attemptId) async {
-    final response = await _client.get(
-      _endpoint('learning/attempts/${Uri.encodeComponent(attemptId)}'),
+    final response = await withApiTimeout(
+      _client.get(
+        _endpoint('learning/attempts/${Uri.encodeComponent(attemptId)}'),
+      ),
+      requestTimeout,
     );
     if (response.statusCode == 404) {
       return null;

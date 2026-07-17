@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -92,6 +93,22 @@ void main() {
 
     expect(repository.listExamAttempts(), throwsA(isA<AttemptApiException>()));
   });
+
+  test(
+    'ApiAttemptRepository times out when the API does not respond',
+    () async {
+      final repository = ApiAttemptRepository(
+        baseUrl: 'http://localhost:3000',
+        client: MockClient((_) => Completer<http.Response>().future),
+        requestTimeout: const Duration(milliseconds: 1),
+      );
+
+      await expectLater(
+        repository.listExamAttempts(),
+        throwsA(isA<TimeoutException>()),
+      );
+    },
+  );
 }
 
 final _summaryJson = <String, Object?>{

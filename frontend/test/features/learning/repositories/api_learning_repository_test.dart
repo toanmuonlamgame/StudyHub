@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -389,6 +390,19 @@ void main() {
           contains('subjects'),
         ),
       ),
+    );
+  });
+
+  test('times out when the learning API does not respond', () async {
+    final repository = ApiLearningRepository(
+      baseUrl: 'http://studyhub.test',
+      client: MockClient((_) => Completer<http.Response>().future),
+      requestTimeout: const Duration(milliseconds: 1),
+    );
+
+    await expectLater(
+      repository.getSubjects(),
+      throwsA(isA<TimeoutException>()),
     );
   });
 }

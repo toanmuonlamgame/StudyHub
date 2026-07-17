@@ -184,6 +184,25 @@ void main() {
     );
   });
 
+  test(
+    'API contribution times out without losing the submitted draft',
+    () async {
+      final draft = _validDraft();
+      final repository = ApiContributionRepository(
+        baseUrl: 'http://localhost:3000',
+        client: MockClient((_) => Completer<http.Response>().future),
+        requestTimeout: const Duration(milliseconds: 1),
+      );
+
+      await expectLater(
+        repository.submitForReview(draft),
+        throwsA(isA<TimeoutException>()),
+      );
+      expect(draft.title, 'Community set');
+      expect(draft.questions, hasLength(1));
+    },
+  );
+
   testWidgets('Home opens localized contribution introduction lazily', (
     tester,
   ) async {
@@ -296,6 +315,18 @@ void main() {
 
     expect(find.text('Pending Review'), findsOneWidget);
     expect(find.text('Community set'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('submission-back-to-home')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('home-hub-list')), findsOneWidget);
+    expect(
+      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      0,
+    );
+    expect(find.text('Pending Review'), findsNothing);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Pending Review'), findsNothing);
   });
 
   testWidgets('submission failure preserves the creator draft', (tester) async {
@@ -377,7 +408,10 @@ void main() {
       find.byKey(const Key('paste-exam-input')),
       '/question: 2 + 2?\n/answer1: 3\n/answer2: 4\n/correct: 2\n/explanation: Basic addition.',
     );
-    await tester.tap(find.text('Check and preview'));
+    final previewAction = find.text('Check and preview');
+    await tester.ensureVisible(previewAction);
+    await tester.pumpAndSettle();
+    await tester.tap(previewAction);
     await tester.pumpAndSettle();
 
     expect(find.text('1 recognized'), findsOneWidget);
@@ -389,6 +423,62 @@ void main() {
       find.widgetWithText(FilledButton, 'Edit recognized questions'),
     );
     expect(importButton.onPressed, isNotNull);
+  });
+
+  testWidgets('pasted exam submission returns directly to Home', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
+    final tile = find.byKey(const ValueKey('contribution-home-tile'));
+    await tester.scrollUntilVisible(tile, 300, scrollable: _homeScrollable());
+    await tester.drag(_homeScrollable(), const Offset(0, -180));
+    await tester.pumpAndSettle();
+    await tester.tap(tile);
+    await tester.pumpAndSettle();
+    final pasteAction = find.text('Paste full exam');
+    await tester.ensureVisible(pasteAction);
+    await tester.pumpAndSettle();
+    await tester.tap(pasteAction);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('paste-exam-input')),
+      '/question: 2 + 2?\n/answer1: 3\n/answer2: 4\n/correct: 2',
+    );
+    final previewAction = find.text('Check and preview');
+    await tester.ensureVisible(previewAction);
+    await tester.pumpAndSettle();
+    await tester.tap(previewAction);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit recognized questions'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('JavaScript Basics').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Title'),
+      'Pasted set',
+    );
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Review and finish'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit for Review'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit for Review').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pending Review'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('submission-back-to-home')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('home-hub-list')), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Pending Review'), findsNothing);
   });
 
   testWidgets('paste exam blocks import while severe errors remain', (

@@ -13,6 +13,8 @@ import 'package:frontend/features/learning/models/quiz_result.dart';
 import 'package:frontend/features/learning/models/subject.dart';
 import 'package:frontend/features/learning/repositories/learning_repository.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
+import 'package:frontend/features/learning/screens/mode_selection_screen.dart';
+import 'package:frontend/features/learning/screens/quiz_screen.dart';
 import 'package:frontend/features/learning/screens/quiz_result_screen.dart';
 import 'package:frontend/l10n/app_localizations.dart';
 
@@ -281,6 +283,32 @@ void main() {
     );
   });
 
+  testWidgets('active Exam Mode keeps discard confirmation on Back', (
+    WidgetTester tester,
+  ) async {
+    await _openJavaScriptBasicsQuiz(tester);
+    await _selectAnswer(tester, 'const');
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Leave exam?'), findsOneWidget);
+    expect(
+      find.text('Your selected answers will be discarded.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Keep learning'));
+    await tester.pumpAndSettle();
+    expect(find.byType(QuizScreen), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Discard progress'));
+    await tester.pumpAndSettle();
+    expect(find.text('Question 1 of 3'), findsNothing);
+    expect(find.byType(ModeSelectionScreen), findsOneWidget);
+  });
+
   testWidgets('submits a quiz and shows score with answer review', (
     WidgetTester tester,
   ) async {
@@ -319,6 +347,24 @@ void main() {
     await tester.scrollUntilVisible(secondQuestion, 250);
 
     expect(find.text('Correct'), findsWidgets);
+    expect(find.text('Result saved'), findsOneWidget);
+
+    final homeAction = find.byKey(const ValueKey('result-back-to-home'));
+    await tester.scrollUntilVisible(homeAction, 250);
+    await tester.tap(homeAction);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('home-hub-list')), findsOneWidget);
+    expect(_navigationLabel('Home'), findsOneWidget);
+    expect(
+      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      0,
+    );
+    expect(find.text('Exam Result'), findsNothing);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Exam Result'), findsNothing);
+    expect(find.byKey(const ValueKey('home-hub-list')), findsOneWidget);
   });
 
   testWidgets('practice mode checks an answer before showing feedback', (
@@ -386,6 +432,13 @@ void main() {
     expect(find.text('Answer review'), findsOneWidget);
     expect(find.text('Your answer: const'), findsOneWidget);
     expect(find.text('Correct answer: let'), findsOneWidget);
+
+    final homeAction = find.byKey(const ValueKey('result-back-to-home'));
+    await tester.scrollUntilVisible(homeAction, 250);
+    await tester.tap(homeAction);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('home-hub-list')), findsOneWidget);
+    expect(find.text('Practice Result'), findsNothing);
   });
 
   testWidgets('renders answer review directly from QuizResult', (

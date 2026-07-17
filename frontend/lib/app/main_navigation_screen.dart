@@ -10,17 +10,20 @@ import '../features/materials/screens/study_material_list_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/settings/settings_placeholder_screen.dart';
 import '../l10n/app_localizations_x.dart';
+import 'app_navigation.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({
     super.key,
     required this.learningRepository,
+    required this.navigationController,
     required this.contributionRepository,
     required this.localeSelection,
     required this.onLocaleSelected,
   });
 
   final LearningRepository learningRepository;
+  final AppNavigationController navigationController;
   final ContributionRepository contributionRepository;
   final AppLocaleSelection localeSelection;
   final ValueChanged<AppLocaleSelection> onLocaleSelected;
@@ -30,18 +33,25 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _selectedIndex = 0;
   final Map<int, Widget> _builtTabs = {};
 
   @override
   void initState() {
     super.initState();
+    widget.navigationController.addListener(_handleNavigationChanged);
     _builtTabs[0] = _buildHome();
   }
 
   @override
   void didUpdateWidget(covariant MainNavigationScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (!identical(
+      oldWidget.navigationController,
+      widget.navigationController,
+    )) {
+      oldWidget.navigationController.removeListener(_handleNavigationChanged);
+      widget.navigationController.addListener(_handleNavigationChanged);
+    }
     if (oldWidget.localeSelection != widget.localeSelection &&
         _builtTabs.containsKey(3)) {
       _builtTabs[3] = _buildTab(3);
@@ -51,17 +61,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final selectedIndex = widget.navigationController.selectedTab;
 
     return Scaffold(
       body: IndexedStack(
-        index: _selectedIndex,
+        index: selectedIndex,
         children: List.generate(
           4,
           (index) => _builtTabs[index] ?? const SizedBox.shrink(),
         ),
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
+        selectedIndex: selectedIndex,
         onDestinationSelected: _selectTab,
         destinations: [
           NavigationDestination(
@@ -90,13 +101,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _selectTab(int index) {
-    if (index == _selectedIndex) {
-      return;
-    }
-    setState(() {
-      _builtTabs[index] ??= _buildTab(index);
-      _selectedIndex = index;
-    });
+    widget.navigationController.selectTab(index);
+  }
+
+  void _handleNavigationChanged() {
+    if (!mounted) return;
+    final selectedIndex = widget.navigationController.selectedTab;
+    setState(() => _builtTabs[selectedIndex] ??= _buildTab(selectedIndex));
+  }
+
+  @override
+  void dispose() {
+    widget.navigationController.removeListener(_handleNavigationChanged);
+    super.dispose();
   }
 
   Widget _buildTab(int index) {

@@ -230,6 +230,24 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get homeTab;
 
+  /// No description provided for @backToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Home'**
+  String get backToHome;
+
+  /// No description provided for @takeAnotherExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Take another exam'**
+  String get takeAnotherExam;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
   /// No description provided for @learnTab.
   ///
   /// In en, this message translates to:

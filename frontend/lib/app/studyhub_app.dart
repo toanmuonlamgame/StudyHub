@@ -13,6 +13,7 @@ import '../features/progress/progress_store_scope.dart';
 import '../features/progress/repositories/progress_store.dart';
 import '../features/progress/repositories/shared_preferences_progress_store.dart';
 import '../l10n/app_localizations.dart';
+import 'app_navigation.dart';
 import 'main_navigation_screen.dart';
 import '../features/attempts/attempt_repository_scope.dart';
 import '../features/attempts/repositories/attempt_repository.dart';
@@ -47,6 +48,8 @@ class _StudyHubAppState extends State<StudyHubApp> {
   late bool _ownsProgressStore;
   late AttemptRepository _attemptRepository;
   late bool _ownsAttemptRepository;
+  final AppNavigationController _navigationController =
+      AppNavigationController();
 
   @override
   void initState() {
@@ -79,22 +82,26 @@ class _StudyHubAppState extends State<StudyHubApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'StudyHub',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      locale: _localeSelection.locale,
-      supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: AttemptRepositoryScope(
-        repository: _attemptRepository,
-        child: ProgressStoreScope(
-          progressStore: _progressStore,
-          child: MainNavigationScreen(
-            learningRepository: widget.learningRepository,
-            contributionRepository: widget.contributionRepository,
-            localeSelection: _localeSelection,
-            onLocaleSelected: _selectLocale,
+    return AttemptRepositoryScope(
+      repository: _attemptRepository,
+      child: ProgressStoreScope(
+        progressStore: _progressStore,
+        child: AppNavigationScope(
+          controller: _navigationController,
+          child: MaterialApp(
+            title: 'StudyHub',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light,
+            locale: _localeSelection.locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: MainNavigationScreen(
+              navigationController: _navigationController,
+              learningRepository: widget.learningRepository,
+              contributionRepository: widget.contributionRepository,
+              localeSelection: _localeSelection,
+              onLocaleSelected: _selectLocale,
+            ),
           ),
         ),
       ),
@@ -109,6 +116,7 @@ class _StudyHubAppState extends State<StudyHubApp> {
     if (_ownsAttemptRepository) {
       _attemptRepository.dispose();
     }
+    _navigationController.dispose();
     super.dispose();
   }
 

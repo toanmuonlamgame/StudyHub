@@ -14,8 +14,19 @@ Exam session, trusted result review, attempt persistence, and history flow.
   idempotent retry, snapshot review data, ownership filtering, and history detail.
 - [x] Add Flutter attempt save loading/failure/retry states and an Attempt History
   entry from Progress without weakening device-local Practice summaries.
+- [x] Checkpoint 3A: add one reusable completion-to-Home action that selects the
+  Home tab, removes obsolete deep routes, and never pushes a duplicate Home.
+- [x] Keep normal browsing Back behavior and active Exam discard confirmation.
+- [x] Make app-level navigation, attempt, and progress scopes available to
+  routes pushed above the shell.
+- [x] Bound Learning, Contribution, and Attempt API requests with a 15-second
+  timeout while preserving retryable screen state.
 - [ ] Review and apply migration `20260717120000_exam_attempt_history` manually.
+- [ ] Review and apply migration `20260715090000_question_set_submission_foundation`
+  manually if it is not already present in the target database.
 - [ ] Smoke-test save/list/detail in Prisma mode and one real Flutter API Exam.
+- [ ] Smoke-test one real Flutter API manual contribution and one pasted-exam
+  contribution after the submission migration is applied.
 - [ ] Replace the temporary backend demo identity boundary with authenticated ownership.
 
 ## Phase 1 Checkpoint

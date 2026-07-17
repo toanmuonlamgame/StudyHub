@@ -80,6 +80,15 @@ class AppLocalizationsVi extends AppLocalizations {
   String get homeTab => 'Trang chủ';
 
   @override
+  String get backToHome => 'Về Trang chủ';
+
+  @override
+  String get takeAnotherExam => 'Làm đề khác';
+
+  @override
+  String get done => 'Xong';
+
+  @override
   String get learnTab => 'Học tập';
 
   @override
