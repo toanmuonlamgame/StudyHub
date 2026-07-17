@@ -345,6 +345,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String examAnswerStatus(Object answered, Object unanswered) {
+    return '$answered answered · $unanswered unanswered';
+  }
+
+  @override
   String get instantFeedback => 'Instant feedback';
 
   @override
@@ -391,6 +396,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get answerEveryQuestion => 'Answer every question before submitting.';
 
   @override
+  String get submitExamTitle => 'Submit exam?';
+
+  @override
+  String submitWithUnanswered(Object count) {
+    return '$count unanswered question(s) remain. Submit anyway?';
+  }
+
+  @override
+  String get submitAnyway => 'Submit anyway';
+
+  @override
+  String get leaveExamTitle => 'Leave exam?';
+
+  @override
+  String get discardExamProgressMessage =>
+      'Your selected answers will be discarded.';
+
+  @override
+  String get keepLearning => 'Keep learning';
+
+  @override
+  String get discardProgress => 'Discard progress';
+
+  @override
   String get quizSubmitError => 'Quiz could not be submitted.';
 
   @override
@@ -417,6 +446,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wrongAnswers => 'Wrong answers';
 
   @override
+  String get unansweredAnswers => 'Unanswered';
+
+  @override
   String get totalQuestions => 'Total questions';
 
   @override
@@ -429,6 +461,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notAnswered => 'Not answered';
+
+  @override
+  String get unanswered => 'Unanswered';
+
+  @override
+  String get yourChoice => 'Your answer';
+
+  @override
+  String get correctChoice => 'Correct answer';
+
+  @override
+  String get explanation => 'Explanation';
 
   @override
   String get backToQuestionSet => 'Back to Question Set';

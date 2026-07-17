@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/app_motion.dart';
+import '../../../core/app_design_tokens.dart';
 import '../../progress/models/completed_learning_session.dart';
 import '../../progress/progress_store_scope.dart';
 import '../../progress/repositories/progress_store.dart';
 import '../../../l10n/app_localizations_x.dart';
+import '../models/answer_option.dart';
 import '../models/answer_review.dart';
 import '../models/quiz_mode.dart';
 import '../models/quiz_result.dart';
@@ -154,30 +156,48 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _ResultStat(
-                            label: l10n.correctAnswers,
-                            value: result.correctCount.toString(),
-                            color: theme.colorScheme.secondary,
-                          ),
-                        ),
-                        Expanded(
-                          child: _ResultStat(
-                            label: l10n.wrongAnswers,
-                            value: result.wrongCount.toString(),
-                            color: theme.colorScheme.error,
-                          ),
-                        ),
-                        Expanded(
-                          child: _ResultStat(
-                            label: l10n.totalQuestions,
-                            value: result.totalCount.toString(),
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ],
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final statWidth = (constraints.maxWidth - 12) / 2;
+                        return Wrap(
+                          spacing: 12,
+                          runSpacing: 16,
+                          children: [
+                            SizedBox(
+                              width: statWidth,
+                              child: _ResultStat(
+                                label: l10n.correctAnswers,
+                                value: result.correctCount.toString(),
+                                color: theme.colorScheme.secondary,
+                              ),
+                            ),
+                            SizedBox(
+                              width: statWidth,
+                              child: _ResultStat(
+                                label: l10n.wrongAnswers,
+                                value: result.wrongCount.toString(),
+                                color: theme.colorScheme.error,
+                              ),
+                            ),
+                            SizedBox(
+                              width: statWidth,
+                              child: _ResultStat(
+                                label: l10n.unansweredAnswers,
+                                value: result.unansweredCount.toString(),
+                                color: theme.colorScheme.tertiary,
+                              ),
+                            ),
+                            SizedBox(
+                              width: statWidth,
+                              child: _ResultStat(
+                                label: l10n.totalQuestions,
+                                value: result.totalCount.toString(),
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -245,15 +265,28 @@ class _AnswerReviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final statusColor = answerReview.isCorrect
-        ? theme.colorScheme.secondary
-        : theme.colorScheme.error;
+    final status = answerReview.status;
+    final statusColor = switch (status) {
+      AnswerReviewStatus.correct => theme.colorScheme.secondary,
+      AnswerReviewStatus.incorrect => theme.colorScheme.error,
+      AnswerReviewStatus.unanswered => theme.colorScheme.tertiary,
+    };
+    final statusIcon = switch (status) {
+      AnswerReviewStatus.correct => Icons.check_circle_outline,
+      AnswerReviewStatus.incorrect => Icons.cancel_outlined,
+      AnswerReviewStatus.unanswered => Icons.help_outline,
+    };
+    final statusLabel = switch (status) {
+      AnswerReviewStatus.correct => l10n.correct,
+      AnswerReviewStatus.incorrect => l10n.incorrect,
+      AnswerReviewStatus.unanswered => l10n.unanswered,
+    };
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadii.card),
         border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
@@ -261,13 +294,7 @@ class _AnswerReviewCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                answerReview.isCorrect
-                    ? Icons.check_circle_outline
-                    : Icons.cancel_outlined,
-                color: statusColor,
-                size: 22,
-              ),
+              Icon(statusIcon, color: statusColor, size: 22),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -278,13 +305,24 @@ class _AnswerReviewCard extends StatelessWidget {
                 ),
               ),
               Text(
-                answerReview.isCorrect ? l10n.correct : l10n.incorrect,
+                statusLabel,
                 style: theme.textTheme.labelLarge?.copyWith(color: statusColor),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Text(answerReview.questionText, style: theme.textTheme.titleMedium),
+          if (answerReview.answerOptions.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            for (final option in answerReview.answerOptions) ...[
+              _ReviewedAnswerOption(
+                option: option,
+                selected: option.id == answerReview.selectedAnswerOptionId,
+                correct: option.id == answerReview.correctAnswerOptionId,
+              ),
+              const SizedBox(height: 8),
+            ],
+          ],
           const SizedBox(height: 12),
           Text(
             l10n.yourAnswer(
@@ -300,6 +338,87 @@ class _AnswerReviewCard extends StatelessWidget {
           Text(
             l10n.correctAnswer(answerReview.correctAnswerText),
             style: TextStyle(color: theme.colorScheme.secondary),
+          ),
+          if (answerReview.explanation?.trim().isNotEmpty == true) ...[
+            const SizedBox(height: 14),
+            Text(
+              l10n.explanation,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(answerReview.explanation!),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewedAnswerOption extends StatelessWidget {
+  const _ReviewedAnswerOption({
+    required this.option,
+    required this.selected,
+    required this.correct,
+  });
+
+  final AnswerOption option;
+  final bool selected;
+  final bool correct;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final color = correct
+        ? theme.colorScheme.secondary
+        : selected
+        ? theme.colorScheme.error
+        : theme.colorScheme.onSurfaceVariant;
+    final marker = correct
+        ? Icons.check_circle_outline
+        : selected
+        ? Icons.person_outline
+        : Icons.circle_outlined;
+    final labels = [
+      if (selected) l10n.yourChoice,
+      if (correct) l10n.correctChoice,
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: selected || correct ? 0.08 : 0.03),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+        borderRadius: BorderRadius.circular(AppRadii.control),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(marker, color: color, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(option.text),
+                if (labels.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    labels.join(' · '),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),

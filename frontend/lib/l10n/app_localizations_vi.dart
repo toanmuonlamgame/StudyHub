@@ -341,6 +341,11 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String examAnswerStatus(Object answered, Object unanswered) {
+    return 'Đã trả lời $answered · Chưa trả lời $unanswered';
+  }
+
+  @override
   String get instantFeedback => 'Phản hồi ngay';
 
   @override
@@ -388,6 +393,29 @@ class AppLocalizationsVi extends AppLocalizations {
       'Hãy trả lời tất cả câu hỏi trước khi nộp bài.';
 
   @override
+  String get submitExamTitle => 'Nộp bài kiểm tra?';
+
+  @override
+  String submitWithUnanswered(Object count) {
+    return 'Còn $count câu chưa trả lời. Vẫn nộp bài?';
+  }
+
+  @override
+  String get submitAnyway => 'Vẫn nộp bài';
+
+  @override
+  String get leaveExamTitle => 'Rời bài kiểm tra?';
+
+  @override
+  String get discardExamProgressMessage => 'Các đáp án bạn đã chọn sẽ bị hủy.';
+
+  @override
+  String get keepLearning => 'Tiếp tục làm bài';
+
+  @override
+  String get discardProgress => 'Hủy tiến trình';
+
+  @override
   String get quizSubmitError => 'Không thể nộp bài.';
 
   @override
@@ -414,6 +442,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get wrongAnswers => 'Số câu sai';
 
   @override
+  String get unansweredAnswers => 'Chưa trả lời';
+
+  @override
   String get totalQuestions => 'Tổng số câu';
 
   @override
@@ -426,6 +457,18 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get notAnswered => 'Chưa trả lời';
+
+  @override
+  String get unanswered => 'Chưa trả lời';
+
+  @override
+  String get yourChoice => 'Đáp án của bạn';
+
+  @override
+  String get correctChoice => 'Đáp án đúng';
+
+  @override
+  String get explanation => 'Giải thích';
 
   @override
   String get backToQuestionSet => 'Quay lại bộ câu hỏi';

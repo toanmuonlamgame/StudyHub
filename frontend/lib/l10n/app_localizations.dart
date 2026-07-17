@@ -686,6 +686,12 @@ abstract class AppLocalizations {
   /// **'{count} answered'**
   String answeredCount(Object count);
 
+  /// No description provided for @examAnswerStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'{answered} answered · {unanswered} unanswered'**
+  String examAnswerStatus(Object answered, Object unanswered);
+
   /// No description provided for @instantFeedback.
   ///
   /// In en, this message translates to:
@@ -770,6 +776,48 @@ abstract class AppLocalizations {
   /// **'Answer every question before submitting.'**
   String get answerEveryQuestion;
 
+  /// No description provided for @submitExamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit exam?'**
+  String get submitExamTitle;
+
+  /// No description provided for @submitWithUnanswered.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unanswered question(s) remain. Submit anyway?'**
+  String submitWithUnanswered(Object count);
+
+  /// No description provided for @submitAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit anyway'**
+  String get submitAnyway;
+
+  /// No description provided for @leaveExamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave exam?'**
+  String get leaveExamTitle;
+
+  /// No description provided for @discardExamProgressMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your selected answers will be discarded.'**
+  String get discardExamProgressMessage;
+
+  /// No description provided for @keepLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep learning'**
+  String get keepLearning;
+
+  /// No description provided for @discardProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard progress'**
+  String get discardProgress;
+
   /// No description provided for @quizSubmitError.
   ///
   /// In en, this message translates to:
@@ -818,6 +866,12 @@ abstract class AppLocalizations {
   /// **'Wrong answers'**
   String get wrongAnswers;
 
+  /// No description provided for @unansweredAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Unanswered'**
+  String get unansweredAnswers;
+
   /// No description provided for @totalQuestions.
   ///
   /// In en, this message translates to:
@@ -841,6 +895,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not answered'**
   String get notAnswered;
+
+  /// No description provided for @unanswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Unanswered'**
+  String get unanswered;
+
+  /// No description provided for @yourChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answer'**
+  String get yourChoice;
+
+  /// No description provided for @correctChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct answer'**
+  String get correctChoice;
+
+  /// No description provided for @explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Explanation'**
+  String get explanation;
 
   /// No description provided for @backToQuestionSet.
   ///

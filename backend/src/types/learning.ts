@@ -115,11 +115,13 @@ export interface Question {
 export interface AnswerReview {
   questionId: string;
   questionText: string;
-  selectedAnswerOptionId: string;
-  selectedAnswerText: string;
+  answerOptions: AnswerOption[];
+  selectedAnswerOptionId: string | null;
+  selectedAnswerText: string | null;
   correctAnswerOptionId: string;
   correctAnswerText: string;
   isCorrect: boolean;
+  explanation: string | null;
 }
 
 export interface AnswerCheckResult {
@@ -129,6 +131,7 @@ export interface AnswerCheckResult {
   correctAnswerOptionId: string;
   correctAnswerText: string;
   isCorrect: boolean;
+  explanation: string | null;
 }
 
 export interface QuizResult {
@@ -137,6 +140,7 @@ export interface QuizResult {
   totalQuestions: number;
   correctAnswers: number;
   wrongAnswers: number;
+  unansweredAnswers: number;
   percentageScore: number;
   answerReviews: AnswerReview[];
 }

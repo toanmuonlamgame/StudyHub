@@ -130,6 +130,13 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
   mobile quality requirements; representative-device review is still required.
 - Practice Mode ends with a summary assembled only from trusted per-question
   `checkAnswer` responses; Exam Mode continues to use backend `submitQuiz`.
+- Exam Mode supports one-question-at-a-time previous/next navigation, retained
+  answer changes, protected exit after meaningful progress, and explicit
+  submission with unanswered questions. Backend scoring separates incorrect
+  from unanswered answers and rounds percentage to the nearest whole percent.
+- Post-submit review may include all safe answer options and an optional
+  explanation. Attempt persistence and attempt-history UI are intentionally
+  deferred to accelerated MVP Checkpoint 2.
 - Local Progress persists only post-result metadata from Exam and Practice. It
   keeps the newest 100 sessions in `shared_preferences`, stores no answer keys or
   full question payloads, and will remain device-only until authentication and

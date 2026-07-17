@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:frontend/features/learning/models/answer_option.dart';
+import 'package:frontend/features/learning/models/answer_review.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
 import 'package:frontend/features/materials/models/study_material.dart';
 
@@ -87,13 +88,16 @@ void main() {
     expect(result.questionSetTitle, questionSet.title);
     expect(result.correctCount, 2);
     expect(result.wrongCount, 1);
+    expect(result.unansweredCount, 0);
     expect(result.totalCount, 3);
-    expect(result.percentageScore, closeTo(66.67, 0.01));
+    expect(result.percentageScore, 67);
     expect(result.answerReviews, hasLength(3));
     expect(result.answerReviews.first.questionId, questions.first.id);
     expect(result.answerReviews.first.selectedAnswerText, 'const');
     expect(result.answerReviews.first.correctAnswerText, 'let');
     expect(result.answerReviews.first.isCorrect, isFalse);
+    expect(result.answerReviews.first.answerOptions, hasLength(4));
+    expect(result.answerReviews.first.explanation, isNotEmpty);
     expect(result.answerReviews[1].isCorrect, isTrue);
 
     for (final answerReview in result.answerReviews) {
@@ -106,6 +110,51 @@ void main() {
       expect(answerReview.correctAnswerOptionId, isNotEmpty);
       expect(answerReview.correctAnswerText, isNotEmpty);
     }
+  });
+
+  test(
+    'scores unanswered questions separately with rounded percentage',
+    () async {
+      const repository = MockLearningRepository();
+
+      final result = await repository.submitQuiz(
+        questionSetId: 'question_set_js_basics',
+        selectedAnswerOptionIdsByQuestionId: const {
+          'question_js_basics_2': 'js_b2_b',
+        },
+      );
+
+      expect(result.correctCount, 1);
+      expect(result.wrongCount, 0);
+      expect(result.unansweredCount, 2);
+      expect(result.totalCount, 3);
+      expect(result.percentageScore, 33);
+      expect(result.answerReviews.first.status, AnswerReviewStatus.unanswered);
+      expect(result.answerReviews.first.selectedAnswerText, isNull);
+    },
+  );
+
+  test('rejects question and answer ids outside the requested set', () async {
+    const repository = MockLearningRepository();
+
+    expect(
+      () => repository.submitQuiz(
+        questionSetId: 'question_set_js_basics',
+        selectedAnswerOptionIdsByQuestionId: const {
+          'missing-question': 'js_b1_c',
+        },
+      ),
+      throwsStateError,
+    );
+    expect(
+      () => repository.submitQuiz(
+        questionSetId: 'question_set_js_basics',
+        selectedAnswerOptionIdsByQuestionId: const {
+          'question_js_basics_1': 'missing-answer',
+        },
+      ),
+      throwsStateError,
+    );
   });
 
   test('paginates and filters mock question sets', () async {

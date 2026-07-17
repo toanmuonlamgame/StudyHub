@@ -50,6 +50,7 @@ test('PrismaLearningService submitQuiz returns score and answer reviews', async 
             id: 'question_1',
             questionSetId: 'question_set_1',
             text: 'First question?',
+            explanation: 'Because this is the correct answer.',
             position: 1,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -88,19 +89,31 @@ test('PrismaLearningService submitQuiz returns score and answer reviews', async 
   assert.equal(result.totalQuestions, 1);
   assert.equal(result.correctAnswers, 0);
   assert.equal(result.wrongAnswers, 1);
+  assert.equal(result.unansweredAnswers, 0);
   assert.equal(result.percentageScore, 0);
   assert.equal(findArgs.where.status, 'published');
   assert.deepEqual(result.answerReviews, [
     {
       questionId: 'question_1',
       questionText: 'First question?',
+      answerOptions: [
+        { id: 'answer_1', text: 'Wrong answer' },
+        { id: 'answer_2', text: 'Correct answer' },
+      ],
       selectedAnswerOptionId: 'answer_1',
       selectedAnswerText: 'Wrong answer',
       correctAnswerOptionId: 'answer_2',
       correctAnswerText: 'Correct answer',
       isCorrect: false,
+      explanation: 'Because this is the correct answer.',
     },
   ]);
+
+  const unansweredResult = await service.submitQuiz('question_set_1', {});
+  assert.equal(unansweredResult.correctAnswers, 0);
+  assert.equal(unansweredResult.wrongAnswers, 0);
+  assert.equal(unansweredResult.unansweredAnswers, 1);
+  assert.equal(unansweredResult.answerReviews[0].selectedAnswerOptionId, null);
 });
 
 test('PrismaLearningService checkAnswer uses internal correctness data', async () => {
@@ -113,6 +126,7 @@ test('PrismaLearningService checkAnswer uses internal correctness data', async (
         id: 'question_1',
         questionSetId: 'question_set_1',
         text: 'First question?',
+        explanation: null,
         position: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -151,6 +165,7 @@ test('PrismaLearningService checkAnswer uses internal correctness data', async (
     correctAnswerOptionId: 'answer_2',
     correctAnswerText: 'Correct answer',
     isCorrect: false,
+    explanation: null,
   });
   assert.equal(findArgs.where.questionSet.status, 'published');
 });

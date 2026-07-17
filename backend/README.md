@@ -46,7 +46,10 @@ POST /learning/question-sets/:questionSetId/submit
 ```
 
 Question responses omit correctness metadata. Submit scoring stays inside the
-selected service.
+selected backend service. Missing answer-map keys are scored as unanswered;
+incorrect and unanswered counts stay separate, and percentages are rounded to
+the nearest whole percent. Post-submit review may include safe answer options
+and an optional explanation.
 
 The paginated Question Set endpoint defaults to 20 items, accepts at most 50,
 and returns `{ items, nextCursor, hasMore }`. Its opaque cursor uses stable

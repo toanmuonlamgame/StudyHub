@@ -265,16 +265,22 @@ void main() {
           'totalQuestions': 1,
           'correctAnswers': 0,
           'wrongAnswers': 1,
+          'unansweredAnswers': 0,
           'percentageScore': 0,
           'answerReviews': [
             {
               'questionId': 'question_js_basics_1',
               'questionText': 'Which keyword declares a variable?',
+              'answerOptions': [
+                {'id': 'js_b1_b', 'text': 'const'},
+                {'id': 'js_b1_c', 'text': 'let'},
+              ],
               'selectedAnswerOptionId': 'js_b1_b',
               'selectedAnswerText': 'const',
               'correctAnswerOptionId': 'js_b1_c',
               'correctAnswerText': 'let',
               'isCorrect': false,
+              'explanation': 'let can be reassigned.',
             },
           ],
         },
@@ -297,11 +303,14 @@ void main() {
     expect(result.totalCount, 1);
     expect(result.correctCount, 0);
     expect(result.wrongCount, 1);
+    expect(result.unansweredCount, 0);
     expect(result.percentageScore, 0);
     expect(result.answerReviews, hasLength(1));
     expect(result.answerReviews.single.selectedAnswerText, 'const');
     expect(result.answerReviews.single.correctAnswerText, 'let');
     expect(result.answerReviews.single.isCorrect, isFalse);
+    expect(result.answerReviews.single.answerOptions, hasLength(2));
+    expect(result.answerReviews.single.explanation, 'let can be reassigned.');
   });
 
   test('maps a practice answer check result', () async {
@@ -321,6 +330,7 @@ void main() {
           'correctAnswerOptionId': 'js_b1_c',
           'correctAnswerText': 'let',
           'isCorrect': false,
+          'explanation': null,
         },
       });
     });

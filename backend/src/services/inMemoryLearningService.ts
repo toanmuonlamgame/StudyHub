@@ -1,5 +1,6 @@
 import {
   getCorrectAnswerOptionId,
+  getQuestionExplanation,
   questions,
   questionSets,
   subjects,
@@ -44,6 +45,7 @@ import {
   toPublicStudyMaterial,
   toStudyMaterialListItem,
 } from './studyMaterialPagination.js';
+import { calculateRoundedPercentage } from './quizScoring.js';
 
 const questionSetCreatedAtById = new Map(
   questionSets.map((questionSet, index) => [
@@ -237,6 +239,7 @@ export class InMemoryLearningService implements LearningService {
       correctAnswerOptionId: correctAnswer.id,
       correctAnswerText: correctAnswer.text,
       isCorrect: selectedAnswer.id === correctAnswer.id,
+      explanation: getQuestionExplanation(questionId) ?? null,
     };
   }
 
@@ -264,12 +267,12 @@ export class InMemoryLearningService implements LearningService {
       (question) => {
         const selectedAnswerOptionId =
           selectedAnswerOptionIdsByQuestionId[question.id];
-        const selectedAnswer = question.answerOptions.find(
-          ({ id }) => id === selectedAnswerOptionId,
-        );
-        if (selectedAnswer === undefined) {
+        const selectedAnswer = selectedAnswerOptionId
+          ? question.answerOptions.find(({ id }) => id === selectedAnswerOptionId)
+          : undefined;
+        if (selectedAnswerOptionId !== undefined && selectedAnswer === undefined) {
           throw new InvalidQuizSubmissionError(
-            `A valid answer is required for question ${question.id}.`,
+            `Answer option ${selectedAnswerOptionId} does not belong to question ${question.id}.`,
           );
         }
 
@@ -292,11 +295,13 @@ export class InMemoryLearningService implements LearningService {
         return {
           questionId: question.id,
           questionText: question.text,
-          selectedAnswerOptionId: selectedAnswer.id,
-          selectedAnswerText: selectedAnswer.text,
+          answerOptions: question.answerOptions.map(({ id, text }) => ({ id, text })),
+          selectedAnswerOptionId: selectedAnswer?.id ?? null,
+          selectedAnswerText: selectedAnswer?.text ?? null,
           correctAnswerOptionId: correctAnswer.id,
           correctAnswerText: correctAnswer.text,
-          isCorrect: selectedAnswer.id === correctAnswer.id,
+          isCorrect: selectedAnswer?.id === correctAnswer.id,
+          explanation: getQuestionExplanation(question.id) ?? null,
         };
       },
     );
@@ -305,15 +310,18 @@ export class InMemoryLearningService implements LearningService {
       ({ isCorrect }) => isCorrect,
     ).length;
     const totalQuestions = questionSetQuestions.length;
+    const unansweredAnswers = answerReviews.filter(
+      ({ selectedAnswerOptionId }) => selectedAnswerOptionId === null,
+    ).length;
 
     return {
       questionSetId: questionSet.id,
       questionSetTitle: questionSet.title,
       totalQuestions,
       correctAnswers,
-      wrongAnswers: totalQuestions - correctAnswers,
-      percentageScore:
-        totalQuestions === 0 ? 0 : (correctAnswers / totalQuestions) * 100,
+      wrongAnswers: totalQuestions - correctAnswers - unansweredAnswers,
+      unansweredAnswers,
+      percentageScore: calculateRoundedPercentage(correctAnswers, totalQuestions),
       answerReviews,
     };
   }

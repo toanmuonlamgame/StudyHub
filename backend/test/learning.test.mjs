@@ -393,10 +393,37 @@ test('POST submit calculates score and answer reviews', async (t) => {
   assert.equal(result.totalQuestions, 3);
   assert.equal(result.correctAnswers, 2);
   assert.equal(result.wrongAnswers, 1);
-  assert.equal(result.percentageScore, (2 / 3) * 100);
+  assert.equal(result.unansweredAnswers, 0);
+  assert.equal(result.percentageScore, 67);
   assert.equal(result.answerReviews.length, 3);
+  assert.equal(result.answerReviews[0].answerOptions.length, 4);
   assert.equal(result.answerReviews[0].selectedAnswerText, 'const');
   assert.equal(result.answerReviews[0].correctAnswerText, 'let');
+  assert.equal(result.answerReviews[0].isCorrect, false);
+  assert.equal(typeof result.answerReviews[0].explanation, 'string');
+});
+
+test('POST submit scores unanswered questions without rejecting them', async (t) => {
+  const app = createTestApp(t);
+  const response = await app.inject({
+    method: 'POST',
+    url: '/learning/question-sets/question_set_js_basics/submit',
+    payload: {
+      selectedAnswerOptionIdsByQuestionId: {
+        question_js_basics_2: 'js_b2_b',
+      },
+    },
+  });
+  const { result } = response.json();
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(result.totalQuestions, 3);
+  assert.equal(result.correctAnswers, 1);
+  assert.equal(result.wrongAnswers, 0);
+  assert.equal(result.unansweredAnswers, 2);
+  assert.equal(result.percentageScore, 33);
+  assert.equal(result.answerReviews[0].selectedAnswerOptionId, null);
+  assert.equal(result.answerReviews[0].selectedAnswerText, null);
   assert.equal(result.answerReviews[0].isCorrect, false);
 });
 
@@ -416,6 +443,7 @@ test('POST check-answer returns correct feedback', async (t) => {
   assert.equal(result.correctAnswerOptionId, 'js_b1_c');
   assert.equal(result.correctAnswerText, 'let');
   assert.equal(result.isCorrect, true);
+  assert.equal(typeof result.explanation, 'string');
 });
 
 test('POST check-answer returns incorrect feedback', async (t) => {

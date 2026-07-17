@@ -33,8 +33,10 @@ safety guarantees, limitations, and Phase 2 entry criteria.
 - Switch between system, English, and Vietnamese interface languages with local persistence.
 - Use Practice Mode for immediate per-question feedback without exposing answer keys in question payloads.
 - View Question Set details and question counts.
-- Complete a multiple-choice quiz in Exam Mode.
-- View score, correct/wrong counts, and post-submit answer review.
+- Complete a mobile Exam Mode session with retained previous/next navigation,
+  protected exit, and clear unanswered-question submission.
+- View rounded score, correct/wrong/unanswered counts, answer options, correct
+  answers, and optional explanations after submission.
 - Navigate the full Home -> Subjects -> Question Sets -> Quiz -> Result flow.
 
 ### Frontend Architecture

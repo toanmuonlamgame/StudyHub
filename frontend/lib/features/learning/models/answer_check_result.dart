@@ -6,6 +6,7 @@ class AnswerCheckResult {
     required this.correctAnswerOptionId,
     required this.correctAnswerText,
     required this.isCorrect,
+    this.explanation,
   });
 
   final String questionId;
@@ -14,4 +15,5 @@ class AnswerCheckResult {
   final String correctAnswerOptionId;
   final String correctAnswerText;
   final bool isCorrect;
+  final String? explanation;
 }

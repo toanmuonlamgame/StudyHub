@@ -97,6 +97,21 @@ editor supports add-next, duplicate, and safe reset actions. Compatibility
 aliases may be read for migration convenience, but templates only advertise the
 canonical tags above.
 
+## Exam Session and Result Review
+
+Exam Mode presents one question at a time, preserves changed answers across
+previous/next navigation, and confirms before discarding meaningful progress.
+Learners may submit with unanswered questions after an explicit count-based
+confirmation. Flutter sends only selected option IDs; repository/backend logic
+calculates the trusted result outside widgets.
+
+Results separate correct, incorrect, and unanswered counts. Percentages are
+rounded to the nearest whole percent in mock and backend modes. Post-submit
+review can show every answer option, the learner choice, correct choice, and an
+optional explanation without exposing correctness in pre-submit question data.
+Attempt persistence and history are deferred to the next accelerated MVP
+checkpoint.
+
 Run with local mock data:
 
 ```bash

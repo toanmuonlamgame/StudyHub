@@ -241,6 +241,17 @@ const correctAnswerOptionIdsByQuestionId: Record<string, string> = {
   question_database_3: 'db_3_c',
 };
 
+const explanationsByQuestionId: Record<string, string> = {
+  question_js_basics_1:
+    '`let` declares a block-scoped variable whose value may be reassigned.',
+  question_js_basics_2:
+    '`===` compares both value and type without implicit type conversion.',
+};
+
 export function getCorrectAnswerOptionId(questionId: string): string | undefined {
   return correctAnswerOptionIdsByQuestionId[questionId];
+}
+
+export function getQuestionExplanation(questionId: string): string | undefined {
+  return explanationsByQuestionId[questionId];
 }

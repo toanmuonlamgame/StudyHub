@@ -29,6 +29,13 @@ class MockLearningRepository implements LearningRepository {
     'question_database_3': 'db_3_c',
   };
 
+  static const Map<String, String> _explanationsByQuestionId = {
+    'question_js_basics_1':
+        '`let` declares a block-scoped variable whose value may be reassigned.',
+    'question_js_basics_2':
+        '`===` compares both value and type without implicit type conversion.',
+  };
+
   @override
   Future<List<Subject>> getSubjects() async {
     return mock_data.mockSubjects;
@@ -199,6 +206,7 @@ class MockLearningRepository implements LearningRepository {
       correctAnswerOptionId: correctAnswerOptionId,
       correctAnswerText: correctAnswerText,
       isCorrect: selectedAnswerOptionId == correctAnswerOptionId,
+      explanation: _explanationsByQuestionId[questionId],
     );
   }
 
@@ -214,6 +222,14 @@ class MockLearningRepository implements LearningRepository {
 
     final questions = await getQuestionsByQuestionSetId(questionSetId);
     final answerReviews = <AnswerReview>[];
+    final questionIds = questions.map((question) => question.id).toSet();
+    for (final questionId in selectedAnswerOptionIdsByQuestionId.keys) {
+      if (!questionIds.contains(questionId)) {
+        throw StateError(
+          'Question $questionId does not belong to question set $questionSetId.',
+        );
+      }
+    }
 
     for (final question in questions) {
       final selectedAnswerOptionId =
@@ -229,6 +245,11 @@ class MockLearningRepository implements LearningRepository {
         question,
         selectedAnswerOptionId,
       );
+      if (selectedAnswerOptionId != null && selectedAnswerText == null) {
+        throw StateError(
+          'Answer option $selectedAnswerOptionId does not belong to question ${question.id}.',
+        );
+      }
       final correctAnswerText = _findAnswerText(
         question,
         correctAnswerOptionId,
@@ -242,28 +263,22 @@ class MockLearningRepository implements LearningRepository {
         AnswerReview(
           questionId: question.id,
           questionText: question.text,
+          answerOptions: question.answerOptions,
           selectedAnswerOptionId: selectedAnswerOptionId,
           selectedAnswerText: selectedAnswerText,
           correctAnswerOptionId: correctAnswerOptionId,
           correctAnswerText: correctAnswerText,
           isCorrect: selectedAnswerOptionId == correctAnswerOptionId,
+          explanation: _explanationsByQuestionId[question.id],
         ),
       );
     }
 
-    final totalCount = questions.length;
-    final correctCount = answerReviews
-        .where((answerReview) => answerReview.isCorrect)
-        .length;
-
-    return QuizResult(
+    return QuizResult.fromTrustedReviews(
       questionSetId: questionSetId,
       questionSetTitle: questionSet.title,
-      correctCount: correctCount,
-      wrongCount: totalCount - correctCount,
-      totalCount: totalCount,
-      percentageScore: totalCount == 0 ? 0 : correctCount / totalCount * 100,
-      answerReviews: List.unmodifiable(answerReviews),
+      totalCount: questions.length,
+      answerReviews: answerReviews,
     );
   }
 

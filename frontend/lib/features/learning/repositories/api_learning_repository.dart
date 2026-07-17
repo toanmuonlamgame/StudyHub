@@ -299,6 +299,7 @@ QuizResult _quizResultFromJson(Map<String, dynamic> json) {
     totalCount: _readInt(json, 'totalQuestions'),
     correctCount: _readInt(json, 'correctAnswers'),
     wrongCount: _readInt(json, 'wrongAnswers'),
+    unansweredCount: _readInt(json, 'unansweredAnswers'),
     percentageScore: _readDouble(json, 'percentageScore'),
     answerReviews: _readObjectList(
       json,
@@ -311,11 +312,16 @@ AnswerReview _answerReviewFromJson(Map<String, dynamic> json) {
   return AnswerReview(
     questionId: _readString(json, 'questionId'),
     questionText: _readString(json, 'questionText'),
+    answerOptions: _readObjectList(
+      json,
+      'answerOptions',
+    ).map(_answerOptionFromJson).toList(growable: false),
     selectedAnswerOptionId: _readNullableString(json, 'selectedAnswerOptionId'),
     selectedAnswerText: _readNullableString(json, 'selectedAnswerText'),
     correctAnswerOptionId: _readString(json, 'correctAnswerOptionId'),
     correctAnswerText: _readString(json, 'correctAnswerText'),
     isCorrect: _readBool(json, 'isCorrect'),
+    explanation: _readNullableString(json, 'explanation'),
   );
 }
 
@@ -327,6 +333,7 @@ AnswerCheckResult _answerCheckResultFromJson(Map<String, dynamic> json) {
     correctAnswerOptionId: _readString(json, 'correctAnswerOptionId'),
     correctAnswerText: _readString(json, 'correctAnswerText'),
     isCorrect: _readBool(json, 'isCorrect'),
+    explanation: _readNullableString(json, 'explanation'),
   );
 }
 

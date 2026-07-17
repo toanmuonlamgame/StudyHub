@@ -1,7 +1,17 @@
 # StudyHub TODO
 
 ## Current Phase
-Phase 1 foundation complete. Phase 2 mobile-first UI/UX polish is active.
+Accelerated MVP delivery is active. Checkpoint 1 exam session and result review
+is complete; Checkpoint 2 will add attempt persistence and history.
+
+## Accelerated MVP Checkpoints
+- [x] Checkpoint 1: Complete mobile Exam Session navigation, answer retention,
+  protected exit, unanswered submission, backend scoring, and full Result Review.
+- [x] Keep correct answers hidden until Exam submit or Practice check-answer.
+- [x] Show correct, incorrect, and unanswered counts with answer options and
+  optional explanations after submission.
+- [ ] Checkpoint 2: Persist quiz attempts and add attempt-history/result-history
+  experiences without weakening the current local Progress boundary.
 
 ## Phase 1 Checkpoint
 - [x] Complete the Flutter learner flow from Home through Result/Review.

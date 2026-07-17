@@ -33,8 +33,10 @@ class QuizScreen extends StatefulWidget {
 class _QuizScreenState extends State<QuizScreen> {
   final Map<String, String> _examSelectedAnswerIds = {};
   late Future<List<Question>> _questionsFuture;
-  bool _showValidation = false;
   bool _isSubmittingExamModeQuiz = false;
+  bool _isConfirmingExamSubmission = false;
+  bool _isConfirmingDiscard = false;
+  bool _allowPop = false;
   int _examQuestionIndex = 0;
 
   int _practiceQuestionIndex = 0;
@@ -45,6 +47,11 @@ class _QuizScreenState extends State<QuizScreen> {
   final List<AnswerReview> _practiceAnswerReviews = [];
 
   bool get _isPracticeMode => widget.quizMode == QuizMode.practice;
+  bool get _isExamBusy =>
+      _isSubmittingExamModeQuiz || _isConfirmingExamSubmission;
+  bool get _hasMeaningfulProgress => _isPracticeMode
+      ? _practiceSelectedAnswerId != null || _practiceAnswerReviews.isNotEmpty
+      : _examSelectedAnswerIds.isNotEmpty;
 
   @override
   void initState() {
@@ -56,39 +63,47 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isPracticeMode ? l10n.practiceMode : l10n.examMode),
-      ),
-      body: SafeArea(
-        child: FutureBuilder<List<Question>>(
-          future: _questionsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return LearningLoadingState(message: l10n.loadingQuestions);
-            }
+    return PopScope(
+      canPop: _allowPop || !_hasMeaningfulProgress,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && !_isSubmittingExamModeQuiz && !_isConfirmingDiscard) {
+          _confirmDiscardAttempt();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_isPracticeMode ? l10n.practiceMode : l10n.examMode),
+        ),
+        body: SafeArea(
+          child: FutureBuilder<List<Question>>(
+            future: _questionsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return LearningLoadingState(message: l10n.loadingQuestions);
+              }
 
-            if (snapshot.hasError) {
-              return LearningErrorState(
-                title: l10n.questionsLoadErrorTitle,
-                message: l10n.connectionRetryMessage,
-                onRetry: _retryLoadingQuestions,
-              );
-            }
+              if (snapshot.hasError) {
+                return LearningErrorState(
+                  title: l10n.questionsLoadErrorTitle,
+                  message: l10n.connectionRetryMessage,
+                  onRetry: _retryLoadingQuestions,
+                );
+              }
 
-            final questions = snapshot.data ?? const <Question>[];
-            if (questions.isEmpty) {
-              return LearningEmptyState(
-                icon: Icons.quiz_outlined,
-                title: l10n.noQuestionsTitle,
-                message: l10n.noQuestionsMessage,
-              );
-            }
+              final questions = snapshot.data ?? const <Question>[];
+              if (questions.isEmpty) {
+                return LearningEmptyState(
+                  icon: Icons.quiz_outlined,
+                  title: l10n.noQuestionsTitle,
+                  message: l10n.noQuestionsMessage,
+                );
+              }
 
-            return _isPracticeMode
-                ? _buildPracticeContent(context, questions)
-                : _buildExamContent(context, questions);
-          },
+              return _isPracticeMode
+                  ? _buildPracticeContent(context, questions)
+                  : _buildExamContent(context, questions);
+            },
+          ),
         ),
       ),
     );
@@ -114,10 +129,16 @@ class _QuizScreenState extends State<QuizScreen> {
                 ),
               ),
             ),
-            Text(
-              l10n.answeredCount(_examSelectedAnswerIds.length),
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            Flexible(
+              child: Text(
+                l10n.examAnswerStatus(
+                  _examSelectedAnswerIds.length,
+                  questions.length - _examSelectedAnswerIds.length,
+                ),
+                textAlign: TextAlign.end,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ],
@@ -131,10 +152,8 @@ class _QuizScreenState extends State<QuizScreen> {
           key: ValueKey(question.id),
           question: question,
           selectedAnswerId: _examSelectedAnswerIds[question.id],
-          showError:
-              _showValidation &&
-              !_examSelectedAnswerIds.containsKey(question.id),
-          enabled: !_isSubmittingExamModeQuiz,
+          showError: false,
+          enabled: !_isExamBusy,
           onSelected: (answerOptionId) {
             _selectExamAnswer(question.id, answerOptionId);
           },
@@ -145,9 +164,7 @@ class _QuizScreenState extends State<QuizScreen> {
             if (!isFirstQuestion) ...[
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: _isSubmittingExamModeQuiz
-                      ? null
-                      : _previousExamQuestion,
+                  onPressed: _isExamBusy ? null : _previousExamQuestion,
                   icon: const Icon(Icons.arrow_back),
                   label: Text(l10n.previous),
                 ),
@@ -157,11 +174,11 @@ class _QuizScreenState extends State<QuizScreen> {
             Expanded(
               flex: isFirstQuestion ? 1 : 1,
               child: FilledButton.icon(
-                onPressed: _isSubmittingExamModeQuiz
+                onPressed: _isExamBusy
                     ? null
                     : () => isLastQuestion
                           ? _submitExamModeQuiz(questions)
-                          : _nextExamQuestion(question),
+                          : _nextExamQuestion(),
                 icon: _isSubmittingExamModeQuiz
                     ? const SizedBox.square(
                         dimension: 18,
@@ -369,7 +386,6 @@ class _QuizScreenState extends State<QuizScreen> {
   void _retryLoadingQuestions() {
     setState(() {
       _examSelectedAnswerIds.clear();
-      _showValidation = false;
       _practiceQuestionIndex = 0;
       _practiceSelectedAnswerId = null;
       _practiceAnswerCheckResult = null;
@@ -387,27 +403,15 @@ class _QuizScreenState extends State<QuizScreen> {
 
     setState(() {
       _examSelectedAnswerIds[questionId] = answerOptionId;
-      _showValidation = false;
     });
   }
 
-  void _nextExamQuestion(Question question) {
-    if (!_examSelectedAnswerIds.containsKey(question.id)) {
-      setState(() => _showValidation = true);
-      return;
-    }
-
-    setState(() {
-      _examQuestionIndex++;
-      _showValidation = false;
-    });
+  void _nextExamQuestion() {
+    setState(() => _examQuestionIndex++);
   }
 
   void _previousExamQuestion() {
-    setState(() {
-      _examQuestionIndex--;
-      _showValidation = false;
-    });
+    setState(() => _examQuestionIndex--);
   }
 
   Future<void> _checkPracticeAnswer(
@@ -440,11 +444,13 @@ class _QuizScreenState extends State<QuizScreen> {
           AnswerReview(
             questionId: question.id,
             questionText: question.text,
+            answerOptions: question.answerOptions,
             selectedAnswerOptionId: result.selectedAnswerOptionId,
             selectedAnswerText: result.selectedAnswerText,
             correctAnswerOptionId: result.correctAnswerOptionId,
             correctAnswerText: result.correctAnswerText,
             isCorrect: result.isCorrect,
+            explanation: result.explanation,
           ),
         );
         _isCheckingPracticeAnswer = false;
@@ -477,16 +483,10 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void _showPracticeResult(int totalQuestions) {
     final reviews = List<AnswerReview>.unmodifiable(_practiceAnswerReviews);
-    final correctCount = reviews.where((review) => review.isCorrect).length;
-    final result = QuizResult(
+    final result = QuizResult.fromTrustedReviews(
       questionSetId: widget.questionSet.id,
       questionSetTitle: widget.questionSet.title,
-      correctCount: correctCount,
-      wrongCount: totalQuestions - correctCount,
       totalCount: totalQuestions,
-      percentageScore: totalQuestions == 0
-          ? 0
-          : correctCount / totalQuestions * 100,
       answerReviews: reviews,
       quizMode: QuizMode.practice,
     );
@@ -499,17 +499,37 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Future<void> _submitExamModeQuiz(List<Question> questions) async {
-    if (_examSelectedAnswerIds.length != questions.length) {
-      setState(() {
-        _showValidation = true;
-      });
-
-      final messenger = ScaffoldMessenger.of(context);
-      messenger.hideCurrentSnackBar();
-      messenger.showSnackBar(
-        SnackBar(content: Text(context.l10n.answerEveryQuestion)),
-      );
+    if (_isExamBusy) {
       return;
+    }
+
+    final unansweredCount = questions.length - _examSelectedAnswerIds.length;
+    if (unansweredCount > 0) {
+      setState(() => _isConfirmingExamSubmission = true);
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(context.l10n.submitExamTitle),
+          content: Text(context.l10n.submitWithUnanswered(unansweredCount)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(context.l10n.progressCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(context.l10n.submitAnyway),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() => _isConfirmingExamSubmission = false);
+      if (confirmed != true) {
+        return;
+      }
     }
 
     final examSelectedAnswerIds = Map<String, String>.unmodifiable(
@@ -546,6 +566,44 @@ class _QuizScreenState extends State<QuizScreen> {
       setState(() {
         _isSubmittingExamModeQuiz = false;
       });
+    }
+  }
+
+  Future<void> _confirmDiscardAttempt() async {
+    if (_isConfirmingDiscard) {
+      return;
+    }
+    setState(() => _isConfirmingDiscard = true);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.leaveExamTitle),
+        content: Text(context.l10n.discardExamProgressMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.l10n.keepLearning),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(context.l10n.discardProgress),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted) {
+      return;
+    }
+    setState(() => _isConfirmingDiscard = false);
+    if (confirmed != true) {
+      return;
+    }
+
+    setState(() => _allowPop = true);
+    await WidgetsBinding.instance.endOfFrame;
+    if (mounted) {
+      Navigator.of(context).pop();
     }
   }
 }
