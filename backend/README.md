@@ -273,7 +273,7 @@ after composing its draft locally. Draft endpoints are not production-safe
 ownership APIs until authentication and authorization exist.
 
 The atomic request includes a client-generated `submissionId` (1-128
-characters). The backend derives the current temporary identity and never
+non-whitespace characters after trimming). The backend derives the current temporary identity and never
 accepts a client user ID. Replaying the same ID with the same normalized content
 returns the same pending-review submission with HTTP `200`; the first creation
 returns HTTP `201`. Changed content returns

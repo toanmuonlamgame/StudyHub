@@ -194,3 +194,9 @@ The creator contract currently allows at most 50 questions and 8 answer options
 per question. The prepared contribution and idempotency migrations plus a real
 Flutter API-mode submit/retry still require manual verification before this flow
 is treated as database-ready.
+
+Core stabilization guards history retries, Practice completion, and creator
+confirmation against repeated taps. Recoverable failures keep the current
+result or creator draft visible. Parsed full-exam previews render question cards
+lazily, and success/error states remain scrollable on short phones with large
+text.

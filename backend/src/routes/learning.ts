@@ -222,10 +222,25 @@ export function createLearningRoutes(
       async (request, reply) => {
         try {
           const { submissionId, ...input } = request.body;
+          const normalizedSubmissionId = submissionId.trim();
+          if (normalizedSubmissionId.length === 0) {
+            return reply.code(400).send({
+              error: {
+                code: 'SUBMISSION_VALIDATION_FAILED',
+                message: 'Submission validation failed.',
+                fields: [
+                  {
+                    path: 'submissionId',
+                    message: 'Submission ID is required.',
+                  },
+                ],
+              },
+            });
+          }
           const identity = getCurrentIdentity();
           const outcome = await service.createQuestionSetSubmissionForReview(
             identity.userId,
-            submissionId,
+            normalizedSubmissionId,
             input,
           );
           return reply

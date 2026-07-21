@@ -58,67 +58,17 @@ class _PasteExamScreenState extends State<PasteExamScreen> {
             child: Column(
               children: [
                 Expanded(
-                  child: ListView(
+                  child: ListView.builder(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
-                    children: [
-                      _PasteHeader(),
-                      const SizedBox(height: AppSpacing.lg),
-                      KeyedSubtree(
-                        key: _inputKey,
-                        child: TextField(
-                          key: const Key('paste-exam-input'),
-                          controller: _controller,
-                          focusNode: _inputFocusNode,
-                          minLines: 12,
-                          maxLines: 20,
-                          keyboardType: TextInputType.multiline,
-                          decoration: InputDecoration(
-                            labelText: l10n.pasteExamInputLabel,
-                            alignLabelWithHint: true,
-                          ),
-                          onChanged: (_) {
-                            if (_result != null) {
-                              setState(() => _result = null);
-                            }
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Wrap(
-                        spacing: AppSpacing.sm,
-                        runSpacing: AppSpacing.sm,
-                        children: [
-                          OutlinedButton.icon(
-                            onPressed: _copyTemplate,
-                            icon: const Icon(Icons.content_copy_outlined),
-                            label: Text(l10n.copyFormatTemplate),
-                          ),
-                          FilledButton.tonalIcon(
-                            onPressed: _parse,
-                            icon: const Icon(Icons.fact_check_outlined),
-                            label: Text(l10n.parseExamPreview),
-                          ),
-                        ],
-                      ),
-                      if (result != null) ...[
-                        const SizedBox(height: AppSpacing.xxl),
-                        _ParseSummary(key: _summaryKey, result: result),
-                        const SizedBox(height: AppSpacing.lg),
-                        ...result.documentIssues.map(
-                          (issue) => _IssueTile(issue: issue),
-                        ),
-                        ...result.questions.map(
-                          (question) => _QuestionPreview(
-                            question: question,
-                            onFix: question.isValid
-                                ? null
-                                : () => _focusSourceLine(question.sourceLine),
-                          ),
-                        ),
-                      ],
-                    ],
+                    itemCount: result == null
+                        ? 1
+                        : 2 +
+                              result.documentIssues.length +
+                              result.questions.length,
+                    itemBuilder: (context, index) =>
+                        _buildPreviewItem(context, result, index),
                   ),
                 ),
                 if (result != null)
@@ -131,6 +81,77 @@ class _PasteExamScreenState extends State<PasteExamScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPreviewItem(
+    BuildContext context,
+    PasteExamParseResult? result,
+    int index,
+  ) {
+    final l10n = context.l10n;
+    if (index == 0) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _PasteHeader(),
+          const SizedBox(height: AppSpacing.lg),
+          KeyedSubtree(
+            key: _inputKey,
+            child: TextField(
+              key: const Key('paste-exam-input'),
+              controller: _controller,
+              focusNode: _inputFocusNode,
+              minLines: 12,
+              maxLines: 20,
+              keyboardType: TextInputType.multiline,
+              decoration: InputDecoration(
+                labelText: l10n.pasteExamInputLabel,
+                alignLabelWithHint: true,
+              ),
+              onChanged: (_) {
+                if (_result != null) setState(() => _result = null);
+              },
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              OutlinedButton.icon(
+                onPressed: _copyTemplate,
+                icon: const Icon(Icons.content_copy_outlined),
+                label: Text(l10n.copyFormatTemplate),
+              ),
+              FilledButton.tonalIcon(
+                onPressed: _parse,
+                icon: const Icon(Icons.fact_check_outlined),
+                label: Text(l10n.parseExamPreview),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+    if (result == null) return const SizedBox.shrink();
+    if (index == 1) {
+      return Padding(
+        padding: const EdgeInsets.only(top: AppSpacing.xxl),
+        child: _ParseSummary(key: _summaryKey, result: result),
+      );
+    }
+    final contentIndex = index - 2;
+    if (contentIndex < result.documentIssues.length) {
+      return _IssueTile(issue: result.documentIssues[contentIndex]);
+    }
+    final question =
+        result.questions[contentIndex - result.documentIssues.length];
+    return _QuestionPreview(
+      question: question,
+      onFix: question.isValid
+          ? null
+          : () => _focusSourceLine(question.sourceLine),
     );
   }
 

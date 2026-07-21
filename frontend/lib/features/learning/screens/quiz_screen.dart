@@ -46,6 +46,7 @@ class _QuizScreenState extends State<QuizScreen> {
   String? _practiceSelectedAnswerId;
   AnswerCheckResult? _practiceAnswerCheckResult;
   bool _isCheckingPracticeAnswer = false;
+  bool _isCompletingPractice = false;
   bool _practiceAnswerCheckFailed = false;
   final List<AnswerReview> _practiceAnswerReviews = [];
 
@@ -276,7 +277,7 @@ class _QuizScreenState extends State<QuizScreen> {
         ),
         const SizedBox(height: 18),
         FilledButton.icon(
-          onPressed: _practiceAnswerCheckResult == null
+          onPressed: _practiceAnswerCheckResult == null || _isCompletingPractice
               ? null
               : () => _continuePractice(questions),
           icon: Icon(isLastQuestion ? Icons.done : Icons.arrow_forward),
@@ -474,7 +475,9 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _continuePractice(List<Question> questions) {
+    if (_isCompletingPractice) return;
     if (_practiceQuestionIndex == questions.length - 1) {
+      setState(() => _isCompletingPractice = true);
       _showPracticeResult(questions.length);
       return;
     }
@@ -515,6 +518,7 @@ class _QuizScreenState extends State<QuizScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
+          scrollable: true,
           title: Text(context.l10n.submitExamTitle),
           content: Text(context.l10n.submitWithUnanswered(unansweredCount)),
           actions: [
@@ -591,6 +595,7 @@ class _QuizScreenState extends State<QuizScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        scrollable: true,
         title: Text(context.l10n.leaveExamTitle),
         content: Text(context.l10n.discardExamProgressMessage),
         actions: [

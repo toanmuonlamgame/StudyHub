@@ -146,6 +146,57 @@ void main() {
     expect(find.text('No attempts yet'), findsOneWidget);
   });
 
+  testWidgets('history ignores repeated retry taps while loading', (
+    tester,
+  ) async {
+    final repository = _FakeAttemptRepository()..failList = true;
+    await tester.pumpWidget(
+      _localized(
+        repository,
+        ExamAttemptHistoryScreen(
+          repository: repository,
+          onStartLearning: () {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    repository
+      ..failList = false
+      ..holdList = true;
+    await tester.tap(find.text('Try again'));
+    await tester.tap(find.text('Try again'), warnIfMissed: false);
+    await tester.pump();
+
+    expect(repository.listCalls, 2);
+    repository.completeHeldList(const []);
+    await tester.pumpAndSettle();
+    expect(find.text('No attempts yet'), findsOneWidget);
+  });
+
+  testWidgets('history refreshes after a repository change during loading', (
+    tester,
+  ) async {
+    final repository = _FakeAttemptRepository()..holdList = true;
+    await tester.pumpWidget(
+      _localized(
+        repository,
+        ExamAttemptHistoryScreen(
+          repository: repository,
+          onStartLearning: () {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    repository.announceChange();
+    repository.completeHeldList(const []);
+    await tester.pumpAndSettle();
+
+    expect(repository.listCalls, 2);
+    expect(find.text('No attempts yet'), findsOneWidget);
+  });
+
   testWidgets('history renders score/date and opens reused result review', (
     tester,
   ) async {
@@ -345,6 +396,7 @@ class _FakeAttemptRepository extends AttemptRepository {
   bool holdList = false;
   bool failList = false;
   int saveCalls = 0;
+  int listCalls = 0;
   final List<ExamAttemptSaveRequest> requests = [];
   Completer<ExamAttemptDetail>? _saveCompleter;
   Completer<List<ExamAttemptSummary>>? _listCompleter;
@@ -371,6 +423,7 @@ class _FakeAttemptRepository extends AttemptRepository {
 
   @override
   Future<List<ExamAttemptSummary>> listExamAttempts() {
+    listCalls++;
     if (failList) return Future.error(StateError('list failed'));
     if (holdList) {
       _listCompleter = Completer<List<ExamAttemptSummary>>();
@@ -383,6 +436,8 @@ class _FakeAttemptRepository extends AttemptRepository {
     holdList = false;
     _listCompleter!.complete(attempts);
   }
+
+  void announceChange() => notifyListeners();
 
   @override
   Future<ExamAttemptDetail?> getExamAttempt(String attemptId) async => attempt;

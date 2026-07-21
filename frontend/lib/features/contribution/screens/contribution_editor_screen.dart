@@ -45,8 +45,9 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   late final String _submissionId;
   List<Subject> _subjects = const [];
   List<Topic> _topics = const [];
-  bool _loadingTaxonomy = true;
+  bool _loadingTaxonomy = false;
   bool _submitting = false;
+  bool _isConfirmingSubmit = false;
   String? _loadError;
   List<DraftValidationIssue> _issues = const [];
 
@@ -386,6 +387,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   }
 
   Future<void> _loadSubjects() async {
+    if (_loadingTaxonomy) return;
     setState(() {
       _loadingTaxonomy = true;
       _loadError = null;
@@ -471,7 +473,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
       ),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_questionsScrollController.hasClients) {
+      if (mounted && _questionsScrollController.hasClients) {
         _questionsScrollController.animateTo(
           _questionsScrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 220),
@@ -528,7 +530,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
         ],
       ),
     );
-    if (confirmed == true) {
+    if (confirmed == true && mounted) {
       setState(() {
         final questions = [..._draft.questions]..removeAt(index);
         _draft = _draft.copyWith(questions: questions);
@@ -537,9 +539,12 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   }
 
   Future<void> _confirmSubmit() async {
+    if (_submitting || _isConfirmingSubmit) return;
+    setState(() => _isConfirmingSubmit = true);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        scrollable: true,
         title: Text(context.l10n.contributionSubmitForReview),
         content: Text(context.l10n.contributionSubmitConfirm),
         actions: [
@@ -554,6 +559,8 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
         ],
       ),
     );
+    if (!mounted) return;
+    setState(() => _isConfirmingSubmit = false);
     if (confirmed == true) {
       await _submit();
     }
@@ -605,6 +612,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
     final discard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        scrollable: true,
         title: Text(context.l10n.contributionUnsavedTitle),
         content: Text(context.l10n.contributionUnsavedBody),
         actions: [
@@ -626,6 +634,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
     final reset = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        scrollable: true,
         title: Text(context.l10n.contributionResetDraft),
         content: Text(context.l10n.contributionResetDraftConfirm),
         actions: [
@@ -660,6 +669,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
       final replace = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
+          scrollable: true,
           title: Text(context.l10n.contributionReplaceQuestionsTitle),
           content: Text(context.l10n.contributionReplaceQuestionsBody),
           actions: [

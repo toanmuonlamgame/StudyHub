@@ -168,6 +168,9 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
   focused routes above the shell inherit the same app-level dependencies.
 - Flutter API adapters use bounded requests (15 seconds by default). Timeout and
   other transport failures remain retryable and must not discard learner drafts.
+- Core retry and completion actions are single-flight: repeated taps must not
+  duplicate history requests, submissions, persisted attempts, or result routes.
+  Long preview/state screens remain scrollable and long parsed lists render lazily.
 
 ## Roadmap Summary
 - V1: basic taxonomy, browse question sets, take quiz, view results, upload documents/exams.

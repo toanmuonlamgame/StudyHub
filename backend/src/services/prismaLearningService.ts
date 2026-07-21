@@ -375,6 +375,7 @@ export class PrismaLearningService implements LearningService {
     input: SaveExamAttemptInput,
   ): Promise<SaveExamAttemptOutcome> {
     const startedAt = validateExamAttemptInput(input);
+    const submissionId = input.submissionId.trim();
     const requestFingerprint = createExamAttemptFingerprint(
       questionSetId,
       input,
@@ -382,7 +383,7 @@ export class PrismaLearningService implements LearningService {
     );
     const existing = await this.findExamAttemptBySubmissionId(
       userId,
-      input.submissionId,
+      submissionId,
     );
     if (existing !== null) {
       if (existing.requestFingerprint !== requestFingerprint) {
@@ -402,7 +403,7 @@ export class PrismaLearningService implements LearningService {
         transaction.examAttempt.create({
           data: {
             userId,
-            submissionId: input.submissionId,
+            submissionId,
             requestFingerprint,
             questionSetId: result.questionSetId,
             sourceQuestionSetId: result.questionSetId,
@@ -441,7 +442,7 @@ export class PrismaLearningService implements LearningService {
       }
       const duplicate = await this.findExamAttemptBySubmissionId(
         userId,
-        input.submissionId,
+        submissionId,
       );
       if (
         duplicate === null ||

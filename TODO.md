@@ -395,6 +395,17 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Manually verify the editor with a real mobile keyboard on compact Android.
 - [ ] Manually verify a full pasted Vietnamese exam in mock and API modes.
 
+## MVP Stabilization (Commit 2)
+- [x] Guard repeated attempt-history retry requests and stale repository reloads.
+- [x] Guard repeated Practice completion and contribution confirmation actions.
+- [x] Preserve drafts/results across recoverable API failures and retry with the same idempotency identity.
+- [x] Make history states, contribution confirmation, and core dialogs usable on short screens with large text.
+- [x] Lazy-render parsed question previews instead of building the full preview at once.
+- [x] Reject blank contribution submission IDs and normalize attempt idempotency IDs at the backend boundary.
+- [x] Re-audit learner/contribution strings for direct hard-coded UI text.
+- [ ] Manually run the six core journeys on a compact Android device with the real backend.
+- [ ] Apply pending Prisma migrations and run database/API smoke tests before release.
+
 ## Not Doing Yet
 - [ ] Do not create docs/ files until explicitly requested.
 - [ ] Do not write app code until the first milestone is approved.

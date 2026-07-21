@@ -257,7 +257,7 @@ test('atomic contribution submit returns pendingReview and remains hidden from l
 
 test('atomic contribution submit is retry-safe and rejects changed payloads', async (t) => {
   const app = createTestApp(t);
-  const payload = { ...validInput, submissionId: 'retry-safe-submission' };
+  const payload = { ...validInput, submissionId: '  retry-safe-submission  ' };
   const first = await app.inject({
     method: 'POST',
     url: '/learning/question-set-submissions/submit',
@@ -266,7 +266,7 @@ test('atomic contribution submit is retry-safe and rejects changed payloads', as
   const replay = await app.inject({
     method: 'POST',
     url: '/learning/question-set-submissions/submit',
-    payload,
+    payload: { ...payload, submissionId: 'retry-safe-submission' },
   });
   const conflict = await app.inject({
     method: 'POST',
@@ -290,4 +290,15 @@ test('atomic contribution submit requires a client submission ID', async (t) => 
     payload: validInput,
   });
   assert.equal(response.statusCode, 400);
+
+  const whitespaceResponse = await app.inject({
+    method: 'POST',
+    url: '/learning/question-set-submissions/submit',
+    payload: { ...validInput, submissionId: '   ' },
+  });
+  assert.equal(whitespaceResponse.statusCode, 400);
+  assert.equal(
+    whitespaceResponse.json().error.fields[0].path,
+    'submissionId',
+  );
 });

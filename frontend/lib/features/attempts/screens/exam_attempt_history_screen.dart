@@ -24,26 +24,30 @@ class ExamAttemptHistoryScreen extends StatefulWidget {
 
 class _ExamAttemptHistoryScreenState extends State<ExamAttemptHistoryScreen> {
   late Future<List<ExamAttemptSummary>> _attemptsFuture;
+  var _loadGeneration = 0;
+  var _loadInProgress = false;
+  var _repositoryReloadPending = false;
 
   @override
   void initState() {
     super.initState();
-    _attemptsFuture = _loadAttempts();
-    widget.repository.addListener(_reload);
+    _attemptsFuture = _startLoad();
+    widget.repository.addListener(_handleRepositoryChanged);
   }
 
   @override
   void didUpdateWidget(covariant ExamAttemptHistoryScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (identical(oldWidget.repository, widget.repository)) return;
-    oldWidget.repository.removeListener(_reload);
-    widget.repository.addListener(_reload);
-    _reload();
+    oldWidget.repository.removeListener(_handleRepositoryChanged);
+    widget.repository.addListener(_handleRepositoryChanged);
+    _repositoryReloadPending = false;
+    _replaceLoad();
   }
 
   @override
   void dispose() {
-    widget.repository.removeListener(_reload);
+    widget.repository.removeListener(_handleRepositoryChanged);
     super.dispose();
   }
 
@@ -79,15 +83,42 @@ class _ExamAttemptHistoryScreenState extends State<ExamAttemptHistoryScreen> {
   }
 
   void _reload() {
-    if (!mounted) return;
-    final nextAttempts = _loadAttempts();
+    if (!mounted || _loadInProgress) return;
     setState(() {
-      _attemptsFuture = nextAttempts;
+      _attemptsFuture = _startLoad();
     });
   }
 
-  Future<List<ExamAttemptSummary>> _loadAttempts() async {
-    return widget.repository.listExamAttempts();
+  void _handleRepositoryChanged() {
+    if (_loadInProgress) {
+      _repositoryReloadPending = true;
+      return;
+    }
+    _reload();
+  }
+
+  void _replaceLoad() {
+    if (!mounted) return;
+    setState(() => _attemptsFuture = _startLoad());
+  }
+
+  Future<List<ExamAttemptSummary>> _startLoad() {
+    final generation = ++_loadGeneration;
+    _loadInProgress = true;
+    final future = widget.repository.listExamAttempts();
+    future.then<void>(
+      (_) => _finishLoad(generation),
+      onError: (_) => _finishLoad(generation),
+    );
+    return future;
+  }
+
+  void _finishLoad(int generation) {
+    if (generation != _loadGeneration) return;
+    _loadInProgress = false;
+    if (!_repositoryReloadPending) return;
+    _repositoryReloadPending = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reload());
   }
 
   void _openAttempt(ExamAttemptSummary attempt) {
@@ -119,11 +150,12 @@ class ExamAttemptDetailScreen extends StatefulWidget {
 
 class _ExamAttemptDetailScreenState extends State<ExamAttemptDetailScreen> {
   late Future<ExamAttemptDetail?> _attemptFuture;
+  var _loadInProgress = false;
 
   @override
   void initState() {
     super.initState();
-    _attemptFuture = widget.repository.getExamAttempt(widget.attemptId);
+    _attemptFuture = _startLoad();
   }
 
   @override
@@ -140,13 +172,7 @@ class _ExamAttemptDetailScreenState extends State<ExamAttemptDetailScreen> {
         if (snapshot.hasError || attempt == null) {
           return Scaffold(
             appBar: AppBar(title: Text(context.l10n.attemptHistory)),
-            body: _HistoryError(
-              onRetry: () => setState(
-                () => _attemptFuture = widget.repository.getExamAttempt(
-                  widget.attemptId,
-                ),
-              ),
-            ),
+            body: SafeArea(child: _HistoryError(onRetry: _retry)),
           );
         }
         return QuizResultScreen(
@@ -156,6 +182,21 @@ class _ExamAttemptDetailScreenState extends State<ExamAttemptDetailScreen> {
         );
       },
     );
+  }
+
+  Future<ExamAttemptDetail?> _startLoad() {
+    _loadInProgress = true;
+    final future = widget.repository.getExamAttempt(widget.attemptId);
+    future.then<void>(
+      (_) => _loadInProgress = false,
+      onError: (_) => _loadInProgress = false,
+    );
+    return future;
+  }
+
+  void _retry() {
+    if (!mounted || _loadInProgress) return;
+    setState(() => _attemptFuture = _startLoad());
   }
 }
 
@@ -251,9 +292,9 @@ class _HistoryEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -262,6 +303,7 @@ class _HistoryEmpty extends StatelessWidget {
             Text(
               context.l10n.noAttemptsYet,
               style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(context.l10n.tryYourFirstExam, textAlign: TextAlign.center),
@@ -285,9 +327,9 @@ class _HistoryError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

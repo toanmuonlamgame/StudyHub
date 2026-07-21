@@ -592,7 +592,7 @@ test('exam attempt submission is idempotent and history is newest first', async 
   const retry = await app.inject({
     method: 'POST',
     url: '/learning/question-sets/question_set_js_basics/attempts',
-    payload,
+    payload: { ...payload, submissionId: '  stable-retry-key  ' },
   });
   assert.equal(first.statusCode, 201);
   assert.equal(retry.statusCode, 200);

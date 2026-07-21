@@ -350,12 +350,13 @@ export class InMemoryLearningService implements LearningService {
     input: SaveExamAttemptInput,
   ): Promise<SaveExamAttemptOutcome> {
     const parsedStartedAt = validateExamAttemptInput(input);
+    const submissionId = input.submissionId.trim();
     const requestFingerprint = createExamAttemptFingerprint(
       questionSetId,
       input,
       parsedStartedAt,
     );
-    const idempotencyKey = `${userId}\u0000${input.submissionId}`;
+    const idempotencyKey = `${userId}\u0000${submissionId}`;
     const existing = this.examAttempts.get(idempotencyKey);
     if (existing !== undefined) {
       if (existing.requestFingerprint !== requestFingerprint) {

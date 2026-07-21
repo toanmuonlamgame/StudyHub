@@ -18,6 +18,7 @@ import 'package:frontend/features/contribution/repositories/contribution_reposit
 import 'package:frontend/features/contribution/repositories/mock_contribution_repository.dart';
 import 'package:frontend/features/contribution/screens/contribution_editor_screen.dart';
 import 'package:frontend/features/contribution/screens/paste_exam_screen.dart';
+import 'package:frontend/features/contribution/screens/submission_confirmation_screen.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
 import 'package:frontend/l10n/app_localizations.dart';
 
@@ -380,6 +381,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(repository.submissionIds, hasLength(2));
     expect(repository.submissionIds.toSet(), hasLength(1));
+  });
+
+  testWidgets('submission success remains usable on a short scaled phone', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 480);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('vi'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const MediaQuery(
+          data: MediaQueryData(textScaler: TextScaler.linear(1.5)),
+          child: SubmissionConfirmationScreen(
+            confirmation: SubmissionConfirmation(
+              id: 'submission-compact',
+              status: 'pendingReview',
+              title: 'Bộ câu hỏi cộng đồng có tiêu đề dài để kiểm tra bố cục',
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(
+      find.byKey(const ValueKey('submission-back-to-home')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('unsaved creator changes require discard confirmation', (
