@@ -21,6 +21,7 @@ import type {
 } from '../types/learning.js';
 import type {
   QuestionSetSubmission,
+  CreateQuestionSetSubmissionOutcome,
   QuestionSetSubmissionInput,
 } from '../types/questionSetSubmission.js';
 import {
@@ -37,10 +38,12 @@ import {
   LearningDataIntegrityError,
   LearningResourceNotFoundError,
   QuestionSetSubmissionStateError,
+  QuestionSetSubmissionIdempotencyConflictError,
   QuestionSetSubmissionValidationError,
   type LearningService,
 } from './learningService.js';
 import { validateQuestionSetSubmission } from './questionSetSubmissionValidation.js';
+import { createQuestionSetSubmissionFingerprint } from './questionSetSubmissionIdempotency.js';
 import {
   createQuestionSetListItem,
   decodeQuestionSetCursor,
@@ -505,25 +508,83 @@ export class PrismaLearningService implements LearningService {
   }
 
   async createQuestionSetSubmissionForReview(
+    userId: string,
+    clientSubmissionId: string,
     input: QuestionSetSubmissionInput,
-  ): Promise<QuestionSetSubmission> {
+  ): Promise<CreateQuestionSetSubmissionOutcome> {
     this.assertValidSubmission(input, true);
     await this.validateSubmissionReferences(input);
-    const row = await this.prisma.$transaction(async (transaction) =>
-      transaction.questionSet.create({
-        data: {
-          subjectId: input.subjectId,
-          ...(input.topicId === undefined ? {} : { topicId: input.topicId }),
-          title: input.title.trim(),
-          description: input.description.trim(),
-          status: 'pendingReview',
-          sourceType: 'community',
-          submittedAt: new Date(),
-          questions: { create: questionCreateData(input) },
-        },
-        include: submissionInclude,
-      }),
-    );
+    const fingerprint = createQuestionSetSubmissionFingerprint(input);
+    const existing = await this.findSubmissionByClientId(clientSubmissionId);
+    if (existing !== null) {
+      return {
+        submission: this.resolveIdempotentSubmission(
+          existing,
+          userId,
+          fingerprint,
+        ),
+        created: false,
+      };
+    }
+    try {
+      const row = await this.prisma.$transaction(async (transaction) =>
+        transaction.questionSet.create({
+          data: {
+            subjectId: input.subjectId,
+            ...(input.topicId === undefined ? {} : { topicId: input.topicId }),
+            title: input.title.trim(),
+            description: input.description.trim(),
+            status: 'pendingReview',
+            sourceType: 'community',
+            createdByUserId: userId,
+            clientSubmissionId,
+            submissionFingerprint: fingerprint,
+            submittedAt: new Date(),
+            questions: { create: questionCreateData(input) },
+          },
+          include: submissionInclude,
+        }),
+      );
+      return { submission: mapQuestionSetSubmission(row), created: true };
+    } catch (error) {
+      if (!isUniqueConstraintError(error)) throw error;
+      const duplicate = await this.findSubmissionByClientId(clientSubmissionId);
+      if (duplicate === null) {
+        throw new QuestionSetSubmissionIdempotencyConflictError(
+          'Submission ID conflicts with another contribution.',
+        );
+      }
+      return {
+        submission: this.resolveIdempotentSubmission(
+          duplicate,
+          userId,
+          fingerprint,
+        ),
+        created: false,
+      };
+    }
+  }
+
+  private findSubmissionByClientId(clientSubmissionId: string): Promise<any> {
+    return this.prisma.questionSet.findUnique({
+      where: { clientSubmissionId },
+      include: submissionInclude,
+    });
+  }
+
+  private resolveIdempotentSubmission(
+    row: any,
+    userId: string,
+    fingerprint: string,
+  ): QuestionSetSubmission {
+    if (
+      row.createdByUserId !== userId ||
+      row.submissionFingerprint !== fingerprint
+    ) {
+      throw new QuestionSetSubmissionIdempotencyConflictError(
+        'Submission ID was already used with different contribution data.',
+      );
+    }
     return mapQuestionSetSubmission(row);
   }
 

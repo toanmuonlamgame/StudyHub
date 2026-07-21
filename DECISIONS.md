@@ -2,6 +2,33 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-07-21 - MVP Integration Retry And Runtime Configuration
+Decision:
+- Atomic Question Set contribution uses a client-generated submission ID. The
+  backend derives the current identity, fingerprints normalized content, and
+  treats an identical retry as the same pending-review submission.
+- Reusing a contribution submission ID with different content or ownership is a
+  `409` conflict. Prisma enforces uniqueness and creates nested content in one
+  transaction; memory mode mirrors the same contract.
+- Debug and test builds may default to mock mode. Release builds must explicitly
+  select `mock` or `api`, and release API builds must provide a base URL.
+- Unexpected backend failures and data-integrity details are never returned
+  verbatim to API clients.
+
+Reason:
+- Mobile requests can time out after the server succeeds, so a safe retry must
+  not create duplicate moderation work.
+- Explicit release configuration prevents a portfolio or production build from
+  silently presenting fixture data or using an emulator-only URL.
+- Generic 500 responses prevent Prisma, connection, and internal answer-key
+  details from crossing the backend security boundary.
+
+Rule:
+- Keep the same contribution submission ID while retrying one editor session.
+- Do not trust a client user ID and do not persist partial nested submissions.
+- Keep real authentication, migrations, and PostgreSQL smoke testing as explicit
+  follow-up work; no test suite may require or mutate the real database.
+
 ## 2026-07-17 - Exam Attempt Persistence Boundary
 Decision:
 - Completed Exam attempts are persisted by the backend after authoritative

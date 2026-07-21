@@ -137,6 +137,11 @@ Run with local mock data:
 flutter run
 ```
 
+Mock is a development default only. Release builds must explicitly set
+`STUDYHUB_LEARNING_SOURCE`. When the selected source is `api`, release builds
+must also set `STUDYHUB_API_BASE_URL`; they never silently fall back to fixture
+data or the Android emulator URL.
+
 Run against the backend mock Learning API from an Android emulator:
 
 ```bash
@@ -180,10 +185,12 @@ correct answer.
 
 The draft stays in Flutter memory until final confirmation. Mock mode validates
 locally; API mode calls `POST /learning/question-set-submissions/submit`. A
-failed request keeps form state. Draft sync, authenticated ownership,
+failed request keeps form state and retries with the same client submission ID,
+allowing the backend to return the original pending-review submission instead
+of creating a duplicate. Draft sync, authenticated ownership,
 moderation UI, and rewards are deferred.
 
 The creator contract currently allows at most 50 questions and 8 answer options
-per question. The prepared Prisma migration and a real Flutter API-mode
-submission still require manual verification before this flow is treated as
-database-ready.
+per question. The prepared contribution and idempotency migrations plus a real
+Flutter API-mode submit/retry still require manual verification before this flow
+is treated as database-ready.

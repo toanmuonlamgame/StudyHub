@@ -12,6 +12,7 @@ import {
   LearningDataIntegrityError,
   LearningResourceNotFoundError,
   QuestionSetSubmissionStateError,
+  QuestionSetSubmissionIdempotencyConflictError,
   QuestionSetSubmissionValidationError,
   type LearningService,
 } from '../services/learningService.js';
@@ -45,6 +46,10 @@ interface SubmissionParams {
 
 interface AttemptParams {
   attemptId: string;
+}
+
+interface AtomicQuestionSetSubmissionBody extends QuestionSetSubmissionInput {
+  submissionId: string;
 }
 
 interface StudyMaterialListQuery extends QuestionSetListQuery {
@@ -141,6 +146,15 @@ const questionSetSubmissionBodySchema = {
   },
 } as const;
 
+const atomicQuestionSetSubmissionBodySchema = {
+  ...questionSetSubmissionBodySchema,
+  required: [...questionSetSubmissionBodySchema.required, 'submissionId'],
+  properties: {
+    ...questionSetSubmissionBodySchema.properties,
+    submissionId: { type: 'string', minLength: 1, maxLength: 128 },
+  },
+} as const;
+
 function sendLearningError(error: unknown, reply: FastifyReply): FastifyReply {
   if (error instanceof LearningResourceNotFoundError) {
     return reply.code(404).send({ error: error.message });
@@ -154,8 +168,19 @@ function sendLearningError(error: unknown, reply: FastifyReply): FastifyReply {
   if (error instanceof ExamAttemptIdempotencyConflictError) {
     return reply.code(409).send({ error: error.message });
   }
+  if (error instanceof QuestionSetSubmissionIdempotencyConflictError) {
+    return reply.code(409).send({
+      error: {
+        code: 'SUBMISSION_IDEMPOTENCY_CONFLICT',
+        message: error.message,
+        fields: [],
+      },
+    });
+  }
   if (error instanceof LearningDataIntegrityError) {
-    return reply.code(500).send({ error: error.message });
+    return reply
+      .code(500)
+      .send({ error: 'Learning data is temporarily unavailable.' });
   }
   if (error instanceof QuestionSetSubmissionValidationError) {
     return reply.code(400).send({
@@ -191,14 +216,21 @@ export function createLearningRoutes(
       },
     );
 
-    app.post<{ Body: QuestionSetSubmissionInput }>(
+    app.post<{ Body: AtomicQuestionSetSubmissionBody }>(
       '/question-set-submissions/submit',
-      { schema: { body: questionSetSubmissionBodySchema } },
+      { schema: { body: atomicQuestionSetSubmissionBodySchema } },
       async (request, reply) => {
         try {
-          const submission =
-            await service.createQuestionSetSubmissionForReview(request.body);
-          return reply.code(201).send({ submission });
+          const { submissionId, ...input } = request.body;
+          const identity = getCurrentIdentity();
+          const outcome = await service.createQuestionSetSubmissionForReview(
+            identity.userId,
+            submissionId,
+            input,
+          );
+          return reply
+            .code(outcome.created ? 201 : 200)
+            .send({ submission: outcome.submission });
         } catch (error) {
           return sendLearningError(error, reply);
         }

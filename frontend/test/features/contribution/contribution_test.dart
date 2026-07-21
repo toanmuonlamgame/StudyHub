@@ -86,11 +86,17 @@ void main() {
     'mock contribution returns pendingReview and rejects incomplete data',
     () async {
       const repository = MockContributionRepository();
-      final confirmation = await repository.submitForReview(_validDraft());
+      final confirmation = await repository.submitForReview(
+        _validDraft(),
+        submissionId: 'test-submission-1',
+      );
       expect(confirmation.status, 'pendingReview');
 
       await expectLater(
-        repository.submitForReview(const QuestionSetDraft()),
+        repository.submitForReview(
+          const QuestionSetDraft(),
+          submissionId: 'test-submission-2',
+        ),
         throwsA(isA<ContributionValidationException>()),
       );
     },
@@ -120,9 +126,13 @@ void main() {
         }),
       );
 
-      final result = await repository.submitForReview(_validDraft());
+      final result = await repository.submitForReview(
+        _validDraft(),
+        submissionId: 'test-submission-3',
+      );
       expect(result.status, 'pendingReview');
       expect(requestBody.containsKey('createdByUserId'), isFalse);
+      expect(requestBody['submissionId'], 'test-submission-3');
       expect(
         ((requestBody['questions'] as List).first as Map)['answerOptions'],
         isA<List>(),
@@ -150,7 +160,10 @@ void main() {
     );
 
     await expectLater(
-      repository.submitForReview(_validDraft()),
+      repository.submitForReview(
+        _validDraft(),
+        submissionId: 'test-submission-4',
+      ),
       throwsA(
         isA<ContributionValidationException>().having(
           (error) => error.issues.first.path,
@@ -179,7 +192,10 @@ void main() {
     );
 
     await expectLater(
-      repository.submitForReview(_validDraft()),
+      repository.submitForReview(
+        _validDraft(),
+        submissionId: 'test-submission-5',
+      ),
       throwsA(isA<ContributionSubmissionException>()),
     );
   });
@@ -195,7 +211,10 @@ void main() {
       );
 
       await expectLater(
-        repository.submitForReview(draft),
+        repository.submitForReview(
+          draft,
+          submissionId: 'test-submission-timeout',
+        ),
         throwsA(isA<TimeoutException>()),
       );
       expect(draft.title, 'Community set');
@@ -330,9 +349,10 @@ void main() {
   });
 
   testWidgets('submission failure preserves the creator draft', (tester) async {
+    final repository = _FailingContributionRepository();
     await tester.pumpWidget(
-      const StudyHubApp(
-        contributionRepository: _FailingContributionRepository(),
+      StudyHubApp(
+        contributionRepository: repository,
         initialLocaleSelection: AppLocaleSelection.english,
       ),
     );
@@ -347,6 +367,19 @@ void main() {
 
     expect(find.text('Community set'), findsOneWidget);
     expect(find.textContaining('Your draft is still here'), findsOneWidget);
+
+    tester
+        .state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger))
+        .hideCurrentSnackBar();
+    final retryButton = find.text('Submit for Review');
+    await tester.ensureVisible(retryButton);
+    await tester.pumpAndSettle();
+    await tester.tap(retryButton);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit for Review').last);
+    await tester.pumpAndSettle();
+    expect(repository.submissionIds, hasLength(2));
+    expect(repository.submissionIds.toSet(), hasLength(1));
   });
 
   testWidgets('unsaved creator changes require discard confirmation', (
@@ -641,10 +674,14 @@ Future<void> _fillValidContribution(WidgetTester tester) async {
 }
 
 class _FailingContributionRepository implements ContributionRepository {
-  const _FailingContributionRepository();
+  final List<String> submissionIds = [];
 
   @override
-  Future<SubmissionConfirmation> submitForReview(QuestionSetDraft draft) {
+  Future<SubmissionConfirmation> submitForReview(
+    QuestionSetDraft draft, {
+    required String submissionId,
+  }) {
+    submissionIds.add(submissionId);
     throw const ContributionSubmissionException('Network unavailable.');
   }
 }
@@ -654,7 +691,10 @@ class _DelayedContributionRepository implements ContributionRepository {
   int calls = 0;
 
   @override
-  Future<SubmissionConfirmation> submitForReview(QuestionSetDraft draft) {
+  Future<SubmissionConfirmation> submitForReview(
+    QuestionSetDraft draft, {
+    required String submissionId,
+  }) {
     calls++;
     return _completer.future;
   }

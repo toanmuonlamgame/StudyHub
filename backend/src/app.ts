@@ -62,6 +62,16 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     ajv: { customOptions: { removeAdditional: false } },
   });
 
+  app.setErrorHandler((error, request, reply) => {
+    const statusCode = readErrorStatusCode(error);
+    if (statusCode !== null && statusCode < 500) {
+      const message = error instanceof Error ? error.message : 'Bad request.';
+      return reply.code(statusCode).send({ error: message });
+    }
+    request.log.error({ err: error }, 'Unhandled request error');
+    return reply.code(500).send({ error: 'Internal server error.' });
+  });
+
   app.register(cors, {
     origin: (origin, callback) => {
       callback(
@@ -79,4 +89,16 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   app.register(createLearningRoutes(learningService), { prefix: '/learning' });
 
   return app;
+}
+
+function readErrorStatusCode(error: unknown): number | null {
+  if (
+    typeof error !== 'object' ||
+    error === null ||
+    !('statusCode' in error) ||
+    typeof error.statusCode !== 'number'
+  ) {
+    return null;
+  }
+  return error.statusCode;
 }

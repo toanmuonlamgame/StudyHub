@@ -17,6 +17,7 @@ import type {
 } from '../types/learning.js';
 import type {
   QuestionSetSubmission,
+  CreateQuestionSetSubmissionOutcome,
   QuestionSetSubmissionInput,
   SubmissionValidationFieldError,
 } from '../types/questionSetSubmission.js';
@@ -56,8 +57,10 @@ export interface LearningService {
     input: QuestionSetSubmissionInput,
   ): Promise<QuestionSetSubmission>;
   createQuestionSetSubmissionForReview(
+    userId: string,
+    submissionId: string,
     input: QuestionSetSubmissionInput,
-  ): Promise<QuestionSetSubmission>;
+  ): Promise<CreateQuestionSetSubmissionOutcome>;
   updateQuestionSetSubmission(
     submissionId: string,
     input: QuestionSetSubmissionInput,
@@ -79,6 +82,8 @@ export class LearningDataIntegrityError extends Error {}
 export class InvalidLearningListQueryError extends Error {}
 
 export class ExamAttemptIdempotencyConflictError extends Error {}
+
+export class QuestionSetSubmissionIdempotencyConflictError extends Error {}
 
 export class QuestionSetSubmissionValidationError extends Error {
   constructor(public readonly fields: SubmissionValidationFieldError[]) {

@@ -4,6 +4,7 @@ import test from 'node:test';
 import { mapQuestion } from '../dist/services/learningMappers.js';
 import { createExamAttemptFingerprint } from '../dist/services/examAttemptValidation.js';
 import { createPrismaLearningService } from '../dist/services/prismaLearningService.js';
+import { createQuestionSetSubmissionFingerprint } from '../dist/services/questionSetSubmissionIdempotency.js';
 
 test('mapQuestion strips internal correctness metadata', () => {
   const question = mapQuestion({
@@ -327,11 +328,15 @@ test('PrismaLearningService creates a nested pending-review submission transacti
   };
   const fakePrisma = {
     subject: { findUnique: async () => ({ id: 'subject_1' }) },
+    questionSet: { findUnique: async () => null },
     $transaction: async (callback) => callback(transaction),
   };
   const service = createPrismaLearningService(fakePrisma);
 
-  const result = await service.createQuestionSetSubmissionForReview({
+  const result = await service.createQuestionSetSubmissionForReview(
+    'demo-user',
+    'client-submission-1',
+    {
     subjectId: 'subject_1',
     title: 'Community set',
     description: 'Description',
@@ -344,17 +349,90 @@ test('PrismaLearningService creates a nested pending-review submission transacti
         ],
       },
     ],
-  });
+    },
+  );
 
   assert.equal(createArgs.data.status, 'pendingReview');
   assert.equal(createArgs.data.sourceType, 'community');
+  assert.equal(createArgs.data.createdByUserId, 'demo-user');
+  assert.equal(createArgs.data.clientSubmissionId, 'client-submission-1');
+  assert.equal(typeof createArgs.data.submissionFingerprint, 'string');
   assert.equal(createArgs.data.questions.create[0].position, 1);
   assert.equal(
     createArgs.data.questions.create[0].answerOptions.create[1].position,
     2,
   );
-  assert.equal(result.status, 'pendingReview');
-  assert.equal(result.questions[0].answerOptions[1].isCorrect, true);
+  assert.equal(result.created, true);
+  assert.equal(result.submission.status, 'pendingReview');
+  assert.equal(
+    result.submission.questions[0].answerOptions[1].isCorrect,
+    true,
+  );
+});
+
+test('PrismaLearningService reuses only matching contribution retries', async () => {
+  const input = {
+    subjectId: 'subject_1',
+    title: 'Community set',
+    description: 'Description',
+    questions: [{
+      text: 'Question?',
+      answerOptions: [
+        { text: 'Wrong', isCorrect: false },
+        { text: 'Correct', isCorrect: true },
+      ],
+    }],
+  };
+  const createdAt = new Date('2026-07-15T00:00:00.000Z');
+  const existing = {
+    id: 'submission_1',
+    ...input,
+    topicId: null,
+    status: 'pendingReview',
+    sourceType: 'community',
+    createdByUserId: 'demo-user',
+    clientSubmissionId: 'client-submission-1',
+    submissionFingerprint: createQuestionSetSubmissionFingerprint(input),
+    submittedAt: createdAt,
+    reviewedAt: null,
+    publishedAt: null,
+    rejectionReason: null,
+    createdAt,
+    updatedAt: createdAt,
+    questions: [{
+      text: 'Question?',
+      explanation: null,
+      answerOptions: [
+        { text: 'Wrong', isCorrect: false },
+        { text: 'Correct', isCorrect: true },
+      ],
+    }],
+  };
+  const fakePrisma = {
+    subject: { findUnique: async () => ({ id: 'subject_1' }) },
+    questionSet: { findUnique: async () => existing },
+    $transaction: async () => {
+      throw new Error('matching retry must not create another row');
+    },
+  };
+  const service = createPrismaLearningService(fakePrisma);
+
+  const replay = await service.createQuestionSetSubmissionForReview(
+    'demo-user',
+    'client-submission-1',
+    input,
+  );
+  assert.equal(replay.created, false);
+  assert.equal(replay.submission.id, 'submission_1');
+
+  await assert.rejects(
+    service.createQuestionSetSubmissionForReview(
+      'demo-user',
+      'client-submission-1',
+      { ...input, title: 'Changed title' },
+    ),
+    /different contribution data/,
+  );
 });
 
 test('PrismaLearningService atomically guards draft submit transition', async () => {

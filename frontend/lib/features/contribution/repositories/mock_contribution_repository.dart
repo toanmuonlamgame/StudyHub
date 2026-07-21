@@ -6,11 +6,14 @@ class MockContributionRepository implements ContributionRepository {
   const MockContributionRepository();
 
   @override
-  Future<SubmissionConfirmation> submitForReview(QuestionSetDraft draft) async {
+  Future<SubmissionConfirmation> submitForReview(
+    QuestionSetDraft draft, {
+    required String submissionId,
+  }) async {
     final issues = draft.validateForSubmission();
     if (issues.isNotEmpty) throw ContributionValidationException(issues);
     return SubmissionConfirmation(
-      id: 'mock-submission-${DateTime.now().microsecondsSinceEpoch}',
+      id: 'mock-$submissionId',
       status: 'pendingReview',
       title: draft.title.trim(),
     );

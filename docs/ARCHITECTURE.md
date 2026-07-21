@@ -62,6 +62,27 @@ Flutter keeps this backend Exam history separate from device-local Progress
 summaries. Practice sessions remain local until an authenticated persistence
 contract is designed.
 
+## Contribution Retry Boundary
+
+Flutter's atomic contribution request includes a stable client `submissionId`
+plus creator content. It does not include a trusted user identity. The Fastify
+route derives the current temporary identity, validates the payload, and passes
+it to the selected `LearningService`.
+
+Memory and Prisma services fingerprint normalized content. An identical retry
+returns the same pending-review submission; the same ID with changed content
+returns `409`. Prisma stores the key and fingerprint on `QuestionSet` and writes
+the Question Set, Questions, and Answer Options in one transaction. Published
+learner APIs continue to hide pending-review submissions and all pre-submit
+correctness metadata.
+
+## Flutter Runtime Configuration
+
+Debug and test builds may default to mock mode. A release build must explicitly
+set `STUDYHUB_LEARNING_SOURCE`; release API mode must also set
+`STUDYHUB_API_BASE_URL`. This prevents silent fixture fallback and accidental
+use of the Android-emulator loopback URL outside development.
+
 ## V1 Architecture
 V1 should support:
 

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -40,6 +42,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   final _questionsScrollController = ScrollController();
   _EditorStep _step = _EditorStep.details;
   late QuestionSetDraft _draft;
+  late final String _submissionId;
   List<Subject> _subjects = const [];
   List<Topic> _topics = const [];
   bool _loadingTaxonomy = true;
@@ -51,6 +54,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   void initState() {
     super.initState();
     _draft = widget.initialDraft;
+    _submissionId = _createSubmissionId();
     _titleController.text = _draft.title;
     _descriptionController.text = _draft.description;
     if (widget.startWithQuestions && _draft.questions.isNotEmpty) {
@@ -564,6 +568,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
     try {
       final confirmation = await widget.contributionRepository.submitForReview(
         _draft,
+        submissionId: _submissionId,
       );
       if (!mounted) {
         return;
@@ -589,6 +594,11 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
         );
       }
     }
+  }
+
+  String _createSubmissionId() {
+    final randomSuffix = Random.secure().nextInt(0x7fffffff).toRadixString(16);
+    return 'question-set-${DateTime.now().microsecondsSinceEpoch}-$randomSuffix';
   }
 
   Future<void> _confirmDiscard() async {

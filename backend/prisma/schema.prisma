@@ -93,24 +93,26 @@ model StudyMaterial {
 }
 
 model QuestionSet {
-  id              String                @id @default(cuid())
-  subjectId       String
-  topicId         String?
-  title           String
-  description     String
-  status          QuestionSetStatus     @default(published)
-  sourceType      QuestionSetSourceType @default(system)
-  createdByUserId String?
-  submittedAt     DateTime?
-  reviewedAt      DateTime?
-  publishedAt     DateTime?
-  rejectionReason String?
-  subject         Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  topic           Topic?                @relation(fields: [topicId], references: [id], onDelete: SetNull)
-  questions       Question[]
-  examAttempts    ExamAttempt[]
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
+  id                    String                @id @default(cuid())
+  subjectId             String
+  topicId               String?
+  title                 String
+  description           String
+  status                QuestionSetStatus     @default(published)
+  sourceType            QuestionSetSourceType @default(system)
+  createdByUserId       String?
+  clientSubmissionId    String?               @unique
+  submissionFingerprint String?
+  submittedAt           DateTime?
+  reviewedAt            DateTime?
+  publishedAt           DateTime?
+  rejectionReason       String?
+  subject               Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topic                 Topic?                @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  questions             Question[]
+  examAttempts          ExamAttempt[]
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
 
   @@index([status, createdAt, id])
   @@index([sourceType, status, createdAt, id])

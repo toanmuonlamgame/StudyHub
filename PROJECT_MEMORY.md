@@ -142,6 +142,16 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - Attempt retries use a client-generated submission ID unique per current user.
   The backend fingerprints the canonical request and returns the existing
   attempt only when retry content matches; changed content returns a conflict.
+- Atomic Question Set contribution retries use the same pattern: Flutter keeps
+  one client submission ID for the editor session, while the backend derives
+  temporary ownership, fingerprints normalized content, and returns the same
+  pending-review submission only when retry content matches.
+- Debug/test builds may default to mock learning data for local development.
+  Release builds must explicitly choose their learning source; release API mode
+  must also provide an explicit non-secret backend base URL.
+- Unexpected backend and stored-data integrity errors are logged server-side but
+  returned to clients with stable generic messages that do not expose Prisma,
+  database, credential, or internal answer-key details.
 - Historical review stores question, option, selected-answer, correct-answer,
   and explanation snapshots so published content changes cannot corrupt history.
 - Local Progress persists only post-result metadata from Exam and Practice. It

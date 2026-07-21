@@ -272,6 +272,13 @@ and atomic final submission at
 after composing its draft locally. Draft endpoints are not production-safe
 ownership APIs until authentication and authorization exist.
 
+The atomic request includes a client-generated `submissionId` (1-128
+characters). The backend derives the current temporary identity and never
+accepts a client user ID. Replaying the same ID with the same normalized content
+returns the same pending-review submission with HTTP `200`; the first creation
+returns HTTP `201`. Changed content returns
+`SUBMISSION_IDEMPOTENCY_CONFLICT` with HTTP `409`.
+
 Only `published` Question Sets are visible through learner list, search, detail,
 questions, check-answer, and quiz-submit APIs. Validation returns
 `SUBMISSION_VALIDATION_FAILED` with field paths. Client user IDs are not trusted,
@@ -280,6 +287,12 @@ questions and 8 answer options per question; Fastify rejects unknown request
 fields.
 
 Migration `20260715090000_question_set_submission_foundation` is prepared but
-must be reviewed and applied manually. Normal tests remain memory-only. Prisma
-submission smoke testing and a real Flutter-to-backend submission remain manual
-checks after that migration is applied.
+must be reviewed and applied manually. Migration
+`20260721120000_question_set_submission_idempotency` then adds the nullable
+client key/fingerprint fields and unique index. Normal tests remain memory-only.
+Prisma submission/retry smoke testing and a real Flutter-to-backend submission
+remain manual checks after both migrations are applied.
+
+Unexpected server and stored-data integrity errors are logged by Fastify but
+return generic HTTP `500` messages. Prisma, connection, credential, and internal
+answer-key details must not be exposed in API responses.

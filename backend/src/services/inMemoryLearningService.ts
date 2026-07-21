@@ -27,6 +27,7 @@ import type {
 } from '../types/learning.js';
 import type {
   QuestionSetSubmission,
+  CreateQuestionSetSubmissionOutcome,
   QuestionSetSubmissionInput,
 } from '../types/questionSetSubmission.js';
 import {
@@ -35,10 +36,12 @@ import {
   LearningDataIntegrityError,
   LearningResourceNotFoundError,
   QuestionSetSubmissionStateError,
+  QuestionSetSubmissionIdempotencyConflictError,
   QuestionSetSubmissionValidationError,
   type LearningService,
 } from './learningService.js';
 import { validateQuestionSetSubmission } from './questionSetSubmissionValidation.js';
+import { createQuestionSetSubmissionFingerprint } from './questionSetSubmissionIdempotency.js';
 import {
   createQuestionSetListItem,
   decodeQuestionSetCursor,
@@ -65,6 +68,10 @@ const questionSetCreatedAtById = new Map(
 
 export class InMemoryLearningService implements LearningService {
   private readonly submissions = new Map<string, QuestionSetSubmission>();
+  private readonly atomicSubmissions = new Map<
+    string,
+    { userId: string; fingerprint: string; submissionId: string }
+  >();
   private readonly examAttempts = new Map<string, StoredExamAttempt>();
   private nextSubmissionNumber = 1;
   private nextAttemptNumber = 1;
@@ -428,22 +435,45 @@ export class InMemoryLearningService implements LearningService {
   }
 
   async createQuestionSetSubmissionForReview(
+    userId: string,
+    clientSubmissionId: string,
     input: QuestionSetSubmissionInput,
-  ): Promise<QuestionSetSubmission> {
+  ): Promise<CreateQuestionSetSubmissionOutcome> {
     this.assertValidSubmission(input, true);
     this.validateSubmissionReferences(input);
+    const fingerprint = createQuestionSetSubmissionFingerprint(input);
+    const existing = this.atomicSubmissions.get(clientSubmissionId);
+    if (existing !== undefined) {
+      if (existing.userId !== userId || existing.fingerprint !== fingerprint) {
+        throw new QuestionSetSubmissionIdempotencyConflictError(
+          'Submission ID was already used with different contribution data.',
+        );
+      }
+      return {
+        submission: cloneSubmission(
+          this.requireSubmission(existing.submissionId),
+        ),
+        created: false,
+      };
+    }
     const now = new Date().toISOString();
     const submission: QuestionSetSubmission = {
       ...cloneSubmissionInput(input),
       id: `submission_${this.nextSubmissionNumber++}`,
       status: 'pendingReview',
       sourceType: 'community',
+      createdByUserId: userId,
       submittedAt: now,
       createdAt: now,
       updatedAt: now,
     };
     this.submissions.set(submission.id, submission);
-    return cloneSubmission(submission);
+    this.atomicSubmissions.set(clientSubmissionId, {
+      userId,
+      fingerprint,
+      submissionId: submission.id,
+    });
+    return { submission: cloneSubmission(submission), created: true };
   }
 
   async updateQuestionSetSubmission(

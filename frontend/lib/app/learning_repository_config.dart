@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../features/learning/repositories/api_learning_repository.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/repositories/mock_learning_repository.dart';
@@ -10,48 +12,82 @@ import '../features/attempts/repositories/mock_attempt_repository.dart';
 
 const _learningSource = String.fromEnvironment(
   'STUDYHUB_LEARNING_SOURCE',
-  defaultValue: 'mock',
+  defaultValue: '',
 );
 const _apiBaseUrl = String.fromEnvironment(
   'STUDYHUB_API_BASE_URL',
-  defaultValue: 'http://10.0.2.2:3000',
+  defaultValue: '',
 );
 
+const _androidEmulatorApiBaseUrl = 'http://10.0.2.2:3000';
+
+({String source, String apiBaseUrl}) resolveLearningRuntimeConfig({
+  String source = _learningSource,
+  String apiBaseUrl = _apiBaseUrl,
+  bool isReleaseMode = kReleaseMode,
+}) {
+  final normalizedSource = source.trim().toLowerCase();
+  final resolvedSource = normalizedSource.isEmpty
+      ? (isReleaseMode
+            ? throw StateError(
+                'Release builds require STUDYHUB_LEARNING_SOURCE=api or mock.',
+              )
+            : 'mock')
+      : normalizedSource;
+  if (resolvedSource != 'mock' && resolvedSource != 'api') {
+    throw StateError('Unsupported STUDYHUB_LEARNING_SOURCE: $source');
+  }
+
+  final normalizedBaseUrl = apiBaseUrl.trim();
+  if (resolvedSource == 'api' && normalizedBaseUrl.isEmpty && isReleaseMode) {
+    throw StateError('API release builds require STUDYHUB_API_BASE_URL.');
+  }
+  return (
+    source: resolvedSource,
+    apiBaseUrl: normalizedBaseUrl.isEmpty
+        ? _androidEmulatorApiBaseUrl
+        : normalizedBaseUrl,
+  );
+}
+
 LearningRepository createLearningRepositoryFromEnvironment() {
-  switch (_learningSource) {
+  final config = resolveLearningRuntimeConfig();
+  switch (config.source) {
     case 'mock':
       return const MockLearningRepository();
     case 'api':
-      return ApiLearningRepository(baseUrl: _apiBaseUrl);
+      return ApiLearningRepository(baseUrl: config.apiBaseUrl);
     default:
       throw StateError(
-        'Unsupported STUDYHUB_LEARNING_SOURCE: $_learningSource',
+        'Unsupported STUDYHUB_LEARNING_SOURCE: ${config.source}',
       );
   }
 }
 
 ContributionRepository createContributionRepositoryFromEnvironment() {
-  switch (_learningSource) {
+  final config = resolveLearningRuntimeConfig();
+  switch (config.source) {
     case 'mock':
       return const MockContributionRepository();
     case 'api':
-      return ApiContributionRepository(baseUrl: _apiBaseUrl);
+      return ApiContributionRepository(baseUrl: config.apiBaseUrl);
     default:
       throw StateError(
-        'Unsupported STUDYHUB_LEARNING_SOURCE: $_learningSource',
+        'Unsupported STUDYHUB_LEARNING_SOURCE: ${config.source}',
       );
   }
 }
 
 AttemptRepository createAttemptRepositoryFromEnvironment() {
-  switch (_learningSource) {
+  final config = resolveLearningRuntimeConfig();
+  switch (config.source) {
     case 'mock':
       return MockAttemptRepository();
     case 'api':
-      return ApiAttemptRepository(baseUrl: _apiBaseUrl);
+      return ApiAttemptRepository(baseUrl: config.apiBaseUrl);
     default:
       throw StateError(
-        'Unsupported STUDYHUB_LEARNING_SOURCE: $_learningSource',
+        'Unsupported STUDYHUB_LEARNING_SOURCE: ${config.source}',
       );
   }
 }

@@ -2,7 +2,10 @@ import '../models/question_set_draft.dart';
 import '../models/submission_confirmation.dart';
 
 abstract interface class ContributionRepository {
-  Future<SubmissionConfirmation> submitForReview(QuestionSetDraft draft);
+  Future<SubmissionConfirmation> submitForReview(
+    QuestionSetDraft draft, {
+    required String submissionId,
+  });
 }
 
 class ContributionValidationException implements Exception {

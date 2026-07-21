@@ -4,6 +4,22 @@
 Accelerated MVP delivery is active. Checkpoints 1 and 2 now provide a complete
 Exam session, trusted result review, attempt persistence, and history flow.
 
+## Real MVP Integration Checkpoint
+- [x] Align Flutter contribution payloads with the atomic Fastify submission
+  contract and keep one idempotency key across transport retries.
+- [x] Derive temporary contribution ownership from the backend identity boundary.
+- [x] Keep memory and Prisma contribution services behaviorally aligned.
+- [x] Sanitize unexpected and data-integrity errors before they reach API clients.
+- [x] Require explicit learning source and API URL configuration for release API builds.
+- [x] Add automated coverage for contribution retry, release configuration, and
+  backend error sanitization.
+- [ ] Review and apply migration
+  `20260721120000_question_set_submission_idempotency` manually after the two
+  earlier pending MVP migrations.
+- [ ] Run real Prisma smoke tests for contribution submit/retry and Exam attempt
+  save/list/detail after all pending migrations are applied.
+- [ ] Run the full Flutter API-mode journeys on a real device against PostgreSQL.
+
 ## Accelerated MVP Checkpoints
 - [x] Checkpoint 1: Complete mobile Exam Session navigation, answer retention,
   protected exit, unanswered submission, backend scoring, and full Result Review.

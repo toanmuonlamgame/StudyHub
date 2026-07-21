@@ -20,12 +20,15 @@ class ApiContributionRepository implements ContributionRepository {
   final Duration requestTimeout;
 
   @override
-  Future<SubmissionConfirmation> submitForReview(QuestionSetDraft draft) async {
+  Future<SubmissionConfirmation> submitForReview(
+    QuestionSetDraft draft, {
+    required String submissionId,
+  }) async {
     final response = await withApiTimeout(
       _client.post(
         _baseUri.resolve('learning/question-set-submissions/submit'),
         headers: const {'content-type': 'application/json'},
-        body: jsonEncode(draft.toJson()),
+        body: jsonEncode({'submissionId': submissionId, ...draft.toJson()}),
       ),
       requestTimeout,
     );

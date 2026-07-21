@@ -53,6 +53,7 @@ test('creates and updates an incomplete draft', async (t) => {
     url: '/learning/question-set-submissions/submit',
     payload: {
       ...validInput,
+      submissionId: 'normalized-submission',
       title: '  Community JavaScript Review  ',
       questions: [{
         ...validInput.questions[0],
@@ -176,11 +177,13 @@ test('returns structured full-validation errors', async (t) => {
     ],
   ];
 
+  let caseNumber = 0;
   for (const [payload, expectedPath] of cases) {
+    caseNumber += 1;
     const response = await app.inject({
       method: 'POST',
       url: '/learning/question-set-submissions/submit',
-      payload,
+      payload: { ...payload, submissionId: `invalid-case-${caseNumber}` },
     });
     const body = response.json();
     assert.equal(response.statusCode, 400, expectedPath);
@@ -224,7 +227,7 @@ test('atomic contribution submit returns pendingReview and remains hidden from l
   const response = await app.inject({
     method: 'POST',
     url: '/learning/question-set-submissions/submit',
-    payload: validInput,
+    payload: { ...validInput, submissionId: 'atomic-hidden-submission' },
   });
   const submission = response.json().submission;
 
@@ -250,4 +253,41 @@ test('atomic contribution submit returns pendingReview and remains hidden from l
   assert.equal(detail.statusCode, 404);
   assert.equal(questions.statusCode, 404);
   assert.equal(quiz.statusCode, 404);
+});
+
+test('atomic contribution submit is retry-safe and rejects changed payloads', async (t) => {
+  const app = createTestApp(t);
+  const payload = { ...validInput, submissionId: 'retry-safe-submission' };
+  const first = await app.inject({
+    method: 'POST',
+    url: '/learning/question-set-submissions/submit',
+    payload,
+  });
+  const replay = await app.inject({
+    method: 'POST',
+    url: '/learning/question-set-submissions/submit',
+    payload,
+  });
+  const conflict = await app.inject({
+    method: 'POST',
+    url: '/learning/question-set-submissions/submit',
+    payload: { ...payload, title: 'Different title' },
+  });
+
+  assert.equal(first.statusCode, 201);
+  assert.equal(first.json().submission.createdByUserId, 'demo-user');
+  assert.equal(replay.statusCode, 200);
+  assert.equal(replay.json().submission.id, first.json().submission.id);
+  assert.equal(conflict.statusCode, 409);
+  assert.equal(conflict.json().error.code, 'SUBMISSION_IDEMPOTENCY_CONFLICT');
+});
+
+test('atomic contribution submit requires a client submission ID', async (t) => {
+  const app = createTestApp(t);
+  const response = await app.inject({
+    method: 'POST',
+    url: '/learning/question-set-submissions/submit',
+    payload: validInput,
+  });
+  assert.equal(response.statusCode, 400);
 });

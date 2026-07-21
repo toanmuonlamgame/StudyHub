@@ -38,6 +38,11 @@ export interface QuestionSetSubmission extends QuestionSetSubmissionInput {
   updatedAt: string;
 }
 
+export interface CreateQuestionSetSubmissionOutcome {
+  submission: QuestionSetSubmission;
+  created: boolean;
+}
+
 export interface SubmissionValidationFieldError {
   path: string;
   message: string;
