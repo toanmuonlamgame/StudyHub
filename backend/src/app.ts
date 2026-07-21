@@ -9,7 +9,11 @@ import { createPrismaLearningService } from './services/prismaLearningService.js
 export interface BuildAppOptions {
   learningService?: LearningService;
   learningDataSource?: string;
+  isProduction?: boolean;
+  corsOrigins?: string[];
 }
+
+const requestBodyLimitBytes = 1024 * 1024;
 
 function isAllowedDevelopmentOrigin(origin: string): boolean {
   try {
@@ -51,14 +55,27 @@ function createConfiguredLearningService(dataSource: string): LearningService {
 }
 
 export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
+  const isProduction = options.isProduction ?? process.env.NODE_ENV === 'production';
+  const configuredDataSource =
+    options.learningDataSource ?? process.env.STUDYHUB_LEARNING_DATA_SOURCE;
+  if (isProduction && configuredDataSource === undefined && options.learningService === undefined) {
+    throw new Error(
+      'Production requires STUDYHUB_LEARNING_DATA_SOURCE=prisma.',
+    );
+  }
   const dataSource =
-    options.learningDataSource ??
-    process.env.STUDYHUB_LEARNING_DATA_SOURCE ??
-    'memory';
+    configuredDataSource ?? 'memory';
+  if (isProduction && dataSource !== 'prisma' && options.learningService === undefined) {
+    throw new Error('Production requires STUDYHUB_LEARNING_DATA_SOURCE=prisma.');
+  }
   const learningService =
     options.learningService ?? createConfiguredLearningService(dataSource);
+  const configuredCorsOrigins = new Set(
+    options.corsOrigins ?? readConfiguredCorsOrigins(),
+  );
   const app = Fastify({
     logger: true,
+    bodyLimit: requestBodyLimitBytes,
     ajv: { customOptions: { removeAdditional: false } },
   });
 
@@ -76,7 +93,9 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     origin: (origin, callback) => {
       callback(
         null,
-        origin === undefined || isAllowedDevelopmentOrigin(origin),
+        origin === undefined ||
+          configuredCorsOrigins.has(origin) ||
+          (!isProduction && isAllowedDevelopmentOrigin(origin)),
       );
     },
   });
@@ -89,6 +108,13 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   app.register(createLearningRoutes(learningService), { prefix: '/learning' });
 
   return app;
+}
+
+function readConfiguredCorsOrigins(): string[] {
+  return (process.env.STUDYHUB_CORS_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
 }
 
 function readErrorStatusCode(error: unknown): number | null {

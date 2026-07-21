@@ -247,7 +247,8 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Implement `ApiLearningRepository` against the mock Fastify Learning API.
 - [x] Keep mock as default and add non-secret `dart-define` API mode.
 - [x] Pass the Flutter API mode smoke test on a real device over LAN.
-- Tested real-device backend base URL: `http://192.168.1.12:3000`.
+- Real-device LAN smoke test passed previously; use
+  `http://<developer-computer-LAN-IP>:3000` because the address can change.
 - Android emulator backend base URL: `http://10.0.2.2:3000`.
 
 ## Backend Foundation
@@ -405,6 +406,20 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Re-audit learner/contribution strings for direct hard-coded UI text.
 - [ ] Manually run the six core journeys on a compact Android device with the real backend.
 - [ ] Apply pending Prisma migrations and run database/API smoke tests before release.
+
+## MVP Release Readiness (Commit 3)
+- [x] Set the Android app name, stable application ID, and MVP version metadata.
+- [x] Add release Internet permission while limiting cleartext HTTP to debug builds.
+- [x] Require API mode plus an explicit HTTPS origin for Flutter release builds.
+- [x] Require explicit Prisma mode and DATABASE_URL for backend production startup.
+- [x] Add production CORS allowlist, 1 MiB request limit, and graceful shutdown.
+- [x] Add Prisma deploy script and safe release/device documentation.
+- [x] Pass backend/Flutter automated checks and build local debug/release APK baselines.
+- [ ] Replace the Flutter template launcher icon with final StudyHub branding.
+- [ ] Configure a private production upload keystore outside Git.
+- [ ] Deploy an HTTPS backend API and build the final API-connected release APK.
+- [ ] Review/apply pending migrations and run Prisma smoke tests personally.
+- [ ] Complete the iQOO Z9 Turbo checklist in `docs/RELEASE_READINESS.md`.
 
 ## Not Doing Yet
 - [ ] Do not create docs/ files until explicitly requested.

@@ -1114,5 +1114,5 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attemptHistoryLocalIdentity =>
-      'History currently belongs to this temporary demo identity. Account ownership will replace it when authentication is added.';
+      'History is not linked to a signed-in account yet. Account ownership will be available when sign-in is added.';
 }

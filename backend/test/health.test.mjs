@@ -59,3 +59,53 @@ test('CORS allows 127.0.0.1 but not non-local browser origins', async (t) => {
   assert.equal(remoteResponse.statusCode, 200);
   assert.equal(remoteResponse.headers['access-control-allow-origin'], undefined);
 });
+
+test('production CORS uses only the configured browser allowlist', async (t) => {
+  const allowedOrigin = 'https://studyhub.example.test';
+  const app = buildApp({
+    learningService: createHealthTestService(),
+    isProduction: true,
+    corsOrigins: [allowedOrigin],
+  });
+  t.after(() => app.close());
+
+  const allowedResponse = await app.inject({
+    method: 'GET',
+    url: '/health',
+    headers: { origin: allowedOrigin },
+  });
+  const localResponse = await app.inject({
+    method: 'GET',
+    url: '/health',
+    headers: { origin: 'http://localhost:54321' },
+  });
+
+  assert.equal(
+    allowedResponse.headers['access-control-allow-origin'],
+    allowedOrigin,
+  );
+  assert.equal(localResponse.headers['access-control-allow-origin'], undefined);
+});
+
+function createHealthTestService() {
+  return {
+    getSubjects: async () => [],
+    getTopicsBySubjectId: async () => [],
+    getQuestionSetsBySubjectId: async () => [],
+    listQuestionSets: async () => ({ items: [], nextCursor: null, hasMore: false }),
+    getQuestionSetById: async () => null,
+    getQuestionsByQuestionSetId: async () => [],
+    checkAnswer: async () => { throw new Error('Not used.'); },
+    submitQuiz: async () => { throw new Error('Not used.'); },
+    saveExamAttempt: async () => { throw new Error('Not used.'); },
+    listExamAttempts: async () => [],
+    getExamAttempt: async () => null,
+    listStudyMaterials: async () => ({ items: [], nextCursor: null, hasMore: false }),
+    getStudyMaterialById: async () => null,
+    createQuestionSetSubmission: async () => { throw new Error('Not used.'); },
+    createQuestionSetSubmissionForReview: async () => { throw new Error('Not used.'); },
+    updateQuestionSetSubmission: async () => { throw new Error('Not used.'); },
+    getQuestionSetSubmission: async () => null,
+    submitQuestionSetForReview: async () => { throw new Error('Not used.'); },
+  };
+}

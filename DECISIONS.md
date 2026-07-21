@@ -668,3 +668,21 @@ Rules:
 
 Reason: completion actions should return learners to a predictable top-level
 state, while unfinished work and repository ownership remain protected.
+
+## 2026-07-21 - Android Release Identity And Runtime Boundaries
+Decision: Android uses the stable identity `StudyHub` with application ID
+`com.toanmuonlamgame.studyhub` and MVP version `1.0.0+1`.
+
+Rules:
+- Flutter release builds use only `ApiLearningRepository` configuration with an
+  explicit HTTPS API origin; mock mode, localhost, emulator URLs, and cleartext
+  HTTP are development-only.
+- Backend production startup requires explicit Prisma mode and `DATABASE_URL`.
+- Production browser CORS uses an exact environment allowlist; localhost CORS is
+  development-only.
+- Local release APKs may use debug signing for device verification, but public
+  distribution requires a private upload keystore kept outside Git.
+
+Reason: a release candidate must fail clearly when production data or network
+configuration is missing and must not ship Flutter template identity or silently
+use demo fixtures.

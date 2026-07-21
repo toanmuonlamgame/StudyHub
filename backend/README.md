@@ -11,6 +11,22 @@ npm test
 ```
 
 The server uses port `3000` by default and accepts a `PORT` environment variable.
+Fastify limits request bodies to 1 MiB and shuts down cleanly on `SIGINT` or
+`SIGTERM`.
+
+## Production configuration
+
+Production must set `NODE_ENV=production`,
+`STUDYHUB_LEARNING_DATA_SOURCE=prisma`, and a secret `DATABASE_URL`. It fails at
+startup instead of silently using memory fixtures. Build with `npm run build`,
+apply reviewed migrations with `npm run prisma:migrate:deploy`, and run compiled
+JavaScript with `npm start`.
+
+`STUDYHUB_CORS_ORIGINS` is an optional comma-separated exact browser-origin
+allowlist. Localhost browser origins are accepted only outside production;
+native Android requests do not require browser CORS. See
+[`docs/RELEASE_READINESS.md`](../docs/RELEASE_READINESS.md) for the complete
+release sequence.
 
 ### Flutter Web local CORS
 
@@ -273,7 +289,8 @@ after composing its draft locally. Draft endpoints are not production-safe
 ownership APIs until authentication and authorization exist.
 
 The atomic request includes a client-generated `submissionId` (1-128
-non-whitespace characters after trimming). The backend derives the current temporary identity and never
+non-whitespace characters after trimming). The backend derives the current
+temporary identity and never
 accepts a client user ID. Replaying the same ID with the same normalized content
 returns the same pending-review submission with HTTP `200`; the first creation
 returns HTTP `201`. Changed content returns

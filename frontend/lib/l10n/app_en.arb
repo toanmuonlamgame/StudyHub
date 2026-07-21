@@ -324,5 +324,5 @@
   "resultNotYetSaved": "Result not yet saved",
   "savingResult": "Saving result...",
   "attemptCorrectSummary": "{correct} of {total} correct",
-  "attemptHistoryLocalIdentity": "History currently belongs to this temporary demo identity. Account ownership will replace it when authentication is added."
+  "attemptHistoryLocalIdentity": "History is not linked to a signed-in account yet. Account ownership will be available when sign-in is added."
 }

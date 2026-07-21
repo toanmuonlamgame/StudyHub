@@ -1112,5 +1112,5 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get attemptHistoryLocalIdentity =>
-      'Lịch sử hiện thuộc về danh tính demo tạm thời trên backend. Tài khoản thật sẽ thay thế ranh giới này khi thêm xác thực.';
+      'Lịch sử chưa được liên kết với tài khoản đăng nhập. Quyền sở hữu tài khoản sẽ có khi tính năng đăng nhập được bổ sung.';
 }

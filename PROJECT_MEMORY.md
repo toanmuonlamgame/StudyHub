@@ -4,7 +4,7 @@
 - Project name: StudyHub
 - Product type: mobile learning platform
 - Goal: learning project and internship portfolio
-- Current phase: Phase 1 foundation complete; preparing Phase 2 UI/UX polish
+- Current phase: Android MVP release-candidate preparation after integration and stabilization
 
 ## Product Purpose
 StudyHub is a mobile learning platform for organizing and studying learning content. The product should help users browse structured learning content, practice question sets, upload their own materials, and contribute useful community content.
@@ -27,6 +27,11 @@ StudyHub is not a pre-seeded question database first. It should support a small 
 - Study Credits are internal credits for unlocking selected content or features.
 - Study Credits cannot be withdrawn as real money.
 - V1 should not implement the full credit economy.
+- Android identity is `StudyHub`, application ID
+  `com.toanmuonlamgame.studyhub`, version `1.0.0+1`.
+- Flutter release builds require API mode and an explicit HTTPS API origin.
+  Backend production requires explicit Prisma mode plus `DATABASE_URL`; local
+  mock/memory and cleartext LAN behavior remain development-only.
 
 ## Core Content Model
 ### Taxonomy

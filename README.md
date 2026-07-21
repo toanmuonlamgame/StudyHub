@@ -9,7 +9,7 @@ grows from a small learning loop into trusted community content.
 
 ## Current Status
 
-**Active development**
+**Android MVP release-candidate preparation**
 
 Phase 1 is complete as a working learning foundation. See the
 [Phase 1 checkpoint](docs/PHASE_1_CHECKPOINT.md) for completed capabilities,
@@ -136,6 +136,9 @@ flutter run
 See [frontend/README.md](frontend/README.md) for Flutter mock/API configuration
 and Android emulator networking.
 
+The complete build, environment, signing, migration, and physical-device
+checklist is in [Android MVP release readiness](docs/RELEASE_READINESS.md).
+
 ## API And Data Modes
 
 ### Flutter
@@ -151,7 +154,7 @@ flutter run \
 
 ### Backend
 
-- **Memory mode is the default:** no PostgreSQL connection is required.
+- **Development memory mode is the default:** no PostgreSQL connection is required.
 - **Prisma mode:** provide a local `DATABASE_URL` and select the data source:
 
 ```powershell
@@ -163,6 +166,10 @@ npm run dev
 `backend/.env` is local-only, ignored by Git, and must never be committed.
 Normal `npm test` remains database-independent; `npm run test:prisma-smoke` is
 the explicit local PostgreSQL verification command.
+
+Production requires `NODE_ENV=production`, an explicit Prisma data source, and
+`DATABASE_URL`. Flutter release builds require API mode and an explicit HTTPS
+API origin; they cannot use mock mode or the emulator URL.
 
 ## Quality And Performance Principles
 
@@ -212,6 +219,7 @@ The complete review standard is documented in
 - [Product research](docs/PRODUCT_RESEARCH.md)
 - [Architecture lessons](docs/ARCHITECTURE_LESSONS.md)
 - [Quality system](docs/QUALITY_SYSTEM.md)
+- [Android MVP release readiness](docs/RELEASE_READINESS.md)
 - [Frontend development guide](frontend/README.md)
 - [Backend development guide](backend/README.md)
 

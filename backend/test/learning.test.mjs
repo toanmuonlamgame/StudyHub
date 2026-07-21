@@ -35,6 +35,17 @@ test('buildApp defaults to in-memory data without PostgreSQL', async (t) => {
   }
 });
 
+test('production requires an explicit Prisma data source', () => {
+  assert.throws(
+    () => buildApp({ isProduction: true }),
+    /STUDYHUB_LEARNING_DATA_SOURCE=prisma/,
+  );
+  assert.throws(
+    () => buildApp({ isProduction: true, learningDataSource: 'memory' }),
+    /STUDYHUB_LEARNING_DATA_SOURCE=prisma/,
+  );
+});
+
 test('buildApp accepts an injected LearningService', async (t) => {
   const learningService = {
     getSubjects: async () => [{ id: 'injected', name: 'Injected Subject' }],

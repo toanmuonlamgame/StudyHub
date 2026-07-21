@@ -30,17 +30,33 @@ const _androidEmulatorApiBaseUrl = 'http://10.0.2.2:3000';
   final resolvedSource = normalizedSource.isEmpty
       ? (isReleaseMode
             ? throw StateError(
-                'Release builds require STUDYHUB_LEARNING_SOURCE=api or mock.',
+                'Release builds require STUDYHUB_LEARNING_SOURCE=api.',
               )
             : 'mock')
       : normalizedSource;
   if (resolvedSource != 'mock' && resolvedSource != 'api') {
     throw StateError('Unsupported STUDYHUB_LEARNING_SOURCE: $source');
   }
+  if (isReleaseMode && resolvedSource != 'api') {
+    throw StateError('Release builds require STUDYHUB_LEARNING_SOURCE=api.');
+  }
 
   final normalizedBaseUrl = apiBaseUrl.trim();
   if (resolvedSource == 'api' && normalizedBaseUrl.isEmpty && isReleaseMode) {
     throw StateError('API release builds require STUDYHUB_API_BASE_URL.');
+  }
+  if (isReleaseMode) {
+    final uri = Uri.tryParse(normalizedBaseUrl);
+    if (uri == null ||
+        uri.scheme != 'https' ||
+        !uri.hasAuthority ||
+        uri.userInfo.isNotEmpty ||
+        uri.query.isNotEmpty ||
+        uri.fragment.isNotEmpty) {
+      throw StateError(
+        'Release STUDYHUB_API_BASE_URL must be an HTTPS origin without credentials, query, or fragment.',
+      );
+    }
   }
   return (
     source: resolvedSource,

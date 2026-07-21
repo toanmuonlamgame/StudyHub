@@ -1,6 +1,12 @@
 # StudyHub Frontend
 
-The Flutter app uses `MockLearningRepository` by default.
+The Flutter app uses `MockLearningRepository` by default in development. Release
+builds require API mode and an explicit HTTPS API origin.
+
+Android displays the app as `StudyHub` with application ID
+`com.toanmuonlamgame.studyhub` and version `1.0.0+1`. The main manifest requests
+only Internet access. Debug builds allow cleartext HTTP for emulator/LAN
+development; release builds do not enable cleartext traffic.
 
 ## Learner navigation
 
@@ -163,6 +169,19 @@ Run checks with:
 flutter analyze --no-pub
 flutter test
 ```
+
+Build a local release candidate with an explicit deployed HTTPS API origin:
+
+```powershell
+flutter build apk --release `
+  --dart-define=STUDYHUB_LEARNING_SOURCE=api `
+  --dart-define=STUDYHUB_API_BASE_URL=https://<deployed-api-origin>
+```
+
+The APK is written to `build/app/outputs/flutter-apk/app-release.apk`. Current
+release builds use debug signing for local installation only; production
+distribution requires a private upload keystore configured outside Git. See
+[`docs/RELEASE_READINESS.md`](../docs/RELEASE_READINESS.md).
 
 ## Study Materials
 

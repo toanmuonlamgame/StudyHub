@@ -324,5 +324,5 @@
   "resultNotYetSaved": "Kết quả chưa được lưu",
   "savingResult": "Đang lưu kết quả...",
   "attemptCorrectSummary": "Đúng {correct}/{total} câu",
-  "attemptHistoryLocalIdentity": "Lịch sử hiện thuộc về danh tính demo tạm thời trên backend. Tài khoản thật sẽ thay thế ranh giới này khi thêm xác thực."
+  "attemptHistoryLocalIdentity": "Lịch sử chưa được liên kết với tài khoản đăng nhập. Quyền sở hữu tài khoản sẽ có khi tính năng đăng nhập được bổ sung."
 }

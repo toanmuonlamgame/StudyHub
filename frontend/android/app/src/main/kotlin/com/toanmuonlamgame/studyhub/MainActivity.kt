@@ -1,4 +1,4 @@
-package com.example.frontend
+package com.toanmuonlamgame.studyhub
 
 import io.flutter.embedding.android.FlutterActivity
 

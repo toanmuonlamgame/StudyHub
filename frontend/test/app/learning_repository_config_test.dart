@@ -23,6 +23,21 @@ void main() {
     );
   });
 
+  test('release configuration rejects mock and cleartext API modes', () {
+    expect(
+      () => resolveLearningRuntimeConfig(source: 'mock', isReleaseMode: true),
+      throwsStateError,
+    );
+    expect(
+      () => resolveLearningRuntimeConfig(
+        source: 'api',
+        apiBaseUrl: 'http://api.example.test',
+        isReleaseMode: true,
+      ),
+      throwsStateError,
+    );
+  });
+
   test('release API mode accepts an explicit non-secret base URL', () {
     final config = resolveLearningRuntimeConfig(
       source: 'api',
