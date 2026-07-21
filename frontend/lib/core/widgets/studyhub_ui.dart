@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../app_design_tokens.dart';
+
 class StudyHubSectionHeader extends StatelessWidget {
   const StudyHubSectionHeader({
     super.key,
@@ -76,6 +78,142 @@ class StudyHubIconSurface extends StatelessWidget {
   }
 }
 
+class StudyHubPageHeader extends StatelessWidget {
+  const StudyHubPageHeader({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.body,
+    this.eyebrow,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+  final String? eyebrow;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Semantics(
+      header: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          StudyHubIconSurface(icon: icon, size: 48),
+          const SizedBox(height: AppSpacing.lg),
+          if (eyebrow != null) ...[
+            Text(
+              eyebrow!,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+          ],
+          Text(title, style: theme.textTheme.headlineSmall),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            body,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StudyHubStateView extends StatelessWidget {
+  const StudyHubStateView({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.message,
+    this.action,
+    this.tone = StudyHubStateTone.neutral,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? message;
+  final Widget? action;
+  final StudyHubStateTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final (foreground, background) = switch (tone) {
+      StudyHubStateTone.neutral => (
+        theme.colorScheme.primary,
+        theme.colorScheme.primaryContainer,
+      ),
+      StudyHubStateTone.success => (
+        AppColors.success,
+        theme.colorScheme.secondaryContainer,
+      ),
+      StudyHubStateTone.error => (
+        theme.colorScheme.error,
+        theme.colorScheme.errorContainer,
+      ),
+    };
+
+    return Semantics(
+      liveRegion: true,
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.xxl),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: background,
+                    borderRadius: BorderRadius.circular(AppRadii.feature),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: foreground,
+                    size: AppIconSizes.state,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleLarge,
+                ),
+                if (message != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    message!,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+                if (action != null) ...[
+                  const SizedBox(height: AppSpacing.xl),
+                  SizedBox(width: double.infinity, child: action),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum StudyHubStateTone { neutral, success, error }
+
 class ComingSoonBadge extends StatelessWidget {
   const ComingSoonBadge({super.key, required this.label});
 
@@ -139,7 +277,7 @@ class EmptyMetricCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    '—',
+                    '-',
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: theme.colorScheme.outline,
                     ),

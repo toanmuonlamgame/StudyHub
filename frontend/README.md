@@ -182,6 +182,15 @@ flutter analyze --no-pub
 flutter test
 ```
 
+## UI system
+
+The learner app uses a mobile-first Material 3 theme backed by shared semantic
+color, spacing, radius, icon, layout, elevation, and motion tokens. Auth, Home,
+navigation, subject browsing, and learning states share the same hierarchy and
+accessibility rules. Home displays only real actions and available account data;
+it does not invent recommendations, streaks, or progress. See
+[`docs/UI_UX_REDESIGN.md`](../docs/UI_UX_REDESIGN.md) for the research and audit.
+
 Build a local release candidate with an explicit deployed HTTPS API origin:
 
 ```powershell
@@ -239,3 +248,17 @@ confirmation against repeated taps. Recoverable failures keep the current
 result or creator draft visible. Parsed full-exam previews render question cards
 lazily, and success/error states remain scrollable on short phones with large
 text.
+
+## Account experience
+
+Email/password authentication restores a backend-issued session and protects
+account-owned attempts, bookmarks, and submissions. Profile shows real attempt,
+saved-set, and submission counts, and links to History, Saved, and Contributions.
+Saved items can be removed or reopened in the normal learner flow. Contribution
+management supports draft actions and read-only pending, approved, and rejected
+details, including moderator rejection notes.
+
+Google sign-in remains disabled until provider-console configuration and secure
+backend ID-token verification are implemented. Facebook is hidden. See
+[`docs/SOCIAL_AUTH_SETUP.md`](../docs/SOCIAL_AUTH_SETUP.md); no client-only or
+fake provider login is used.

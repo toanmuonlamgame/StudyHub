@@ -26,16 +26,18 @@ Reason:
 Rule:
 - Keep the same contribution submission ID while retrying one editor session.
 - Do not trust a client user ID and do not persist partial nested submissions.
-- Keep real authentication, migrations, and PostgreSQL smoke testing as explicit
-  follow-up work; no test suite may require or mutate the real database.
+- Authentication is now backend-owned as recorded in the later 2026-07-21
+  decision. Migrations and PostgreSQL smoke testing remain explicit manual work;
+  no normal test suite may require or mutate the real database.
 
 ## 2026-07-17 - Exam Attempt Persistence Boundary
 Decision:
 - Completed Exam attempts are persisted by the backend after authoritative
   scoring. Flutter sends selected option IDs, a start time, and a stable
   submission ID; it never sends a trusted score or user ID.
-- Until authentication exists, routes obtain `demo-user` from one replaceable
-  backend identity boundary. Service reads always filter by that identity.
+- This decision originally used a replaceable `demo-user` boundary. It is
+  superseded by the later backend-owned session decision; service reads still
+  filter by authenticated identity.
 - `(userId, submissionId)` is unique. A retry with the same canonical request
   returns the existing attempt; reusing the key with different Question Set,
   start time, or selected answers is a conflict.
@@ -647,7 +649,9 @@ level.
 
 - Flutter keeps the current draft locally and sends one atomic final submission.
 - Creator DTOs may contain `isCorrect`; learner GET DTOs never do.
-- `createdByUserId` stays nullable and untrusted until authentication exists.
+- This decision originally kept `createdByUserId` nullable. New authenticated
+  submissions derive ownership from the backend session; legacy seeded rows may
+  remain nullable according to the prepared schema.
 - No unauthenticated approve/reject routes are exposed.
 - Memory and Prisma implementations share centralized validation and lifecycle
   behavior behind `LearningService`.
@@ -687,6 +691,23 @@ Reason: a release candidate must fail clearly when production data or network
 configuration is missing and must not ship Flutter template identity or silently
 use demo fixtures.
 
+## 2026-07-21 - Coherent Learner UI System
+Decision: StudyHub uses one token-driven, mobile-first visual system with a single
+dominant action per screen, semantic color, labeled Material icons, bounded
+content widths, shared state views, and reduced-motion-aware transitions.
+
+Rules:
+- Home may expose only real data and working destinations; it must not invent
+  recommendations, streaks, rankings, or progress.
+- Visual polish must not change repository/API boundaries or answer-safety rules.
+- Social-auth controls remain disabled or hidden until a secure backend contract
+  exists; UI must never imply that an unavailable provider works.
+- Third-party app screens and proprietary illustration assets are conceptual
+  references only and are never copied.
+
+Reason: consistent hierarchy and interaction patterns improve discoverability and
+portfolio quality without adding runtime weight, misleading data, or a UI rewrite.
+
 ## 2026-07-21 - Essential MVP Authentication And Ownership
 Decision: StudyHub uses backend-owned email/password authentication with opaque,
 expiring bearer sessions for the essential MVP. Passwords use salted `scrypt`
@@ -710,3 +731,17 @@ for ordinary users. Review actions remain a future authorized admin/backend conc
 Decision: Saved Question Sets are account-owned bookmarks with a database unique
 constraint on `(userId, questionSetId)`. Bookmark creation is idempotent and Saved
 lists return normal learner-safe Question Set metadata only.
+
+## 2026-07-21 - Account Destinations And Social Provider Boundary
+Decision: the existing four-tab mobile shell remains the primary navigation.
+Saved, attempt History, Contributions, and Profile are account-owned secondary
+destinations exposed from Home, Progress, Profile, or Settings instead of adding
+more bottom-navigation tabs.
+
+Decision: Google sign-in stays visibly unavailable and Facebook stays hidden
+until provider clients and a backend ID-token verification/exchange contract are
+configured. Flutter must never manufacture a successful provider session or
+store a provider client secret.
+
+Reason: this keeps navigation touch-friendly and predictable while preserving
+the backend as the only trusted identity source.

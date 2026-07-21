@@ -220,6 +220,10 @@ The complete review standard is documented in
 - Testable Fastify routes and Prisma-independent normal test suite.
 - PostgreSQL schema, migration, repeatable seed, and automated Prisma smoke test.
 - Explicit pre-submit/post-submit answer safety boundary.
+- Backend-owned email/password authentication with account-scoped attempts,
+  bookmarks, and creator submissions.
+- Completed Profile, Saved, History, Settings, and contribution-management
+  surfaces with real repository data and retryable states.
 - Moderation-ready community Question Set submissions with local drafts,
   structured validation, and published-only learner visibility.
 - Fast manual Question Set creation plus a validated full-exam paste workflow
@@ -236,6 +240,7 @@ The complete review standard is documented in
 - [Product research](docs/PRODUCT_RESEARCH.md)
 - [Architecture lessons](docs/ARCHITECTURE_LESSONS.md)
 - [Quality system](docs/QUALITY_SYSTEM.md)
+- [Social authentication setup](docs/SOCIAL_AUTH_SETUP.md)
 - [Android MVP release readiness](docs/RELEASE_READINESS.md)
 - [Frontend development guide](frontend/README.md)
 - [Backend development guide](backend/README.md)

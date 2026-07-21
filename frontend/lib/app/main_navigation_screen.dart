@@ -72,31 +72,40 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           (index) => _builtTabs[index] ?? const SizedBox.shrink(),
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: _selectTab,
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
-            label: l10n.homeTab,
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.menu_book_outlined),
-            selectedIcon: const Icon(Icons.menu_book),
-            label: l10n.learnTab,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.insights_outlined),
-            selectedIcon: const Icon(Icons.insights),
-            label: l10n.progressTab,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: const Icon(Icons.settings),
-            label: l10n.settingsTab,
-          ),
-        ],
+        ),
+        child: NavigationBar(
+          selectedIndex: selectedIndex,
+          onDestinationSelected: _selectTab,
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home_rounded),
+              label: l10n.homeTab,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.menu_book_outlined),
+              selectedIcon: const Icon(Icons.menu_book_rounded),
+              label: l10n.learnTab,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.insights_outlined),
+              selectedIcon: const Icon(Icons.insights_rounded),
+              label: l10n.progressTab,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.settings_outlined),
+              selectedIcon: const Icon(Icons.settings_rounded),
+              label: l10n.settingsTab,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -123,6 +132,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       1 => SubjectListScreen(learningRepository: widget.learningRepository),
       2 => ProgressScreen(onStartLearning: () => _selectTab(1)),
       3 => SettingsScreen(
+        learningRepository: widget.learningRepository,
         localeSelection: widget.localeSelection,
         onLocaleSelected: widget.onLocaleSelected,
         contributionRepository: widget.contributionRepository,
@@ -135,7 +145,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return HomeScreen(
       onStartLearning: () => _selectTab(1),
       onOpenProgress: () => _selectTab(2),
-      onOpenSettings: () => _selectTab(3),
       onOpenStudyMaterials: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => StudyMaterialListScreen(
@@ -153,7 +162,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       onOpenSaved: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => const SavedQuestionSetsScreen(),
+          builder: (_) => SavedQuestionSetsScreen(
+            learningRepository: widget.learningRepository,
+          ),
         ),
       ),
     );

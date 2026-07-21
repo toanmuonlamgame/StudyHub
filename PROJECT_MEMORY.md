@@ -215,6 +215,16 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - StudyHub's visual system uses centralized indigo, teal, warm accent, semantic
   state, spacing, and radius tokens so polished UI does not scatter hard-coded
   styling across features.
+- The learner UI uses one dominant action per screen, labeled Material icons,
+  shared state views, account-aware but non-invented Home content, bounded mobile
+  layouts, and reduced-motion-aware transitions. See `docs/UI_UX_REDESIGN.md`.
+- The essential account experience uses backend-owned identity and real repository
+  data: Profile summarizes attempts, bookmarks, and submissions; Saved reopens
+  learner-safe sets; contribution management keeps drafts editable and later
+  lifecycle states read-only. The four-tab shell remains the mobile navigation
+  baseline, with Saved, History, and Contributions as clear secondary routes.
+- Google sign-in remains disabled until provider-console clients and a secure
+  backend ID-token exchange are configured; Facebook remains hidden.
 
 ## AI Workflow
 - Codex app: main coding assistant.

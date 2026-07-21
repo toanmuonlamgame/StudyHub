@@ -18,6 +18,7 @@ import 'package:frontend/features/contribution/repositories/api_contribution_rep
 import 'package:frontend/features/contribution/repositories/contribution_repository.dart';
 import 'package:frontend/features/contribution/repositories/mock_contribution_repository.dart';
 import 'package:frontend/features/contribution/screens/contribution_editor_screen.dart';
+import 'package:frontend/features/contribution/screens/contribution_detail_screen.dart';
 import 'package:frontend/features/contribution/screens/contribution_intro_screen.dart';
 import 'package:frontend/features/contribution/screens/paste_exam_screen.dart';
 import 'package:frontend/features/contribution/screens/submission_confirmation_screen.dart';
@@ -232,7 +233,7 @@ void main() {
       const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
     );
     final contributionTile = find.byKey(
-      const ValueKey('contribution-home-tile'),
+      const ValueKey('home-quick-contribution'),
     );
     await tester.scrollUntilVisible(
       contributionTile,
@@ -273,7 +274,7 @@ void main() {
       ),
     );
     final contributionTile = find.byKey(
-      const ValueKey('contribution-home-tile'),
+      const ValueKey('home-quick-contribution'),
     );
     await tester.scrollUntilVisible(
       contributionTile,
@@ -507,7 +508,7 @@ void main() {
     await tester.pumpWidget(
       const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
     );
-    final tile = find.byKey(const ValueKey('contribution-home-tile'));
+    final tile = find.byKey(const ValueKey('home-quick-contribution'));
     await tester.scrollUntilVisible(tile, 300, scrollable: _homeScrollable());
     await tester.drag(_homeScrollable(), const Offset(0, -180));
     await tester.pumpAndSettle();
@@ -669,6 +670,33 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Pending Review'), findsOneWidget);
   });
+
+  testWidgets('approved contribution opens as read-only detail', (
+    tester,
+  ) async {
+    final submission = ContributionSubmission(
+      id: 'approved-1',
+      status: ContributionStatus.approved,
+      draft: _validDraft(),
+      createdAt: DateTime.utc(2026, 7, 21),
+      updatedAt: DateTime.utc(2026, 7, 21),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: ContributionDetailScreen(submission: submission),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Approved'), findsOneWidget);
+    expect(find.text(submission.draft.title), findsOneWidget);
+    expect(find.text('Correct answer'), findsOneWidget);
+    expect(find.text('Edit draft'), findsNothing);
+  });
 }
 
 Finder _homeScrollable() => find
@@ -686,7 +714,7 @@ Finder _contributionIntroScrollable() => find
     .first;
 
 Future<void> _openContributionEditor(WidgetTester tester) async {
-  final tile = find.byKey(const ValueKey('contribution-home-tile'));
+  final tile = find.byKey(const ValueKey('home-quick-contribution'));
   await tester.scrollUntilVisible(tile, 300, scrollable: _homeScrollable());
   await tester.drag(_homeScrollable(), const Offset(0, -180));
   await tester.pumpAndSettle();

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/app_design_tokens.dart';
+import '../../../core/widgets/studyhub_ui.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../models/subject.dart';
 import '../repositories/learning_repository.dart';
@@ -56,7 +58,12 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
             }
 
             return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenHorizontal,
+                AppSpacing.sm,
+                AppSpacing.screenHorizontal,
+                AppSpacing.screenBottom,
+              ),
               itemCount: subjects.length + 1,
               separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
@@ -100,28 +107,10 @@ class _SubjectListHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.chooseSubjectTitle,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            context.l10n.chooseSubjectSubtitle,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
+    return StudyHubPageHeader(
+      icon: Icons.menu_book_outlined,
+      title: context.l10n.chooseSubjectTitle,
+      body: context.l10n.chooseSubjectSubtitle,
     );
   }
 }
@@ -151,16 +140,16 @@ class _SubjectCard extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: 46,
-                  height: 46,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppRadii.control),
                   ),
                   child: Icon(
-                    Icons.menu_book_outlined,
+                    _subjectIcon(subject),
                     color: theme.colorScheme.primary,
-                    size: 24,
+                    size: AppIconSizes.feature,
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -223,5 +212,19 @@ class _SubjectCard extends StatelessWidget {
     }
 
     return parts.isEmpty ? null : parts.join(' | ');
+  }
+
+  IconData _subjectIcon(Subject subject) {
+    final value = '${subject.id} ${subject.name}'.toLowerCase();
+    if (value.contains('database') || value.contains('data')) {
+      return Icons.storage_outlined;
+    }
+    if (value.contains('javascript') || value.contains('code')) {
+      return Icons.code_rounded;
+    }
+    if (value.contains('java') || value.contains('oop')) {
+      return Icons.account_tree_outlined;
+    }
+    return Icons.menu_book_outlined;
   }
 }

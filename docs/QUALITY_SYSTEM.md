@@ -179,6 +179,9 @@ data-growth checklist in
 bounded payloads, stable pagination, indexed filtering, visibility rules, and the
 absence of correctness/private-data leaks.
 
+For visual hierarchy, shared components, icon/motion choices, and conceptual
+research references, also apply [UI_UX_REDESIGN.md](UI_UX_REDESIGN.md).
+
 ## Creator Content Guardrail
 
 - Keep creator answer-key models separate from learner-safe models.

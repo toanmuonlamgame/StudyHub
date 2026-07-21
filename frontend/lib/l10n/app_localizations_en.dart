@@ -549,6 +549,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeGreeting => 'Ready to learn?';
 
   @override
+  String homeGreetingName(String name) {
+    return 'Ready to learn, $name?';
+  }
+
+  @override
   String get homeSupportingLine =>
       'Choose a destination and make this session count.';
 
@@ -1145,6 +1150,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sign in to keep attempts, saved sets, and contributions under your account.';
 
   @override
+  String get authOrContinueWith => 'Or continue with';
+
+  @override
+  String get googleSignInComingSoon => 'Google sign-in - coming soon';
+
+  @override
+  String get showPassword => 'Show password';
+
+  @override
+  String get hidePassword => 'Hide password';
+
+  @override
   String get authInvalidCredentials => 'Email or password is incorrect.';
 
   @override
@@ -1259,4 +1276,61 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutStudyHubBody =>
       'A mobile learning platform for structured study, safe quizzes, and community-created content.';
+
+  @override
+  String get accountActive => 'Active account';
+
+  @override
+  String get accountOverview => 'Account overview';
+
+  @override
+  String get yourLearning => 'Your learning';
+
+  @override
+  String get profileStatsError => 'Account activity could not be loaded';
+
+  @override
+  String get profileUpdateFailed =>
+      'Your display name could not be updated. Try again.';
+
+  @override
+  String get confirmLogOut => 'Log out of StudyHub?';
+
+  @override
+  String get confirmLogOutBody =>
+      'You will need to sign in again to access account-owned learning data.';
+
+  @override
+  String get socialSignIn => 'Social sign-in';
+
+  @override
+  String get socialSignInUnavailable =>
+      'Provider setup and secure backend verification are still required.';
+
+  @override
+  String get savedLoadError => 'Saved question sets could not be loaded';
+
+  @override
+  String get savedActionError =>
+      'The saved item could not be updated. Try again.';
+
+  @override
+  String get savedOpenError => 'This saved question set could not be opened.';
+
+  @override
+  String get checkConnectionBody => 'Check your connection and try again.';
+
+  @override
+  String get contributionLoadError => 'Contributions could not be loaded';
+
+  @override
+  String get contributionEmptyBody =>
+      'Create a draft when you are ready to share a useful question set.';
+
+  @override
+  String get contributionActionError =>
+      'The contribution could not be updated. Your existing content is safe.';
+
+  @override
+  String get openDetails => 'View details';
 }

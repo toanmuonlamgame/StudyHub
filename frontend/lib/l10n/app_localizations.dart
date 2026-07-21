@@ -1052,6 +1052,12 @@ abstract class AppLocalizations {
   /// **'Ready to learn?'**
   String get homeGreeting;
 
+  /// No description provided for @homeGreetingName.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to learn, {name}?'**
+  String homeGreetingName(String name);
+
   /// No description provided for @homeSupportingLine.
   ///
   /// In en, this message translates to:
@@ -2102,6 +2108,30 @@ abstract class AppLocalizations {
   /// **'Sign in to keep attempts, saved sets, and contributions under your account.'**
   String get authWelcomeBody;
 
+  /// No description provided for @authOrContinueWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Or continue with'**
+  String get authOrContinueWith;
+
+  /// No description provided for @googleSignInComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in - coming soon'**
+  String get googleSignInComingSoon;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get hidePassword;
+
   /// No description provided for @authInvalidCredentials.
   ///
   /// In en, this message translates to:
@@ -2323,6 +2353,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A mobile learning platform for structured study, safe quizzes, and community-created content.'**
   String get aboutStudyHubBody;
+
+  /// No description provided for @accountActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active account'**
+  String get accountActive;
+
+  /// No description provided for @accountOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Account overview'**
+  String get accountOverview;
+
+  /// No description provided for @yourLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Your learning'**
+  String get yourLearning;
+
+  /// No description provided for @profileStatsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Account activity could not be loaded'**
+  String get profileStatsError;
+
+  /// No description provided for @profileUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your display name could not be updated. Try again.'**
+  String get profileUpdateFailed;
+
+  /// No description provided for @confirmLogOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out of StudyHub?'**
+  String get confirmLogOut;
+
+  /// No description provided for @confirmLogOutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You will need to sign in again to access account-owned learning data.'**
+  String get confirmLogOutBody;
+
+  /// No description provided for @socialSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Social sign-in'**
+  String get socialSignIn;
+
+  /// No description provided for @socialSignInUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider setup and secure backend verification are still required.'**
+  String get socialSignInUnavailable;
+
+  /// No description provided for @savedLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved question sets could not be loaded'**
+  String get savedLoadError;
+
+  /// No description provided for @savedActionError.
+  ///
+  /// In en, this message translates to:
+  /// **'The saved item could not be updated. Try again.'**
+  String get savedActionError;
+
+  /// No description provided for @savedOpenError.
+  ///
+  /// In en, this message translates to:
+  /// **'This saved question set could not be opened.'**
+  String get savedOpenError;
+
+  /// No description provided for @checkConnectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get checkConnectionBody;
+
+  /// No description provided for @contributionLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Contributions could not be loaded'**
+  String get contributionLoadError;
+
+  /// No description provided for @contributionEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a draft when you are ready to share a useful question set.'**
+  String get contributionEmptyBody;
+
+  /// No description provided for @contributionActionError.
+  ///
+  /// In en, this message translates to:
+  /// **'The contribution could not be updated. Your existing content is safe.'**
+  String get contributionActionError;
+
+  /// No description provided for @openDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get openDetails;
 }
 
 class _AppLocalizationsDelegate

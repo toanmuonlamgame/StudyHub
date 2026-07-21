@@ -546,6 +546,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get homeGreeting => 'Sẵn sàng học chưa?';
 
   @override
+  String homeGreetingName(String name) {
+    return '$name, sẵn sàng học chưa?';
+  }
+
+  @override
   String get homeSupportingLine =>
       'Chọn điểm đến và bắt đầu buổi học hiệu quả.';
 
@@ -1143,6 +1148,18 @@ class AppLocalizationsVi extends AppLocalizations {
       'Đăng nhập để lưu bài làm, bộ đề yêu thích và nội dung đóng góp theo tài khoản.';
 
   @override
+  String get authOrContinueWith => 'Hoặc tiếp tục với';
+
+  @override
+  String get googleSignInComingSoon => 'Đăng nhập Google - sắp có';
+
+  @override
+  String get showPassword => 'Hiện mật khẩu';
+
+  @override
+  String get hidePassword => 'Ẩn mật khẩu';
+
+  @override
   String get authInvalidCredentials => 'Email hoặc mật khẩu không đúng.';
 
   @override
@@ -1257,4 +1274,61 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get aboutStudyHubBody =>
       'Nền tảng học tập di động cho nội dung có cấu trúc, quiz an toàn và đóng góp cộng đồng.';
+
+  @override
+  String get accountActive => 'Tài khoản đang hoạt động';
+
+  @override
+  String get accountOverview => 'Tổng quan tài khoản';
+
+  @override
+  String get yourLearning => 'Hoạt động học tập';
+
+  @override
+  String get profileStatsError => 'Không thể tải hoạt động tài khoản';
+
+  @override
+  String get profileUpdateFailed =>
+      'Không thể cập nhật tên hiển thị. Vui lòng thử lại.';
+
+  @override
+  String get confirmLogOut => 'Đăng xuất khỏi StudyHub?';
+
+  @override
+  String get confirmLogOutBody =>
+      'Bạn cần đăng nhập lại để truy cập dữ liệu học tập thuộc tài khoản.';
+
+  @override
+  String get socialSignIn => 'Đăng nhập mạng xã hội';
+
+  @override
+  String get socialSignInUnavailable =>
+      'Cần cấu hình nhà cung cấp và xác minh an toàn tại backend.';
+
+  @override
+  String get savedLoadError => 'Không thể tải các bộ đề đã lưu';
+
+  @override
+  String get savedActionError =>
+      'Không thể cập nhật bộ đề đã lưu. Vui lòng thử lại.';
+
+  @override
+  String get savedOpenError => 'Không thể mở bộ đề đã lưu này.';
+
+  @override
+  String get checkConnectionBody => 'Kiểm tra kết nối rồi thử lại.';
+
+  @override
+  String get contributionLoadError => 'Không thể tải nội dung đóng góp';
+
+  @override
+  String get contributionEmptyBody =>
+      'Tạo bản nháp khi bạn sẵn sàng chia sẻ một bộ câu hỏi hữu ích.';
+
+  @override
+  String get contributionActionError =>
+      'Không thể cập nhật nội dung đóng góp. Nội dung hiện có vẫn an toàn.';
+
+  @override
+  String get openDetails => 'Xem chi tiết';
 }

@@ -19,6 +19,8 @@ class AppColors {
   static const canvas = Color(0xFFF6F7FC);
   static const surface = Color(0xFFFFFFFF);
   static const surfaceTinted = Color(0xFFF0F1FA);
+  static const info = Color(0xFF2563EB);
+  static const infoContainer = Color(0xFFDBEAFE);
   static const outline = Color(0xFFDDE1EA);
 }
 
@@ -32,6 +34,8 @@ class AppSpacing {
   static const xl = 20.0;
   static const xxl = 24.0;
   static const section = 32.0;
+  static const screenHorizontal = 20.0;
+  static const screenBottom = 32.0;
 }
 
 class AppRadii {
@@ -40,4 +44,35 @@ class AppRadii {
   static const control = 12.0;
   static const card = 16.0;
   static const feature = 20.0;
+}
+
+class AppIconSizes {
+  const AppIconSizes._();
+
+  static const compact = 18.0;
+  static const standard = 22.0;
+  static const feature = 28.0;
+  static const state = 32.0;
+}
+
+class AppElevation {
+  const AppElevation._();
+
+  static const resting = 0.0;
+  static const raised = 1.0;
+  static const overlay = 3.0;
+}
+
+class AppBorders {
+  const AppBorders._();
+
+  static const thin = 1.0;
+  static const emphasized = 1.5;
+}
+
+class AppLayout {
+  const AppLayout._();
+
+  static const mobileContentMaxWidth = 560.0;
+  static const formMaxWidth = 440.0;
 }

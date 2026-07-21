@@ -441,6 +441,29 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Review/apply pending migrations and run Prisma smoke tests personally.
 - [ ] Complete the iQOO Z9 Turbo checklist in `docs/RELEASE_READINESS.md`.
 
+## UI/UX Research And Redesign
+- [x] Audit Auth, Home, navigation, browsing, quiz, results, history, contribution, profile, settings, and shared states.
+- [x] Expand shared visual, layout, icon, elevation, and motion tokens.
+- [x] Replace repeated Home entry points with one primary CTA and real shortcuts.
+- [x] Polish Auth hierarchy, keyboard safety, errors, loading, and honest social-auth status.
+- [x] Unify learning loading, error, and empty states through a shared component.
+- [x] Document conceptual references and adopted/rejected design principles.
+- [ ] Replace the template launcher icon with approved StudyHub branding.
+- [ ] Validate the refreshed surfaces on a physical compact Android device.
+- [ ] Design project-owned onboarding/empty-state illustrations after branding approval.
+- [ ] Implement Google sign-in only after a secure backend OAuth contract is approved.
+
+## Essential Product Experience Completion
+- [x] Complete Profile with real attempt, saved-set, and submission metrics.
+- [x] Expose History, Saved, Contributions, Settings, and logout from the account experience.
+- [x] Make Saved typed, retryable, removable, and reopenable in the learner flow.
+- [x] Add contribution single-flight actions and read-only status/detail review.
+- [x] Keep the four-tab mobile shell and expose secondary destinations without overcrowding it.
+- [x] Document the secure Google provider setup boundary; keep unavailable social login disabled.
+- [ ] Apply pending Prisma migrations and run database smoke tests manually.
+- [ ] Run compact Android keyboard, large-text, and complete account-flow verification.
+- [ ] Configure and implement Google sign-in only after backend token exchange and provider clients are approved.
+
 ## Not Doing Yet
 - [ ] Do not create docs/ files until explicitly requested.
 - [ ] Do not write app code until the first milestone is approved.

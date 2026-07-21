@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:frontend/app/studyhub_app.dart';
 import 'package:frontend/core/app_locale.dart';
+import 'package:frontend/features/auth/repositories/mock_auth_repository.dart';
 import 'package:frontend/features/learning/models/answer_check_result.dart';
 import 'package:frontend/features/learning/models/answer_review.dart';
 import 'package:frontend/features/learning/models/question.dart';
@@ -36,9 +37,7 @@ void main() {
     );
 
     expect(find.text('StudyHub'), findsWidgets);
-    expect(find.text('Featured'), findsOneWidget);
-    expect(find.byKey(const ValueKey('home-banner-carousel')), findsOneWidget);
-    expect(find.byKey(const ValueKey('home-banner-indicator')), findsOneWidget);
+    expect(find.text('Start a learning session'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('home-quick-action-grid')),
@@ -48,6 +47,37 @@ void main() {
     expect(find.text('Quick actions'), findsOneWidget);
     expect(find.textContaining('discount'), findsNothing);
     expect(find.textContaining('% off'), findsNothing);
+  });
+
+  testWidgets('authentication stays usable on a compact scaled viewport', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await tester.pumpWidget(
+      StudyHubApp(
+        authRepository: MockAuthRepository(),
+        initialLocaleSelection: AppLocaleSelection.english,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Continue your learning journey'), findsOneWidget);
+    expect(find.text('Sign in'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.ensureVisible(find.text('Google sign-in - coming soon'));
+    await tester.pumpAndSettle();
+    final googleButton = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'Google sign-in - coming soon'),
+    );
+    expect(googleButton.onPressed, isNull);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('switches between honest top-level app sections', (
@@ -81,19 +111,6 @@ void main() {
     expect(find.byType(Switch), findsNothing);
   });
 
-  testWidgets('featured banner is manually swipeable', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
-    );
-
-    expect(find.bySemanticsLabel('Featured item 1 of 3'), findsWidgets);
-    await tester.drag(find.byType(PageView), const Offset(-320, 0));
-    await tester.pumpAndSettle();
-    expect(find.bySemanticsLabel('Featured item 2 of 3'), findsWidgets);
-  });
-
   testWidgets('home shortcuts switch tabs without eager subject loading', (
     WidgetTester tester,
   ) async {
@@ -112,7 +129,8 @@ void main() {
 
     await tester.tap(_navigationLabel('Home'));
     await tester.pumpAndSettle();
-    await _tapHomeShortcut(tester, 'settings');
+    await tester.tap(_navigationLabel('Settings'));
+    await tester.pumpAndSettle();
     expect(find.text('Language'), findsOneWidget);
     expect(repository.subjectLoadCount, 0);
 
@@ -243,7 +261,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Nổi bật'), findsOneWidget);
+    expect(find.text('Bắt đầu buổi học'), findsOneWidget);
     expect(find.text('Học tập'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -601,8 +619,14 @@ Finder _verticalScrollableWithin(String key) {
       .first;
 }
 
-Future<void> _startLearningFromHome(WidgetTester tester) {
-  return _tapHomeShortcut(tester, 'start-learning');
+Future<void> _startLearningFromHome(WidgetTester tester) async {
+  final action = find.byKey(const ValueKey('home-primary-start-learning'));
+  await tester.fling(_homeScrollable(), const Offset(0, 1200), 1200);
+  await tester.pumpAndSettle();
+  await tester.scrollUntilVisible(action, 250, scrollable: _homeScrollable());
+  await tester.ensureVisible(action);
+  await tester.tap(action);
+  await tester.pumpAndSettle();
 }
 
 Future<void> _openJavaScriptBasicsQuiz(

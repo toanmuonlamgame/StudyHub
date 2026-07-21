@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../../app/app_navigation.dart';
 import '../../core/app_info.dart';
 import '../../core/app_locale.dart';
 import '../../core/widgets/studyhub_ui.dart';
 import '../../l10n/app_localizations_x.dart';
+import '../attempts/attempt_repository_scope.dart';
+import '../attempts/screens/exam_attempt_history_screen.dart';
+import '../auth/auth_controller.dart';
 import '../auth/auth_scope.dart';
 import '../contribution/repositories/contribution_repository.dart';
+import '../contribution/screens/contribution_management_screen.dart';
+import '../learning/repositories/learning_repository.dart';
 import '../profile/profile_screen.dart';
 import '../saved/screens/saved_question_sets_screen.dart';
 
@@ -14,11 +20,13 @@ class SettingsScreen extends StatelessWidget {
     super.key,
     required this.localeSelection,
     required this.onLocaleSelected,
+    required this.learningRepository,
     required this.contributionRepository,
   });
 
   final AppLocaleSelection localeSelection;
   final ValueChanged<AppLocaleSelection> onLocaleSelected;
+  final LearningRepository learningRepository;
   final ContributionRepository contributionRepository;
 
   @override
@@ -44,6 +52,7 @@ class SettingsScreen extends StatelessWidget {
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => ProfileScreen(
+                          learningRepository: learningRepository,
                           contributionRepository: contributionRepository,
                         ),
                       ),
@@ -56,7 +65,43 @@ class SettingsScreen extends StatelessWidget {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                        builder: (_) => const SavedQuestionSetsScreen(),
+                        builder: (_) => SavedQuestionSetsScreen(
+                          learningRepository: learningRepository,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1, indent: 64),
+                  ListTile(
+                    leading: const Icon(Icons.history_rounded),
+                    title: Text(context.l10n.attemptHistory),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ExamAttemptHistoryScreen(
+                          repository: AttemptRepositoryScope.of(context),
+                          onStartLearning: () {
+                            AppNavigationScope.maybeOf(context)?.selectTab(1);
+                            Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            ).popUntil((route) => route.isFirst);
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1, indent: 64),
+                  ListTile(
+                    leading: const Icon(Icons.post_add_outlined),
+                    title: Text(context.l10n.myContributions),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ContributionManagementScreen(
+                          learningRepository: learningRepository,
+                          contributionRepository: contributionRepository,
+                        ),
                       ),
                     ),
                   ),
@@ -64,13 +109,25 @@ class SettingsScreen extends StatelessWidget {
                   ListTile(
                     leading: const Icon(Icons.logout),
                     title: Text(context.l10n.logOut),
-                    onTap: authController.logout,
+                    onTap: () => _confirmLogout(context, authController),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
           ],
+          StudyHubSectionHeader(title: context.l10n.socialSignIn),
+          const SizedBox(height: 10),
+          Card(
+            child: ListTile(
+              enabled: false,
+              leading: const Icon(Icons.g_mobiledata_rounded, size: 30),
+              title: Text(context.l10n.googleSignInComingSoon),
+              subtitle: Text(context.l10n.socialSignInUnavailable),
+              trailing: ComingSoonBadge(label: context.l10n.comingSoon),
+            ),
+          ),
+          const SizedBox(height: 24),
           StudyHubSectionHeader(title: context.l10n.languageSection),
           const SizedBox(height: 10),
           Card(
@@ -125,6 +182,30 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmLogout(
+    BuildContext context,
+    AuthController authController,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.confirmLogOut),
+        content: Text(context.l10n.confirmLogOutBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n.progressCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(context.l10n.logOut),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await authController.logout();
   }
 }
 

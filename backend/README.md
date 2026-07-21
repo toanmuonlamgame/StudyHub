@@ -347,3 +347,12 @@ questions, answers, or correctness fields.
 Unexpected server and stored-data integrity errors are logged by Fastify but
 return generic HTTP `500` messages. Prisma, connection, credential, and internal
 answer-key details must not be exposed in API responses.
+
+## Authentication boundary
+
+Email/password registration, login, current-user loading/profile update, and
+logout issue and validate opaque StudyHub sessions. Protected attempt, bookmark,
+and contribution routes derive ownership from the bearer session and never trust
+a body-supplied user ID. Social login is not active; a future Google exchange
+must verify the provider ID token server-side before issuing a StudyHub session.
+See [`docs/SOCIAL_AUTH_SETUP.md`](../docs/SOCIAL_AUTH_SETUP.md).

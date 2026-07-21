@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/studyhub_ui.dart';
+import '../../auth/auth_scope.dart';
 import '../../../l10n/app_localizations_x.dart';
-import '../models/home_banner_item.dart';
-import '../widgets/home_banner_carousel.dart';
 import '../widgets/home_hub_widgets.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -11,7 +10,6 @@ class HomeScreen extends StatelessWidget {
     super.key,
     required this.onStartLearning,
     required this.onOpenProgress,
-    required this.onOpenSettings,
     required this.onOpenStudyMaterials,
     required this.onOpenContribution,
     required this.onOpenSaved,
@@ -19,7 +17,6 @@ class HomeScreen extends StatelessWidget {
 
   final VoidCallback onStartLearning;
   final VoidCallback onOpenProgress;
-  final VoidCallback onOpenSettings;
   final VoidCallback onOpenStudyMaterials;
   final VoidCallback onOpenContribution;
   final VoidCallback onOpenSaved;
@@ -28,55 +25,13 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final banners = [
-      HomeBannerItem(
-        icon: Icons.compare_arrows_rounded,
-        title: l10n.featuredModesTitle,
-        body: l10n.featuredModesBody,
-        actionLabel: l10n.featuredModesAction,
-        onPressed: onStartLearning,
-        tone: HomeBannerTone.primary,
-      ),
-      HomeBannerItem(
-        icon: Icons.search_rounded,
-        title: l10n.featuredSetsTitle,
-        body: l10n.featuredSetsBody,
-        actionLabel: l10n.featuredSetsAction,
-        onPressed: onStartLearning,
-        tone: HomeBannerTone.success,
-      ),
-      HomeBannerItem(
-        icon: Icons.insights_outlined,
-        title: l10n.featuredProgressTitle,
-        body: l10n.featuredProgressBody,
-        actionLabel: l10n.featuredProgressAction,
-        onPressed: onOpenProgress,
-        tone: HomeBannerTone.neutral,
-      ),
-    ];
+    final user = AuthScope.maybeOf(context)?.user;
+    final displayName = user?.displayName.trim();
     final quickActions = [
-      HomeQuickAction(
-        id: 'start-learning',
-        icon: Icons.play_arrow_rounded,
-        label: l10n.startLearning,
-        onTap: onStartLearning,
-      ),
       HomeQuickAction(
         id: 'browse-subjects',
         icon: Icons.menu_book_outlined,
         label: l10n.browseSubjects,
-        onTap: onStartLearning,
-      ),
-      HomeQuickAction(
-        id: 'exam-mode',
-        icon: Icons.assignment_outlined,
-        label: l10n.examMode,
-        onTap: onStartLearning,
-      ),
-      HomeQuickAction(
-        id: 'practice-mode',
-        icon: Icons.school_outlined,
-        label: l10n.practiceMode,
         onTap: onStartLearning,
       ),
       HomeQuickAction(
@@ -86,10 +41,16 @@ class HomeScreen extends StatelessWidget {
         onTap: onOpenProgress,
       ),
       HomeQuickAction(
-        id: 'settings',
-        icon: Icons.settings_outlined,
-        label: l10n.settingsTab,
-        onTap: onOpenSettings,
+        id: 'contribution',
+        icon: Icons.post_add_outlined,
+        label: l10n.contributionTitle,
+        onTap: onOpenContribution,
+      ),
+      HomeQuickAction(
+        id: 'saved',
+        icon: Icons.bookmarks_outlined,
+        label: l10n.savedQuestionSets,
+        onTap: onOpenSaved,
       ),
     ];
 
@@ -104,77 +65,27 @@ class HomeScreen extends StatelessWidget {
               children: [
                 _HomeHeader(
                   title: l10n.appTitle,
-                  greeting: l10n.homeGreeting,
+                  greeting: displayName == null || displayName.isEmpty
+                      ? l10n.homeGreeting
+                      : l10n.homeGreetingName(displayName),
                   supportingLine: l10n.homeSupportingLine,
                 ),
                 const SizedBox(height: 24),
-                StudyHubSectionHeader(title: l10n.featuredSection),
-                const SizedBox(height: 12),
-                HomeBannerCarousel(items: banners),
-                const SizedBox(height: 28),
-                StudyHubSectionHeader(title: l10n.quickActionsSection),
-                const SizedBox(height: 12),
-                HomeQuickActionGrid(actions: quickActions),
-                const SizedBox(height: 28),
                 PrimaryLearningCard(onPressed: onStartLearning),
                 const SizedBox(height: 28),
                 StudyHubSectionHeader(
-                  title: l10n.learningModes,
-                  subtitle: l10n.learningModesCompactSubtitle,
+                  title: l10n.quickActionsSection,
+                  subtitle: l10n.homeSupportingLine,
                 ),
                 const SizedBox(height: 12),
-                LearningModeShortcutCard(
-                  icon: Icons.assignment_outlined,
-                  title: l10n.examMode,
-                  body: l10n.examModeCompactBody,
-                  onTap: onStartLearning,
-                ),
-                const SizedBox(height: 10),
-                LearningModeShortcutCard(
-                  icon: Icons.school_outlined,
-                  title: l10n.practiceMode,
-                  body: l10n.practiceModeCompactBody,
-                  onTap: onStartLearning,
-                ),
+                HomeQuickActionGrid(actions: quickActions),
                 const SizedBox(height: 28),
                 StudyHubSectionHeader(title: l10n.exploreSection),
                 const SizedBox(height: 12),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    const spacing = 10.0;
-                    final width = (constraints.maxWidth - spacing) / 2;
-                    return Wrap(
-                      spacing: spacing,
-                      runSpacing: spacing,
-                      children: [
-                        SizedBox(
-                          width: width,
-                          child: FeaturePreviewTile(
-                            icon: Icons.description_outlined,
-                            title: l10n.studyMaterials,
-                            onTap: onOpenStudyMaterials,
-                          ),
-                        ),
-                        SizedBox(
-                          width: width,
-                          child: FeaturePreviewTile(
-                            key: const ValueKey('contribution-home-tile'),
-                            icon: Icons.post_add_outlined,
-                            title: l10n.contributionTitle,
-                            onTap: onOpenContribution,
-                          ),
-                        ),
-                        SizedBox(
-                          width: width,
-                          child: FeaturePreviewTile(
-                            icon: Icons.bookmarks_outlined,
-                            title: l10n.savedQuestionSets,
-                            onTap: onOpenSaved,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                FeaturePreviewTile(
+                  icon: Icons.description_outlined,
+                  title: l10n.studyMaterials,
+                  onTap: onOpenStudyMaterials,
                 ),
                 const SizedBox(height: 24),
                 Container(

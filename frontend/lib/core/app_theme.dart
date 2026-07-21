@@ -54,6 +54,11 @@ class AppTheme {
         height: 1.35,
         fontWeight: FontWeight.w600,
       ),
+      titleSmall: const TextStyle(
+        fontSize: 14,
+        height: 1.35,
+        fontWeight: FontWeight.w700,
+      ),
       bodyLarge: const TextStyle(fontSize: 16, height: 1.5),
       bodyMedium: const TextStyle(fontSize: 14, height: 1.45),
       labelLarge: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
@@ -77,7 +82,8 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        elevation: 0,
+        elevation: AppElevation.raised,
+        shadowColor: AppColors.ink.withValues(alpha: 0.06),
         margin: EdgeInsets.zero,
         color: surface,
         shape: RoundedRectangleBorder(
@@ -106,6 +112,16 @@ class AppTheme {
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          minimumSize: const Size(48, 48),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(minimumSize: const Size.square(48)),
+      ),
       chipTheme: ChipThemeData(
         backgroundColor: colorScheme.surface,
         side: const BorderSide(color: outline),
@@ -132,6 +148,22 @@ class AppTheme {
           borderSide: const BorderSide(color: primary, width: 2),
         ),
       ),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFFE9EBF1),
+        thickness: 1,
+        space: 1,
+      ),
+      dialogTheme: DialogThemeData(
+        elevation: AppElevation.overlay,
+        backgroundColor: surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.feature),
+        ),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: surface,
+        showDragHandle: true,
+      ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: primary,
         linearTrackColor: Color(0xFFE7E7FF),
@@ -144,7 +176,7 @@ class AppTheme {
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        height: 72,
+        height: 76,
         elevation: 0,
         backgroundColor: surface,
         indicatorColor: colorScheme.primaryContainer,
@@ -163,6 +195,11 @@ class AppTheme {
                 : FontWeight.w600,
           );
         }),
+      ),
+      listTileTheme: const ListTileThemeData(
+        minTileHeight: 56,
+        iconColor: AppColors.mutedInk,
+        contentPadding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       ),
     );
   }
