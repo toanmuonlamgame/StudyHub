@@ -77,7 +77,7 @@ void main() {
     await tester.tap(_navigationLabel('Settings'));
     await tester.pumpAndSettle();
     expect(find.text('About StudyHub'), findsOneWidget);
-    expect(find.text('Learning safety'), findsWidgets);
+    expect(find.text('Privacy and security'), findsOneWidget);
     expect(find.byType(Switch), findsNothing);
   });
 
@@ -123,7 +123,7 @@ void main() {
     expect(repository.subjectLoadCount, 1);
   });
 
-  testWidgets('Home labels active and upcoming destinations honestly', (
+  testWidgets('Home labels active destinations honestly', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -135,7 +135,7 @@ void main() {
       350,
       scrollable: _homeScrollable(),
     );
-    expect(find.text('Coming soon'), findsWidgets);
+    expect(find.text('Coming soon'), findsNothing);
     expect(find.bySemanticsLabel('Study Materials'), findsOneWidget);
     expect(find.bySemanticsLabel('Study Materials, coming soon'), findsNothing);
   });

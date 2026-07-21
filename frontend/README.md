@@ -16,8 +16,9 @@ open as focused routes above the shell, so bottom navigation does not distract
 from a learning session.
 
 Progress shows real completed Exam and Practice summaries stored on the current
-device without invented history, charts, or streaks. Settings exposes only the
-functional language preference plus app/safety information.
+device without invented history, charts, or streaks. Settings exposes account,
+profile, Saved Question Sets, logout, language, version, privacy/security, and
+About StudyHub information.
 
 Completed Result/Review, Attempt detail, and contribution confirmation screens
 offer a direct Back to Home action. It selects the existing Home tab and clears
@@ -49,9 +50,20 @@ The result remains visible while saving, reports failure honestly, and retries
 with the same submission ID so the backend does not create duplicates.
 
 The History action in Progress opens a newest-first Exam list and reuses the
-normal result-review screen for detail. Backend history currently belongs to a
-temporary demo identity until authentication exists. Practice remains in the
-device-local Progress store and is not presented as server-synced history.
+normal result-review screen for detail. Backend history belongs to the
+authenticated account. Practice remains in the device-local Progress store and
+is not presented as server-synced history.
+
+## Authentication And Account Data
+
+API mode supports registration, login, session restore, display-name editing,
+and logout through `AuthRepository`. The app gates protected learner screens
+until authentication succeeds. An invalid or expired stored session is cleared
+when `/auth/me` rejects it, returning the user to the localized auth screen.
+
+Attempt history, contribution management, and Saved Question Sets use the same
+bearer session. Flutter never sends a trusted user ID. Mock authentication exists
+for local UI development; durable multi-run accounts require API/Prisma mode.
 
 ## Home hub architecture
 
@@ -64,8 +76,8 @@ The Home feature is split into a screen, immutable banner model, and focused
 widgets under `lib/features/home`. Its `PageView` is manually controlled and does
 not auto-rotate. Banner copy describes real learning flows rather than prices,
 discounts, or unsupported product claims. Study Materials is now an active deep
-route. Saved Content and Learning Plans remain visibly labeled `Coming soon`
-and have no fake interaction.
+route. Saved Question Sets is active; Learning Plans remains post-MVP and is not
+shown as a misleading functional action.
 
 Shared presentation primitives such as section headers, icon surfaces, upcoming
 badges, and empty metric cards live in `lib/core/widgets/studyhub_ui.dart`. They
@@ -202,12 +214,20 @@ creator-only review, submit for review, and pending confirmation. Creator draft
 models are separate from learner-safe models because they contain the selected
 correct answer.
 
-The draft stays in Flutter memory until final confirmation. Mock mode validates
-locally; API mode calls `POST /learning/question-set-submissions/submit`. A
+Creators may save drafts, reopen/edit/delete owned drafts, submit them for review,
+and inspect draft, pending-review, approved, or rejected status. Mock mode validates
+locally; API mode uses authenticated contribution endpoints. A
 failed request keeps form state and retries with the same client submission ID,
 allowing the backend to return the original pending-review submission instead
-of creating a duplicate. Draft sync, authenticated ownership,
-moderation UI, and rewards are deferred.
+of creating a duplicate. Moderation actions and rewards remain deferred; ordinary
+users cannot mutate a submission after it leaves draft state.
+
+## Saved Question Sets
+
+The Question Set detail app-bar action saves or removes a bookmark through an
+injected `BookmarkRepository`. Saved is available from Home and Settings. API
+mode persists account-owned bookmarks on the backend with duplicate prevention;
+mock mode keeps a development-only in-memory list.
 
 The creator contract currently allows at most 50 questions and 8 answer options
 per question. The prepared contribution and idempotency migrations plus a real

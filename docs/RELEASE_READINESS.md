@@ -152,6 +152,6 @@ flutter build apk --debug
 - [ ] Reinstall/update the APK and verify expected local-data behavior.
 
 Do not mark device checks complete until they are performed on the physical
-device. Authentication remains a temporary demo boundary; this candidate is not
-ready for public multi-user production use until backend authentication and
-authorization replace it.
+device. Minimum account authentication and ownership are implemented, but this
+candidate is not ready for public multi-user use until the auth/bookmark migration,
+Prisma smoke tests, abuse controls, and dedicated security stabilization complete.

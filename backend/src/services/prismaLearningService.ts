@@ -12,6 +12,7 @@ import type {
   PaginatedStudyMaterials,
   Question,
   QuestionSet,
+  QuestionSetListItem,
   QuizResult,
   SaveExamAttemptInput,
   SaveExamAttemptOutcome,
@@ -487,6 +488,7 @@ export class PrismaLearningService implements LearningService {
   }
 
   async createQuestionSetSubmission(
+    userId: string,
     input: QuestionSetSubmissionInput,
   ): Promise<QuestionSetSubmission> {
     this.assertValidSubmission(input, false);
@@ -500,6 +502,7 @@ export class PrismaLearningService implements LearningService {
           description: input.description.trim(),
           status: 'draft',
           sourceType: 'community',
+          createdByUserId: userId,
           questions: { create: questionCreateData(input) },
         },
         include: submissionInclude,
@@ -590,10 +593,11 @@ export class PrismaLearningService implements LearningService {
   }
 
   async updateQuestionSetSubmission(
+    userId: string,
     submissionId: string,
     input: QuestionSetSubmissionInput,
   ): Promise<QuestionSetSubmission> {
-    const current = await this.requireSubmission(submissionId);
+    const current = await this.requireOwnedSubmission(userId, submissionId);
     if (current.status !== 'draft') {
       throw new QuestionSetSubmissionStateError(
         'Only draft submissions can be edited.',
@@ -605,6 +609,7 @@ export class PrismaLearningService implements LearningService {
       const lockedDraft = await transaction.questionSet.updateMany({
         where: {
           id: submissionId,
+          createdByUserId: userId,
           sourceType: 'community',
           status: 'draft',
         },
@@ -633,19 +638,45 @@ export class PrismaLearningService implements LearningService {
   }
 
   async getQuestionSetSubmission(
+    userId: string,
     submissionId: string,
   ): Promise<QuestionSetSubmission | null> {
     const row = await this.prisma.questionSet.findFirst({
-      where: { id: submissionId, sourceType: 'community' },
+      where: { id: submissionId, sourceType: 'community', createdByUserId: userId },
       include: submissionInclude,
     });
     return row === null ? null : mapQuestionSetSubmission(row);
   }
 
+  async listQuestionSetSubmissions(userId: string): Promise<QuestionSetSubmission[]> {
+    const rows = await this.prisma.questionSet.findMany({
+      where: { sourceType: 'community', createdByUserId: userId },
+      include: submissionInclude,
+      orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+    });
+    return rows.map(mapQuestionSetSubmission);
+  }
+
+  async deleteQuestionSetSubmission(userId: string, submissionId: string): Promise<void> {
+    const deleted = await this.prisma.questionSet.deleteMany({
+      where: {
+        id: submissionId,
+        sourceType: 'community',
+        createdByUserId: userId,
+        status: 'draft',
+      },
+    });
+    if (deleted.count === 1) return;
+    const current = await this.getQuestionSetSubmission(userId, submissionId);
+    if (current === null) throw new LearningResourceNotFoundError('Submission not found.');
+    throw new QuestionSetSubmissionStateError('Only draft submissions can be deleted.');
+  }
+
   async submitQuestionSetForReview(
+    userId: string,
     submissionId: string,
   ): Promise<QuestionSetSubmission> {
-    const current = await this.requireSubmission(submissionId);
+    const current = await this.requireOwnedSubmission(userId, submissionId);
     if (current.status !== 'draft') {
       throw new QuestionSetSubmissionStateError(
         'Only draft submissions can be submitted for review.',
@@ -657,6 +688,7 @@ export class PrismaLearningService implements LearningService {
       const transitioned = await transaction.questionSet.updateMany({
         where: {
           id: submissionId,
+          createdByUserId: userId,
           sourceType: 'community',
           status: 'draft',
         },
@@ -673,6 +705,35 @@ export class PrismaLearningService implements LearningService {
       });
     });
     return mapQuestionSetSubmission(row);
+  }
+
+  async listBookmarkedQuestionSets(userId: string): Promise<QuestionSetListItem[]> {
+    const rows = await this.prisma.bookmark.findMany({
+      where: { userId, questionSet: { status: 'published' } },
+      include: { questionSet: { include: { _count: { select: { questions: true } } } } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    });
+    return rows.map(({ questionSet }) =>
+      createQuestionSetListItem(mapQuestionSet(questionSet), questionSet.createdAt),
+    );
+  }
+
+  async bookmarkQuestionSet(userId: string, questionSetId: string): Promise<QuestionSetListItem> {
+    const questionSet = await this.prisma.questionSet.findFirst({
+      where: { id: questionSetId, status: 'published' },
+      include: { _count: { select: { questions: true } } },
+    });
+    if (questionSet === null) throw new LearningResourceNotFoundError('Question set not found.');
+    await this.prisma.bookmark.upsert({
+      where: { userId_questionSetId: { userId, questionSetId } },
+      create: { userId, questionSetId },
+      update: {},
+    });
+    return createQuestionSetListItem(mapQuestionSet(questionSet), questionSet.createdAt);
+  }
+
+  async removeQuestionSetBookmark(userId: string, questionSetId: string): Promise<void> {
+    await this.prisma.bookmark.deleteMany({ where: { userId, questionSetId } });
   }
 
   private assertValidSubmission(
@@ -713,6 +774,21 @@ export class PrismaLearningService implements LearningService {
   private async requireSubmission(submissionId: string) {
     const submission = await this.prisma.questionSet.findFirst({
       where: { id: submissionId, sourceType: 'community' },
+      include: submissionInclude,
+    });
+    if (submission === null) {
+      throw new LearningResourceNotFoundError('Submission not found.');
+    }
+    return submission;
+  }
+
+  private async requireOwnedSubmission(userId: string, submissionId: string) {
+    const submission = await this.prisma.questionSet.findFirst({
+      where: {
+        id: submissionId,
+        sourceType: 'community',
+        createdByUserId: userId,
+      },
       include: submissionInclude,
     });
     if (submission === null) {

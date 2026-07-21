@@ -9,6 +9,8 @@ void main() {
       learningRepository: createLearningRepositoryFromEnvironment(),
       contributionRepository: createContributionRepositoryFromEnvironment(),
       attemptRepository: createAttemptRepositoryFromEnvironment(),
+      authRepository: createAuthRepositoryFromEnvironment(),
+      bookmarkRepository: createBookmarkRepositoryFromEnvironment(),
     ),
   );
 }

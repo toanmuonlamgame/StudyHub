@@ -1,16 +1,22 @@
 import cors from '@fastify/cors';
 import Fastify, { type FastifyInstance } from 'fastify';
 
+import { createAuthRoutes, createRequireUser, type RequireUser } from './routes/auth.js';
 import { createLearningRoutes } from './routes/learning.js';
+import type { AuthService } from './services/authService.js';
+import { InMemoryAuthService } from './services/inMemoryAuthService.js';
 import { InMemoryLearningService } from './services/inMemoryLearningService.js';
 import type { LearningService } from './services/learningService.js';
+import { createPrismaAuthService } from './services/prismaAuthService.js';
 import { createPrismaLearningService } from './services/prismaLearningService.js';
 
 export interface BuildAppOptions {
   learningService?: LearningService;
+  authService?: AuthService;
   learningDataSource?: string;
   isProduction?: boolean;
   corsOrigins?: string[];
+  requireUser?: RequireUser;
 }
 
 const requestBodyLimitBytes = 1024 * 1024;
@@ -54,6 +60,12 @@ function createConfiguredLearningService(dataSource: string): LearningService {
   );
 }
 
+function createConfiguredAuthService(dataSource: string): AuthService {
+  if (dataSource === 'memory') return new InMemoryAuthService();
+  if (dataSource === 'prisma') return createPrismaAuthService();
+  throw new Error(`Unsupported STUDYHUB_LEARNING_DATA_SOURCE: ${dataSource}.`);
+}
+
 export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const isProduction = options.isProduction ?? process.env.NODE_ENV === 'production';
   const configuredDataSource =
@@ -70,6 +82,7 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   }
   const learningService =
     options.learningService ?? createConfiguredLearningService(dataSource);
+  const authService = options.authService ?? createConfiguredAuthService(dataSource);
   const configuredCorsOrigins = new Set(
     options.corsOrigins ?? readConfiguredCorsOrigins(),
   );
@@ -105,7 +118,14 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     service: 'studyhub-backend',
   }));
 
-  app.register(createLearningRoutes(learningService), { prefix: '/learning' });
+  app.register(createAuthRoutes(authService), { prefix: '/auth' });
+  app.register(
+    createLearningRoutes(
+      learningService,
+      options.requireUser ?? createRequireUser(authService),
+    ),
+    { prefix: '/learning' },
+  );
 
   return app;
 }

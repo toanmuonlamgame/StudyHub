@@ -1,8 +1,27 @@
 # StudyHub TODO
 
 ## Current Phase
-Accelerated MVP delivery is active. Checkpoints 1 and 2 now provide a complete
-Exam session, trusted result review, attempt persistence, and history flow.
+Essential MVP feature completion is implemented in code. Authentication,
+account ownership, profile/settings, contribution management, and saved
+Question Sets are ready for migration and dedicated stabilization testing.
+
+## Essential MVP Completion
+- [x] Add register, login, logout, current-user, profile-update, and expiring
+  session contracts for memory and Prisma modes.
+- [x] Hash passwords and session tokens; never expose either stored hash.
+- [x] Replace production `demo-user` identity with authenticated ownership.
+- [x] Scope Exam attempt history/detail and contributions to the current user.
+- [x] Add owned contribution draft list/edit/delete/submit lifecycle and status UI.
+- [x] Add account-owned, duplicate-safe Question Set bookmarks and Saved UI.
+- [x] Replace the Settings placeholder with functional account, language,
+  app-version, privacy/security, Saved, profile, and logout destinations.
+- [x] Keep existing search, subject/topic filters, clear, debounce, pagination,
+  loading, empty, and retry behavior.
+- [ ] Review and apply migration `20260722120000_auth_and_bookmarks` manually.
+- [ ] Run Prisma-mode auth/ownership/bookmark/contribution smoke tests.
+- [ ] Run real-device Flutter API journeys for registration, login, session
+  restore, Saved, contribution management, attempt ownership, and logout.
+- [ ] Add controlled moderator/admin review actions in the future Admin Dashboard.
 
 ## Real MVP Integration Checkpoint
 - [x] Align Flutter contribution payloads with the atomic Fastify submission
@@ -43,7 +62,7 @@ Exam session, trusted result review, attempt persistence, and history flow.
 - [ ] Smoke-test save/list/detail in Prisma mode and one real Flutter API Exam.
 - [ ] Smoke-test one real Flutter API manual contribution and one pasted-exam
   contribution after the submission migration is applied.
-- [ ] Replace the temporary backend demo identity boundary with authenticated ownership.
+- [x] Replace the temporary backend demo identity boundary with authenticated ownership.
 
 ## Phase 1 Checkpoint
 - [x] Complete the Flutter learner flow from Home through Result/Review.
@@ -73,7 +92,8 @@ Exam session, trusted result review, attempt persistence, and history flow.
 - [x] Activate safe, published Study Materials metadata browsing from Home.
 - [ ] Add authenticated material upload, ownership, storage, validation, and moderation.
 - [ ] Manually verify Study Materials in mock/API mode on a real Android device.
-- [ ] Define real Saved Content and Learning Plans contracts before enabling those destinations.
+- [x] Define and enable account-owned Saved Question Sets.
+- [ ] Define a Learning Plans contract before enabling that post-MVP destination.
 - [ ] Manually test Home banners and shortcuts on compact/common Android devices.
 - [ ] Run TalkBack review for banner position, quick actions, upcoming features,
   Progress metrics, and disabled Settings preferences.

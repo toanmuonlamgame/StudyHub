@@ -4,7 +4,7 @@
 - Project name: StudyHub
 - Product type: mobile learning platform
 - Goal: learning project and internship portfolio
-- Current phase: Android MVP release-candidate preparation after integration and stabilization
+- Current phase: essential MVP feature completion, before migration and dedicated stabilization
 
 ## Product Purpose
 StudyHub is a mobile learning platform for organizing and studying learning content. The product should help users browse structured learning content, practice question sets, upload their own materials, and contribute useful community content.
@@ -123,8 +123,9 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - Mobile phone layouts are the learner UI source of truth; wider Chrome layouts
   remain constrained and responsive for development and secondary use.
 - Shared loading, error, and empty states keep learner feedback consistent.
-  Progress now stores trusted completed-session summaries on the current device;
-  Settings remains honest until additional preferences are functional.
+  Progress stores trusted completed-session summaries on the current device;
+  Settings now exposes functional account, language, Saved, version, privacy,
+  profile, and logout destinations.
 - StudyHub supports English and Vietnamese system UI. The app-level locale
   selection supports system default, persists locally, and updates immediately.
 - Interface localization is separate from learning-content language: subject,
@@ -142,14 +143,17 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - Post-submit review may include all safe answer options and an optional
   explanation. Accelerated MVP Checkpoint 2 adds backend Exam attempt
   persistence, newest-first history, and reusable result-detail review.
-- Exam attempts use a centralized temporary `demo-user` backend identity until
-  authentication exists. Flutter never sends a trusted user ID.
+- StudyHub now has minimum email/password authentication with expiring opaque
+  sessions. Passwords and session tokens are stored only as hashes by the backend.
+- Exam attempts, contributions, and saved Question Sets belong to the authenticated
+  user. Flutter never sends a trusted user ID; protected routes derive identity
+  from the verified bearer session.
 - Attempt retries use a client-generated submission ID unique per current user.
   The backend fingerprints the canonical request and returns the existing
   attempt only when retry content matches; changed content returns a conflict.
 - Atomic Question Set contribution retries use the same pattern: Flutter keeps
   one client submission ID for the editor session, while the backend derives
-  temporary ownership, fingerprints normalized content, and returns the same
+  authenticated ownership, fingerprints normalized content, and returns the same
   pending-review submission only when retry content matches.
 - Debug/test builds may default to mock learning data for local development.
   Release builds must explicitly choose their learning source; release API mode
@@ -161,11 +165,11 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
   and explanation snapshots so published content changes cannot corrupt history.
 - Local Progress persists only post-result metadata from Exam and Practice. It
   keeps the newest 100 sessions in `shared_preferences`, stores no answer keys or
-  full question payloads, and will remain device-only until authentication and
-  backend sync are deliberately implemented.
-- Backend Attempt History is separate from local Progress: it currently persists
-  completed Exam details only; Practice remains device-local until a future
-  authenticated contract is deliberately added.
+  full question payloads, and remains device-only until authenticated backend
+  progress sync is deliberately implemented.
+- Backend Attempt History is separate from local Progress: authenticated Exam
+  details persist server-side; Practice remains device-local until a future sync
+  contract is deliberately added.
 - Completed result, attempt-detail, and contribution-success flows share one
   return-to-Home operation: select shell tab 0 and pop the root Navigator to its
   first route. It does not push another Home route; ordinary Back remains intact.
@@ -199,7 +203,10 @@ V1 is the first usable demo milestone. It should prove the core learning flow wi
 - Use `docs/QUALITY_SYSTEM.md` as the balanced UX, performance, security, and Definition of Done guardrail for future features.
 - Future AI study aids must come from user-provided sources, retain citations/provenance, and pass review before publication.
 - Plan for data growth with backend filtering, cursor pagination, PostgreSQL indexes, and later measured caching, external search, or analytics only when needed.
-- Community Question Sets use a moderation-ready lifecycle: local creator draft, backend `pendingReview`, then future authorized publish/reject. Learner APIs expose only `published` content.
+- Community Question Sets use an account-owned moderation-ready lifecycle:
+  `draft`, `pendingReview`, `approved`/published, and `rejected`. Creators can
+  manage drafts and inspect statuses; future authorized admin tooling owns review
+  actions. Learner APIs expose only published content.
 - Creator answer-key models remain separate from learner-safe quiz DTOs. Real ownership and draft sync begin only after authentication.
 - Question Set creation supports a fast manual editor and a canonical structured
   paste format (`/question`, `/answerN`, `/correct`, optional `/explanation`).

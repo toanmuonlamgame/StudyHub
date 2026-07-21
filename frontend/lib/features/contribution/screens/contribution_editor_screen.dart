@@ -10,6 +10,7 @@ import '../../learning/repositories/learning_repository.dart';
 import '../models/answer_option_draft.dart';
 import '../models/question_draft.dart';
 import '../models/question_set_draft.dart';
+import '../models/submission_confirmation.dart';
 import '../repositories/contribution_repository.dart';
 import '../widgets/question_editor_card.dart';
 import 'paste_exam_screen.dart';
@@ -24,12 +25,14 @@ class ContributionEditorScreen extends StatefulWidget {
     required this.contributionRepository,
     this.initialDraft = const QuestionSetDraft(),
     this.startWithQuestions = false,
+    this.existingSubmissionId,
   });
 
   final LearningRepository learningRepository;
   final ContributionRepository contributionRepository;
   final QuestionSetDraft initialDraft;
   final bool startWithQuestions;
+  final String? existingSubmissionId;
 
   @override
   State<ContributionEditorScreen> createState() =>
@@ -87,6 +90,11 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
           ),
           title: Text(_stepTitle(l10n)),
           actions: [
+            IconButton(
+              tooltip: l10n.contributionSaveDraft,
+              onPressed: _submitting ? null : _saveDraft,
+              icon: const Icon(Icons.save_outlined),
+            ),
             IconButton(
               tooltip: l10n.contributionPasteFullExam,
               onPressed: _submitting ? null : _openPasteExam,
@@ -573,10 +581,12 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
       _issues = const [];
     });
     try {
-      final confirmation = await widget.contributionRepository.submitForReview(
-        _draft,
-        submissionId: _submissionId,
-      );
+      final confirmation = widget.existingSubmissionId == null
+          ? await widget.contributionRepository.submitForReview(
+              _draft,
+              submissionId: _submissionId,
+            )
+          : await _updateAndSubmitExisting();
       if (!mounted) {
         return;
       }
@@ -586,6 +596,49 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
               SubmissionConfirmationScreen(confirmation: confirmation),
         ),
       );
+    } on ContributionValidationException catch (error) {
+      if (mounted) {
+        setState(() {
+          _issues = error.issues;
+          _submitting = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _submitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.contributionSubmissionFailed)),
+        );
+      }
+    }
+  }
+
+  Future<SubmissionConfirmation> _updateAndSubmitExisting() async {
+    final id = widget.existingSubmissionId!;
+    await widget.contributionRepository.updateDraft(id, _draft);
+    return widget.contributionRepository.submitDraftForReview(id);
+  }
+
+  Future<void> _saveDraft() async {
+    if (_submitting) return;
+    setState(() {
+      _submitting = true;
+      _issues = const [];
+    });
+    try {
+      if (widget.existingSubmissionId == null) {
+        await widget.contributionRepository.createDraft(_draft);
+      } else {
+        await widget.contributionRepository.updateDraft(
+          widget.existingSubmissionId!,
+          _draft,
+        );
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.contributionDraftSaved)),
+      );
+      Navigator.of(context).pop(true);
     } on ContributionValidationException catch (error) {
       if (mounted) {
         setState(() {

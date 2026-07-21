@@ -5,6 +5,7 @@ import '../../learning/repositories/learning_repository.dart';
 import '../models/question_set_draft.dart';
 import '../repositories/contribution_repository.dart';
 import 'contribution_editor_screen.dart';
+import 'contribution_management_screen.dart';
 import 'paste_exam_screen.dart';
 
 class ContributionIntroScreen extends StatelessWidget {
@@ -55,6 +56,19 @@ class ContributionIntroScreen extends StatelessWidget {
                   text: l10n.contributionLocalGuideline,
                 ),
                 const SizedBox(height: 28),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ContributionManagementScreen(
+                        learningRepository: learningRepository,
+                        contributionRepository: contributionRepository,
+                      ),
+                    ),
+                  ),
+                  icon: const Icon(Icons.folder_copy_outlined),
+                  label: Text(l10n.myContributions),
+                ),
+                const SizedBox(height: 12),
                 FilledButton.icon(
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(

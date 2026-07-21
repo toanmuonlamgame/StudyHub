@@ -686,3 +686,27 @@ Rules:
 Reason: a release candidate must fail clearly when production data or network
 configuration is missing and must not ship Flutter template identity or silently
 use demo fixtures.
+
+## 2026-07-21 - Essential MVP Authentication And Ownership
+Decision: StudyHub uses backend-owned email/password authentication with opaque,
+expiring bearer sessions for the essential MVP. Passwords use salted `scrypt`
+hashes, session tokens are random and stored only as SHA-256 hashes, and Flutter
+persists only the returned session needed to restore sign-in.
+
+Rules:
+- Protected routes derive the current user from the bearer session; request-body
+  user IDs are never trusted.
+- Exam attempts, community submissions, and bookmarks are scoped by user ID in
+  both memory and Prisma services.
+- Registration creates the user and initial session transactionally in Prisma mode.
+- Invalid or expired sessions return `401` and are cleared during Flutter session restore.
+- Social login, verification, reset, and two-factor authentication remain post-MVP.
+
+## 2026-07-21 - Contribution And Bookmark Lifecycle
+Decision: Creators can manage only their own `draft` submissions. Submitting moves
+content to `pendingReview`; approved/published and rejected content is read-only
+for ordinary users. Review actions remain a future authorized admin/backend concern.
+
+Decision: Saved Question Sets are account-owned bookmarks with a database unique
+constraint on `(userId, questionSetId)`. Bookmark creation is idempotent and Saved
+lists return normal learner-safe Question Set metadata only.

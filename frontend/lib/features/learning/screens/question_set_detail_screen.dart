@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations_x.dart';
+import '../../saved/bookmark_scope.dart';
 import '../models/question_set.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
@@ -8,7 +9,7 @@ import '../repositories/learning_repository.dart';
 import '../widgets/learning_stat_chip.dart';
 import 'mode_selection_screen.dart';
 
-class QuestionSetDetailScreen extends StatelessWidget {
+class QuestionSetDetailScreen extends StatefulWidget {
   const QuestionSetDetailScreen({
     super.key,
     required this.subject,
@@ -23,21 +24,52 @@ class QuestionSetDetailScreen extends StatelessWidget {
   final LearningRepository learningRepository;
 
   @override
+  State<QuestionSetDetailScreen> createState() =>
+      _QuestionSetDetailScreenState();
+}
+
+class _QuestionSetDetailScreenState extends State<QuestionSetDetailScreen> {
+  bool _bookmarked = false;
+  bool _bookmarkLoading = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadBookmark();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final estimatedMinutes =
-        questionSet.estimatedMinutes ??
-        (questionSet.questionCount * 1.5).ceil();
-    final difficulty = questionSet.difficulty ?? 'easy';
+        widget.questionSet.estimatedMinutes ??
+        (widget.questionSet.questionCount * 1.5).ceil();
+    final difficulty = widget.questionSet.difficulty ?? 'easy';
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.questionSetTitle)),
+      appBar: AppBar(
+        title: Text(l10n.questionSetTitle),
+        actions: [
+          IconButton(
+            tooltip: _bookmarked ? l10n.removeFromSaved : l10n.saveForLater,
+            onPressed: _bookmarkLoading ? null : _toggleBookmark,
+            icon: Icon(
+              _bookmarked
+                  ? Icons.bookmark_rounded
+                  : Icons.bookmark_border_rounded,
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           children: [
-            Text(questionSet.title, style: theme.textTheme.headlineSmall),
+            Text(
+              widget.questionSet.title,
+              style: theme.textTheme.headlineSmall,
+            ),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -49,9 +81,9 @@ class QuestionSetDetailScreen extends StatelessWidget {
                 const SizedBox(width: 7),
                 Expanded(
                   child: Text(
-                    topic == null
-                        ? subject.name
-                        : '${subject.name} / ${topic!.name}',
+                    widget.topic == null
+                        ? widget.subject.name
+                        : '${widget.subject.name} / ${widget.topic!.name}',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -66,7 +98,7 @@ class QuestionSetDetailScreen extends StatelessWidget {
               children: [
                 LearningStatChip(
                   icon: Icons.help_outline,
-                  label: l10n.questionCount(questionSet.questionCount),
+                  label: l10n.questionCount(widget.questionSet.questionCount),
                 ),
                 LearningStatChip(
                   icon: Icons.schedule_outlined,
@@ -82,7 +114,7 @@ class QuestionSetDetailScreen extends StatelessWidget {
             Text(l10n.aboutQuestionSet, style: theme.textTheme.titleLarge),
             const SizedBox(height: 9),
             Text(
-              questionSet.description,
+              widget.questionSet.description,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -123,8 +155,42 @@ class QuestionSetDetailScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => ModeSelectionScreen(
-          questionSet: questionSet,
-          learningRepository: learningRepository,
+          questionSet: widget.questionSet,
+          learningRepository: widget.learningRepository,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _loadBookmark() async {
+    final value = await BookmarkScope.of(
+      context,
+    ).contains(widget.questionSet.id);
+    if (mounted) {
+      setState(() {
+        _bookmarked = value;
+        _bookmarkLoading = false;
+      });
+    }
+  }
+
+  Future<void> _toggleBookmark() async {
+    setState(() => _bookmarkLoading = true);
+    final repository = BookmarkScope.of(context);
+    if (_bookmarked) {
+      await repository.remove(widget.questionSet.id);
+    } else {
+      await repository.save(widget.questionSet);
+    }
+    if (!mounted) return;
+    setState(() {
+      _bookmarked = !_bookmarked;
+      _bookmarkLoading = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _bookmarked ? context.l10n.savedAdded : context.l10n.savedRemoved,
         ),
       ),
     );

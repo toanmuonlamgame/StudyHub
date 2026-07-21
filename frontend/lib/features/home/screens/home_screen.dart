@@ -14,6 +14,7 @@ class HomeScreen extends StatelessWidget {
     required this.onOpenSettings,
     required this.onOpenStudyMaterials,
     required this.onOpenContribution,
+    required this.onOpenSaved,
   });
 
   final VoidCallback onStartLearning;
@@ -21,6 +22,7 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenStudyMaterials;
   final VoidCallback onOpenContribution;
+  final VoidCallback onOpenSaved;
 
   @override
   Widget build(BuildContext context) {
@@ -165,8 +167,9 @@ class HomeScreen extends StatelessWidget {
                         SizedBox(
                           width: width,
                           child: FeaturePreviewTile(
-                            icon: Icons.event_note_outlined,
-                            title: l10n.learningPlans,
+                            icon: Icons.bookmarks_outlined,
+                            title: l10n.savedQuestionSets,
+                            onTap: onOpenSaved,
                           ),
                         ),
                       ],

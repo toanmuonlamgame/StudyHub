@@ -1112,5 +1112,149 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get attemptHistoryLocalIdentity =>
-      'Lịch sử chưa được liên kết với tài khoản đăng nhập. Quyền sở hữu tài khoản sẽ có khi tính năng đăng nhập được bổ sung.';
+      'Lịch sử được liên kết an toàn với tài khoản đang đăng nhập của bạn.';
+
+  @override
+  String get signIn => 'Đăng nhập';
+
+  @override
+  String get register => 'Tạo tài khoản';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Mật khẩu';
+
+  @override
+  String get displayName => 'Tên hiển thị';
+
+  @override
+  String get noAccount => 'Bạn mới dùng StudyHub?';
+
+  @override
+  String get haveAccount => 'Bạn đã có tài khoản?';
+
+  @override
+  String get authWelcome => 'Tiếp tục hành trình học tập';
+
+  @override
+  String get authWelcomeBody =>
+      'Đăng nhập để lưu bài làm, bộ đề yêu thích và nội dung đóng góp theo tài khoản.';
+
+  @override
+  String get authInvalidCredentials => 'Email hoặc mật khẩu không đúng.';
+
+  @override
+  String get authInvalidEmail => 'Nhập địa chỉ email hợp lệ.';
+
+  @override
+  String get authPasswordLength => 'Mật khẩu phải có từ 8 đến 128 ký tự.';
+
+  @override
+  String get authRequestFailed =>
+      'Không thể hoàn tất yêu cầu. Vui lòng thử lại.';
+
+  @override
+  String get authSessionExpired =>
+      'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+
+  @override
+  String get profile => 'Hồ sơ';
+
+  @override
+  String get account => 'Tài khoản';
+
+  @override
+  String get logOut => 'Đăng xuất';
+
+  @override
+  String get editDisplayName => 'Sửa tên hiển thị';
+
+  @override
+  String get saveChanges => 'Lưu thay đổi';
+
+  @override
+  String get appVersion => 'Phiên bản ứng dụng';
+
+  @override
+  String get privacySecurity => 'Quyền riêng tư và bảo mật';
+
+  @override
+  String get privacySecurityNote =>
+      'StudyHub không lưu thông tin bí mật trong ứng dụng và kiểm tra quyền sở hữu tại backend.';
+
+  @override
+  String get savedQuestionSets => 'Bộ đề đã lưu';
+
+  @override
+  String get saveForLater => 'Lưu để học sau';
+
+  @override
+  String get removeFromSaved => 'Bỏ khỏi danh sách đã lưu';
+
+  @override
+  String get savedEmpty => 'Chưa có bộ đề nào được lưu.';
+
+  @override
+  String get savedEmptyBody =>
+      'Lưu một bộ đề hữu ích từ trang chi tiết để xem lại tại đây.';
+
+  @override
+  String get savedAdded => 'Đã lưu để học sau.';
+
+  @override
+  String get savedRemoved => 'Đã bỏ khỏi danh sách lưu.';
+
+  @override
+  String get myContributions => 'Nội dung tôi đóng góp';
+
+  @override
+  String get contributionDraft => 'Bản nháp';
+
+  @override
+  String get contributionApproved => 'Đã duyệt';
+
+  @override
+  String get contributionRejected => 'Bị từ chối';
+
+  @override
+  String get contributionStatus => 'Trạng thái';
+
+  @override
+  String get contributionRejectionReason => 'Ghi chú duyệt';
+
+  @override
+  String get contributionNoItems => 'Bạn chưa có nội dung đóng góp.';
+
+  @override
+  String get contributionCreateDraft => 'Tạo bản nháp';
+
+  @override
+  String get contributionSaveDraft => 'Lưu bản nháp';
+
+  @override
+  String get contributionDraftSaved => 'Đã lưu bản nháp.';
+
+  @override
+  String get contributionEditDraft => 'Sửa bản nháp';
+
+  @override
+  String get contributionDeleteDraft => 'Xóa bản nháp';
+
+  @override
+  String get contributionDeleteDraftConfirm => 'Xóa vĩnh viễn bản nháp này?';
+
+  @override
+  String get contributionDeleted => 'Đã xóa bản nháp.';
+
+  @override
+  String get completedAttempts => 'Bài đã hoàn thành';
+
+  @override
+  String get submittedQuestionSets => 'Bộ đề đã gửi';
+
+  @override
+  String get aboutStudyHubBody =>
+      'Nền tảng học tập di động cho nội dung có cấu trúc, quiz an toàn và đóng góp cộng đồng.';
 }

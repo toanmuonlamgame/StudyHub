@@ -21,7 +21,10 @@ const validInput = {
 };
 
 function createTestApp(t) {
-  const app = buildApp({ learningDataSource: 'memory' });
+  const app = buildApp({
+    learningDataSource: 'memory',
+    requireUser: async () => ({ id: 'test-user' }),
+  });
   t.after(() => app.close());
   return app;
 }
@@ -38,7 +41,7 @@ test('creates and updates an incomplete draft', async (t) => {
   assert.equal(createResponse.statusCode, 201);
   assert.equal(draft.status, 'draft');
   assert.equal(draft.sourceType, 'community');
-  assert.equal('createdByUserId' in draft, false);
+  assert.equal(draft.createdByUserId, 'test-user');
 
   const updateResponse = await app.inject({
     method: 'PUT',
@@ -275,7 +278,7 @@ test('atomic contribution submit is retry-safe and rejects changed payloads', as
   });
 
   assert.equal(first.statusCode, 201);
-  assert.equal(first.json().submission.createdByUserId, 'demo-user');
+  assert.equal(first.json().submission.createdByUserId, 'test-user');
   assert.equal(replay.statusCode, 200);
   assert.equal(replay.json().submission.id, first.json().submission.id);
   assert.equal(conflict.statusCode, 409);

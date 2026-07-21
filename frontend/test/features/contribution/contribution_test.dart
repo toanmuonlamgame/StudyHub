@@ -12,11 +12,13 @@ import 'package:frontend/core/app_locale.dart';
 import 'package:frontend/features/contribution/models/answer_option_draft.dart';
 import 'package:frontend/features/contribution/models/question_draft.dart';
 import 'package:frontend/features/contribution/models/question_set_draft.dart';
+import 'package:frontend/features/contribution/models/contribution_submission.dart';
 import 'package:frontend/features/contribution/models/submission_confirmation.dart';
 import 'package:frontend/features/contribution/repositories/api_contribution_repository.dart';
 import 'package:frontend/features/contribution/repositories/contribution_repository.dart';
 import 'package:frontend/features/contribution/repositories/mock_contribution_repository.dart';
 import 'package:frontend/features/contribution/screens/contribution_editor_screen.dart';
+import 'package:frontend/features/contribution/screens/contribution_intro_screen.dart';
 import 'package:frontend/features/contribution/screens/paste_exam_screen.dart';
 import 'package:frontend/features/contribution/screens/submission_confirmation_screen.dart';
 import 'package:frontend/features/learning/repositories/mock_learning_repository.dart';
@@ -86,7 +88,7 @@ void main() {
   test(
     'mock contribution returns pendingReview and rejects incomplete data',
     () async {
-      const repository = MockContributionRepository();
+      final repository = MockContributionRepository();
       final confirmation = await repository.submitForReview(
         _validDraft(),
         submissionId: 'test-submission-1',
@@ -244,6 +246,12 @@ void main() {
 
     expect(find.text('Share a useful question set'), findsOneWidget);
     expect(find.text('Create exam quickly'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Paste full exam'),
+      200,
+      scrollable: _contributionIntroScrollable(),
+    );
+    await tester.pumpAndSettle();
     expect(find.text('Paste full exam'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
   });
@@ -296,8 +304,8 @@ void main() {
           locale: const Locale('en'),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
-          home: const ContributionEditorScreen(
-            learningRepository: MockLearningRepository(),
+          home: ContributionEditorScreen(
+            learningRepository: const MockLearningRepository(),
             contributionRepository: MockContributionRepository(),
           ),
         ),
@@ -445,7 +453,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           home: ContributionEditorScreen(
             learningRepository: const MockLearningRepository(),
-            contributionRepository: const MockContributionRepository(),
+            contributionRepository: MockContributionRepository(),
             initialDraft: _validDraft(),
             startWithQuestions: true,
           ),
@@ -506,7 +514,11 @@ void main() {
     await tester.tap(tile);
     await tester.pumpAndSettle();
     final pasteAction = find.text('Paste full exam');
-    await tester.ensureVisible(pasteAction);
+    await tester.scrollUntilVisible(
+      pasteAction,
+      200,
+      scrollable: _contributionIntroScrollable(),
+    );
     await tester.pumpAndSettle();
     await tester.tap(pasteAction);
     await tester.pumpAndSettle();
@@ -666,6 +678,13 @@ Finder _homeScrollable() => find
     )
     .first;
 
+Finder _contributionIntroScrollable() => find
+    .descendant(
+      of: find.byType(ContributionIntroScreen),
+      matching: find.byType(Scrollable),
+    )
+    .first;
+
 Future<void> _openContributionEditor(WidgetTester tester) async {
   final tile = find.byKey(const ValueKey('contribution-home-tile'));
   await tester.scrollUntilVisible(tile, 300, scrollable: _homeScrollable());
@@ -673,7 +692,10 @@ Future<void> _openContributionEditor(WidgetTester tester) async {
   await tester.pumpAndSettle();
   await tester.tap(tile);
   await tester.pumpAndSettle();
-  await tester.tap(find.text('Create exam quickly'));
+  final createAction = find.text('Create exam quickly');
+  await tester.ensureVisible(createAction);
+  await tester.pumpAndSettle();
+  await tester.tap(createAction);
   await tester.pumpAndSettle();
 }
 
@@ -708,7 +730,9 @@ Future<void> _fillValidContribution(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-class _FailingContributionRepository implements ContributionRepository {
+class _FailingContributionRepository
+    with _UnsupportedContributionManagement
+    implements ContributionRepository {
   final List<String> submissionIds = [];
 
   @override
@@ -721,7 +745,9 @@ class _FailingContributionRepository implements ContributionRepository {
   }
 }
 
-class _DelayedContributionRepository implements ContributionRepository {
+class _DelayedContributionRepository
+    with _UnsupportedContributionManagement
+    implements ContributionRepository {
   final _completer = Completer<SubmissionConfirmation>();
   int calls = 0;
 
@@ -743,6 +769,20 @@ class _DelayedContributionRepository implements ContributionRepository {
       ),
     );
   }
+}
+
+mixin _UnsupportedContributionManagement {
+  Future<List<ContributionSubmission>> listSubmissions() =>
+      throw UnimplementedError();
+  Future<ContributionSubmission> createDraft(QuestionSetDraft draft) =>
+      throw UnimplementedError();
+  Future<ContributionSubmission> updateDraft(
+    String submissionId,
+    QuestionSetDraft draft,
+  ) => throw UnimplementedError();
+  Future<void> deleteDraft(String submissionId) => throw UnimplementedError();
+  Future<SubmissionConfirmation> submitDraftForReview(String submissionId) =>
+      throw UnimplementedError();
 }
 
 QuestionSetDraft _validDraft() => const QuestionSetDraft(

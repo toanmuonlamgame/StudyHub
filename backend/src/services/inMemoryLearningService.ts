@@ -73,6 +73,7 @@ export class InMemoryLearningService implements LearningService {
     { userId: string; fingerprint: string; submissionId: string }
   >();
   private readonly examAttempts = new Map<string, StoredExamAttempt>();
+  private readonly bookmarksByUserId = new Map<string, Set<string>>();
   private nextSubmissionNumber = 1;
   private nextAttemptNumber = 1;
 
@@ -418,6 +419,7 @@ export class InMemoryLearningService implements LearningService {
   }
 
   async createQuestionSetSubmission(
+    userId: string,
     input: QuestionSetSubmissionInput,
   ): Promise<QuestionSetSubmission> {
     this.assertValidSubmission(input, false);
@@ -428,6 +430,7 @@ export class InMemoryLearningService implements LearningService {
       id: `submission_${this.nextSubmissionNumber++}`,
       status: 'draft',
       sourceType: 'community',
+      createdByUserId: userId,
       createdAt: now,
       updatedAt: now,
     };
@@ -478,10 +481,11 @@ export class InMemoryLearningService implements LearningService {
   }
 
   async updateQuestionSetSubmission(
+    userId: string,
     submissionId: string,
     input: QuestionSetSubmissionInput,
   ): Promise<QuestionSetSubmission> {
-    const current = this.requireSubmission(submissionId);
+    const current = this.requireOwnedSubmission(userId, submissionId);
     if (current.status !== 'draft') {
       throw new QuestionSetSubmissionStateError(
         'Only draft submissions can be edited.',
@@ -499,16 +503,35 @@ export class InMemoryLearningService implements LearningService {
   }
 
   async getQuestionSetSubmission(
+    userId: string,
     submissionId: string,
   ): Promise<QuestionSetSubmission | null> {
     const submission = this.submissions.get(submissionId);
-    return submission === undefined ? null : cloneSubmission(submission);
+    return submission === undefined || submission.createdByUserId !== userId
+      ? null
+      : cloneSubmission(submission);
+  }
+
+  async listQuestionSetSubmissions(userId: string): Promise<QuestionSetSubmission[]> {
+    return [...this.submissions.values()]
+      .filter(({ createdByUserId }) => createdByUserId === userId)
+      .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+      .map(cloneSubmission);
+  }
+
+  async deleteQuestionSetSubmission(userId: string, submissionId: string): Promise<void> {
+    const current = this.requireOwnedSubmission(userId, submissionId);
+    if (current.status !== 'draft') {
+      throw new QuestionSetSubmissionStateError('Only draft submissions can be deleted.');
+    }
+    this.submissions.delete(submissionId);
   }
 
   async submitQuestionSetForReview(
+    userId: string,
     submissionId: string,
   ): Promise<QuestionSetSubmission> {
-    const current = this.requireSubmission(submissionId);
+    const current = this.requireOwnedSubmission(userId, submissionId);
     if (current.status !== 'draft') {
       throw new QuestionSetSubmissionStateError(
         'Only draft submissions can be submitted for review.',
@@ -525,6 +548,28 @@ export class InMemoryLearningService implements LearningService {
     };
     this.submissions.set(submissionId, submitted);
     return cloneSubmission(submitted);
+  }
+
+  async listBookmarkedQuestionSets(userId: string): Promise<import('../types/learning.js').QuestionSetListItem[]> {
+    const ids = this.bookmarksByUserId.get(userId) ?? new Set<string>();
+    return questionSets
+      .filter(({ id }) => ids.has(id))
+      .map((questionSet) => createQuestionSetListItem(questionSet, questionSetCreatedAtById.get(questionSet.id)!));
+  }
+
+  async bookmarkQuestionSet(
+    userId: string,
+    questionSetId: string,
+  ): Promise<import('../types/learning.js').QuestionSetListItem> {
+    const questionSet = this.requireQuestionSet(questionSetId);
+    const ids = this.bookmarksByUserId.get(userId) ?? new Set<string>();
+    ids.add(questionSetId);
+    this.bookmarksByUserId.set(userId, ids);
+    return createQuestionSetListItem(questionSet, questionSetCreatedAtById.get(questionSet.id)!);
+  }
+
+  async removeQuestionSetBookmark(userId: string, questionSetId: string): Promise<void> {
+    this.bookmarksByUserId.get(userId)?.delete(questionSetId);
   }
 
   private assertValidSubmission(
@@ -560,6 +605,17 @@ export class InMemoryLearningService implements LearningService {
   private requireSubmission(submissionId: string): QuestionSetSubmission {
     const submission = this.submissions.get(submissionId);
     if (submission === undefined) {
+      throw new LearningResourceNotFoundError('Submission not found.');
+    }
+    return submission;
+  }
+
+  private requireOwnedSubmission(
+    userId: string,
+    submissionId: string,
+  ): QuestionSetSubmission {
+    const submission = this.requireSubmission(submissionId);
+    if (submission.createdByUserId !== userId) {
       throw new LearningResourceNotFoundError('Submission not found.');
     }
     return submission;

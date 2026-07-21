@@ -3,7 +3,8 @@ import type {
   FastifyReply,
 } from 'fastify';
 
-import { getCurrentIdentity } from '../identity/currentIdentity.js';
+import { sendAuthError, type RequireUser } from './auth.js';
+import { AuthenticationRequiredError } from '../services/authService.js';
 
 import {
   ExamAttemptIdempotencyConflictError,
@@ -156,6 +157,9 @@ const atomicQuestionSetSubmissionBodySchema = {
 } as const;
 
 function sendLearningError(error: unknown, reply: FastifyReply): FastifyReply {
+  if (error instanceof AuthenticationRequiredError) {
+    return sendAuthError(error, reply);
+  }
   if (error instanceof LearningResourceNotFoundError) {
     return reply.code(404).send({ error: error.message });
   }
@@ -201,6 +205,7 @@ function sendLearningError(error: unknown, reply: FastifyReply): FastifyReply {
 
 export function createLearningRoutes(
   service: LearningService,
+  requireUser: RequireUser,
 ): FastifyPluginAsync {
   return async function learningRoutes(app): Promise<void> {
     app.post<{ Body: QuestionSetSubmissionInput }>(
@@ -208,7 +213,8 @@ export function createLearningRoutes(
       { schema: { body: questionSetSubmissionBodySchema } },
       async (request, reply) => {
         try {
-          const submission = await service.createQuestionSetSubmission(request.body);
+          const user = await requireUser(request);
+          const submission = await service.createQuestionSetSubmission(user.id, request.body);
           return reply.code(201).send({ submission });
         } catch (error) {
           return sendLearningError(error, reply);
@@ -237,9 +243,9 @@ export function createLearningRoutes(
               },
             });
           }
-          const identity = getCurrentIdentity();
+          const user = await requireUser(request);
           const outcome = await service.createQuestionSetSubmissionForReview(
-            identity.userId,
+            user.id,
             normalizedSubmissionId,
             input,
           );
@@ -252,11 +258,22 @@ export function createLearningRoutes(
       },
     );
 
+    app.get('/question-set-submissions', async (request, reply) => {
+      try {
+        const user = await requireUser(request);
+        return { submissions: await service.listQuestionSetSubmissions(user.id) };
+      } catch (error) {
+        return sendLearningError(error, reply);
+      }
+    });
+
     app.get<{ Params: SubmissionParams }>(
       '/question-set-submissions/:submissionId',
       async (request, reply) => {
         try {
+          const user = await requireUser(request);
           const submission = await service.getQuestionSetSubmission(
+            user.id,
             request.params.submissionId,
           );
           return submission === null
@@ -273,8 +290,10 @@ export function createLearningRoutes(
       { schema: { body: questionSetSubmissionBodySchema } },
       async (request, reply) => {
         try {
+          const user = await requireUser(request);
           return {
             submission: await service.updateQuestionSetSubmission(
+              user.id,
               request.params.submissionId,
               request.body,
             ),
@@ -285,12 +304,27 @@ export function createLearningRoutes(
       },
     );
 
+    app.delete<{ Params: SubmissionParams }>(
+      '/question-set-submissions/:submissionId',
+      async (request, reply) => {
+        try {
+          const user = await requireUser(request);
+          await service.deleteQuestionSetSubmission(user.id, request.params.submissionId);
+          return reply.code(204).send();
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
     app.post<{ Params: SubmissionParams }>(
       '/question-set-submissions/:submissionId/submit',
       async (request, reply) => {
         try {
+          const user = await requireUser(request);
           return {
             submission: await service.submitQuestionSetForReview(
+              user.id,
               request.params.submissionId,
             ),
           };
@@ -496,8 +530,9 @@ export function createLearningRoutes(
       { schema: { body: saveExamAttemptBodySchema } },
       async (request, reply) => {
         try {
+          const user = await requireUser(request);
           const outcome = await service.saveExamAttempt(
-            getCurrentIdentity().userId,
+            user.id,
             request.params.questionSetId,
             request.body,
           );
@@ -509,7 +544,8 @@ export function createLearningRoutes(
             error instanceof LearningResourceNotFoundError ||
             error instanceof InvalidQuizSubmissionError ||
             error instanceof LearningDataIntegrityError ||
-            error instanceof ExamAttemptIdempotencyConflictError
+            error instanceof ExamAttemptIdempotencyConflictError ||
+            error instanceof AuthenticationRequiredError
           ) {
             return sendLearningError(error, reply);
           }
@@ -521,10 +557,9 @@ export function createLearningRoutes(
 
     app.get('/attempts', async (request, reply) => {
       try {
+        const user = await requireUser(request);
         return {
-          attempts: await service.listExamAttempts(
-            getCurrentIdentity().userId,
-          ),
+          attempts: await service.listExamAttempts(user.id),
         };
       } catch (error) {
         request.log.error(error, 'Unable to load exam attempts.');
@@ -536,8 +571,9 @@ export function createLearningRoutes(
       '/attempts/:attemptId',
       async (request, reply) => {
         try {
+          const user = await requireUser(request);
           const attempt = await service.getExamAttempt(
-            getCurrentIdentity().userId,
+            user.id,
             request.params.attemptId,
           );
           return attempt === null
@@ -546,6 +582,44 @@ export function createLearningRoutes(
         } catch (error) {
           request.log.error(error, 'Unable to load exam attempt.');
           return reply.code(500).send({ error: 'Unable to load exam attempt.' });
+        }
+      },
+    );
+
+    app.get('/bookmarks', async (request, reply) => {
+      try {
+        const user = await requireUser(request);
+        return { items: await service.listBookmarkedQuestionSets(user.id) };
+      } catch (error) {
+        return sendLearningError(error, reply);
+      }
+    });
+
+    app.put<{ Params: QuestionSetParams }>(
+      '/bookmarks/:questionSetId',
+      async (request, reply) => {
+        try {
+          const user = await requireUser(request);
+          const questionSet = await service.bookmarkQuestionSet(
+            user.id,
+            request.params.questionSetId,
+          );
+          return reply.code(200).send({ questionSet });
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
+    app.delete<{ Params: QuestionSetParams }>(
+      '/bookmarks/:questionSetId',
+      async (request, reply) => {
+        try {
+          const user = await requireUser(request);
+          await service.removeQuestionSetBookmark(user.id, request.params.questionSetId);
+          return reply.code(204).send();
+        } catch (error) {
+          return sendLearningError(error, reply);
         }
       },
     );

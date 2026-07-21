@@ -40,7 +40,7 @@ The frontend should only render UI from backend responses and call approved back
 
 ## Trust Rules
 - Backend must not trust userId, role, credit amount, unlock status, or reward requests sent by the frontend.
-- Backend must derive the acting user from verified authentication context when real auth is added.
+- Backend derives the acting user from the verified opaque bearer session.
 - Database secrets, JWT secrets, admin keys, service keys, and production secrets must not be stored in the Flutter app or committed to GitHub.
 - Credit and reward logic must be controlled by backend transactions and audit logs.
 
@@ -51,22 +51,21 @@ submission ID to the attempt endpoint. The backend recalculates the score and
 persists the attempt plus review snapshots in one transaction. The API never
 accepts a trusted client score or user ID.
 
-Until authentication exists, one backend identity provider returns the temporary
-`demo-user`. Attempt service methods always receive that identity and filter
-list/detail reads by owner. `(userId, submissionId)` provides idempotent retry,
+The authentication boundary resolves the bearer session to a backend-owned user
+ID. Attempt service methods always receive that identity and filter list/detail
+reads by owner. `(userId, submissionId)` provides idempotent retry,
 and a canonical request fingerprint rejects reuse of a key with changed data.
 Question and answer snapshots preserve historical meaning if published community
 content changes; the optional source Question Set relation uses `SET NULL`.
 
 Flutter keeps this backend Exam history separate from device-local Progress
-summaries. Practice sessions remain local until an authenticated persistence
-contract is designed.
+summaries. Practice sessions remain local until a dedicated sync contract is designed.
 
 ## Contribution Retry Boundary
 
 Flutter's atomic contribution request includes a stable client `submissionId`
 plus creator content. It does not include a trusted user identity. The Fastify
-route derives the current temporary identity, validates the payload, and passes
+route derives the current authenticated identity, validates the payload, and passes
 it to the selected `LearningService`.
 
 Memory and Prisma services fingerprint normalized content. An identical retry
@@ -386,9 +385,10 @@ validation and lifecycle (`draft -> pendingReview -> published/rejected`). Only
 `published` sets can enter learner browse, search, detail, questions,
 `checkAnswer`, or `submitQuiz` paths.
 
-`createdByUserId` is nullable until real authentication exists. Submission
-endpoints are a development foundation, not proof of creator ownership. Public
-unauthenticated approve/reject routes are prohibited.
+`createdByUserId` is populated from the authenticated session for new creator
+content. Submission reads and draft mutations enforce creator ownership. Public
+approve/reject routes remain prohibited; those actions require a future authorized
+admin boundary.
 
 Submission validation bounds each set to 50 questions and each question to 8
 answer options. Prisma edit and submit transitions conditionally lock the draft

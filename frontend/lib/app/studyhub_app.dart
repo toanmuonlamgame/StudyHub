@@ -9,6 +9,14 @@ import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/repositories/mock_learning_repository.dart';
 import '../features/contribution/repositories/contribution_repository.dart';
 import '../features/contribution/repositories/mock_contribution_repository.dart';
+import '../features/auth/auth_controller.dart';
+import '../features/auth/auth_scope.dart';
+import '../features/auth/auth_session_store.dart';
+import '../features/auth/repositories/auth_repository.dart';
+import '../features/auth/screens/auth_screen.dart';
+import '../features/saved/bookmark_scope.dart';
+import '../features/saved/repositories/bookmark_repository.dart';
+import '../features/saved/repositories/mock_bookmark_repository.dart';
 import '../features/progress/progress_store_scope.dart';
 import '../features/progress/repositories/progress_store.dart';
 import '../features/progress/repositories/shared_preferences_progress_store.dart';
@@ -23,7 +31,10 @@ class StudyHubApp extends StatefulWidget {
   const StudyHubApp({
     super.key,
     this.learningRepository = const MockLearningRepository(),
-    this.contributionRepository = const MockContributionRepository(),
+    this.contributionRepository,
+    this.authRepository,
+    this.authSessionStore = const AuthSessionStore(),
+    this.bookmarkRepository,
     this.initialLocaleSelection,
     this.localePreferenceStore = const LocalePreferenceStore(),
     this.progressStore,
@@ -31,7 +42,10 @@ class StudyHubApp extends StatefulWidget {
   });
 
   final LearningRepository learningRepository;
-  final ContributionRepository contributionRepository;
+  final ContributionRepository? contributionRepository;
+  final AuthRepository? authRepository;
+  final AuthSessionStore authSessionStore;
+  final BookmarkRepository? bookmarkRepository;
   final AppLocaleSelection? initialLocaleSelection;
   final LocalePreferenceStore localePreferenceStore;
   final ProgressStore? progressStore;
@@ -48,6 +62,10 @@ class _StudyHubAppState extends State<StudyHubApp> {
   late bool _ownsProgressStore;
   late AttemptRepository _attemptRepository;
   late bool _ownsAttemptRepository;
+  late ContributionRepository _contributionRepository;
+  late BookmarkRepository _bookmarkRepository;
+  late bool _ownsBookmarkRepository;
+  AuthController? _authController;
   final AppNavigationController _navigationController =
       AppNavigationController();
 
@@ -60,6 +78,17 @@ class _StudyHubAppState extends State<StudyHubApp> {
     _progressStore = widget.progressStore ?? SharedPreferencesProgressStore();
     _ownsAttemptRepository = widget.attemptRepository == null;
     _attemptRepository = widget.attemptRepository ?? MockAttemptRepository();
+    _contributionRepository =
+        widget.contributionRepository ?? MockContributionRepository();
+    _ownsBookmarkRepository = widget.bookmarkRepository == null;
+    _bookmarkRepository = widget.bookmarkRepository ?? MockBookmarkRepository();
+    if (widget.authRepository != null) {
+      _authController = AuthController(
+        repository: widget.authRepository!,
+        store: widget.authSessionStore,
+      );
+      unawaited(_authController!.restore());
+    }
     if (widget.initialLocaleSelection == null) {
       unawaited(_loadStoredLocale());
     }
@@ -82,31 +111,58 @@ class _StudyHubAppState extends State<StudyHubApp> {
 
   @override
   Widget build(BuildContext context) {
-    return AttemptRepositoryScope(
+    final app = AttemptRepositoryScope(
       repository: _attemptRepository,
-      child: ProgressStoreScope(
-        progressStore: _progressStore,
-        child: AppNavigationScope(
-          controller: _navigationController,
-          child: MaterialApp(
-            title: 'StudyHub',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light,
-            locale: _localeSelection.locale,
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            home: MainNavigationScreen(
-              navigationController: _navigationController,
-              learningRepository: widget.learningRepository,
-              contributionRepository: widget.contributionRepository,
-              localeSelection: _localeSelection,
-              onLocaleSelected: _selectLocale,
+      child: BookmarkScope(
+        repository: _bookmarkRepository,
+        child: ProgressStoreScope(
+          progressStore: _progressStore,
+          child: AppNavigationScope(
+            controller: _navigationController,
+            child: MaterialApp(
+              title: 'StudyHub',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light,
+              locale: _localeSelection.locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              home: _buildHome(),
             ),
           ),
         ),
       ),
     );
+    final controller = _authController;
+    return controller == null
+        ? app
+        : AuthScope(controller: controller, child: app);
   }
+
+  Widget _buildHome() {
+    final controller = _authController;
+    if (controller == null) return _buildMainNavigation();
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        if (controller.loading && !controller.isAuthenticated) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return controller.isAuthenticated
+            ? _buildMainNavigation()
+            : AuthScreen(controller: controller);
+      },
+    );
+  }
+
+  Widget _buildMainNavigation() => MainNavigationScreen(
+    navigationController: _navigationController,
+    learningRepository: widget.learningRepository,
+    contributionRepository: _contributionRepository,
+    localeSelection: _localeSelection,
+    onLocaleSelected: _selectLocale,
+  );
 
   @override
   void dispose() {
@@ -116,6 +172,8 @@ class _StudyHubAppState extends State<StudyHubApp> {
     if (_ownsAttemptRepository) {
       _attemptRepository.dispose();
     }
+    if (_ownsBookmarkRepository) _bookmarkRepository.dispose();
+    _authController?.dispose();
     _navigationController.dispose();
     super.dispose();
   }

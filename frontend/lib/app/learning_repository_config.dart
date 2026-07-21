@@ -9,6 +9,13 @@ import '../features/contribution/repositories/mock_contribution_repository.dart'
 import '../features/attempts/repositories/api_attempt_repository.dart';
 import '../features/attempts/repositories/attempt_repository.dart';
 import '../features/attempts/repositories/mock_attempt_repository.dart';
+import '../features/auth/auth_session_store.dart';
+import '../features/auth/repositories/api_auth_repository.dart';
+import '../features/auth/repositories/auth_repository.dart';
+import '../features/auth/repositories/mock_auth_repository.dart';
+import '../features/saved/repositories/api_bookmark_repository.dart';
+import '../features/saved/repositories/bookmark_repository.dart';
+import '../features/saved/repositories/mock_bookmark_repository.dart';
 
 const _learningSource = String.fromEnvironment(
   'STUDYHUB_LEARNING_SOURCE',
@@ -82,11 +89,15 @@ LearningRepository createLearningRepositoryFromEnvironment() {
 
 ContributionRepository createContributionRepositoryFromEnvironment() {
   final config = resolveLearningRuntimeConfig();
+  const sessionStore = AuthSessionStore();
   switch (config.source) {
     case 'mock':
-      return const MockContributionRepository();
+      return MockContributionRepository();
     case 'api':
-      return ApiContributionRepository(baseUrl: config.apiBaseUrl);
+      return ApiContributionRepository(
+        baseUrl: config.apiBaseUrl,
+        accessTokenProvider: sessionStore.loadAccessToken,
+      );
     default:
       throw StateError(
         'Unsupported STUDYHUB_LEARNING_SOURCE: ${config.source}',
@@ -96,14 +107,36 @@ ContributionRepository createContributionRepositoryFromEnvironment() {
 
 AttemptRepository createAttemptRepositoryFromEnvironment() {
   final config = resolveLearningRuntimeConfig();
+  const sessionStore = AuthSessionStore();
   switch (config.source) {
     case 'mock':
       return MockAttemptRepository();
     case 'api':
-      return ApiAttemptRepository(baseUrl: config.apiBaseUrl);
+      return ApiAttemptRepository(
+        baseUrl: config.apiBaseUrl,
+        accessTokenProvider: sessionStore.loadAccessToken,
+      );
     default:
       throw StateError(
         'Unsupported STUDYHUB_LEARNING_SOURCE: ${config.source}',
       );
   }
+}
+
+AuthRepository createAuthRepositoryFromEnvironment() {
+  final config = resolveLearningRuntimeConfig();
+  return config.source == 'api'
+      ? ApiAuthRepository(baseUrl: config.apiBaseUrl)
+      : MockAuthRepository();
+}
+
+BookmarkRepository createBookmarkRepositoryFromEnvironment() {
+  final config = resolveLearningRuntimeConfig();
+  const sessionStore = AuthSessionStore();
+  return config.source == 'api'
+      ? ApiBookmarkRepository(
+          baseUrl: config.apiBaseUrl,
+          accessTokenProvider: sessionStore.loadAccessToken,
+        )
+      : MockBookmarkRepository();
 }

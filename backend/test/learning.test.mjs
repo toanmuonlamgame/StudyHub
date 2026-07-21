@@ -5,7 +5,10 @@ import { buildApp } from '../dist/app.js';
 import { InMemoryLearningService } from '../dist/services/inMemoryLearningService.js';
 
 function createTestApp(t) {
-  const app = buildApp({ learningDataSource: 'memory' });
+  const app = buildApp({
+    learningDataSource: 'memory',
+    requireUser: async () => ({ id: 'test-user' }),
+  });
   t.after(() => app.close());
   return app;
 }

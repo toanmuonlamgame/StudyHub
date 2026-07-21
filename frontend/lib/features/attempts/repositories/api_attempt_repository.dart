@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../../core/api_request.dart';
+import '../../../core/access_token_provider.dart';
 import '../../learning/repositories/learning_result_json_mapper.dart';
 import '../models/exam_attempt.dart';
 import 'attempt_repository.dart';
@@ -11,6 +12,7 @@ class ApiAttemptRepository extends AttemptRepository {
   ApiAttemptRepository({
     required String baseUrl,
     http.Client? client,
+    this.accessTokenProvider,
     this.requestTimeout = defaultApiRequestTimeout,
   }) : _baseUri = _parseBaseUrl(baseUrl),
        _client = client ?? http.Client();
@@ -18,6 +20,7 @@ class ApiAttemptRepository extends AttemptRepository {
   final Uri _baseUri;
   final http.Client _client;
   final Duration requestTimeout;
+  final AccessTokenProvider? accessTokenProvider;
 
   @override
   void dispose() {
@@ -34,7 +37,7 @@ class ApiAttemptRepository extends AttemptRepository {
         _endpoint(
           'learning/question-sets/${Uri.encodeComponent(request.questionSetId)}/attempts',
         ),
-        headers: const {'content-type': 'application/json'},
+        headers: await authenticatedJsonHeaders(accessTokenProvider),
         body: jsonEncode({
           'submissionId': request.submissionId,
           'startedAt': request.startedAt.toUtc().toIso8601String(),
@@ -53,7 +56,10 @@ class ApiAttemptRepository extends AttemptRepository {
   @override
   Future<List<ExamAttemptSummary>> listExamAttempts() async {
     final response = await withApiTimeout(
-      _client.get(_endpoint('learning/attempts')),
+      _client.get(
+        _endpoint('learning/attempts'),
+        headers: await authenticatedJsonHeaders(accessTokenProvider),
+      ),
       requestTimeout,
     );
     final body = _decodeResponse(response, 'listExamAttempts');
@@ -68,6 +74,7 @@ class ApiAttemptRepository extends AttemptRepository {
     final response = await withApiTimeout(
       _client.get(
         _endpoint('learning/attempts/${Uri.encodeComponent(attemptId)}'),
+        headers: await authenticatedJsonHeaders(accessTokenProvider),
       ),
       requestTimeout,
     );

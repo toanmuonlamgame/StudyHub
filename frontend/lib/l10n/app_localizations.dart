@@ -2045,8 +2045,284 @@ abstract class AppLocalizations {
   /// No description provided for @attemptHistoryLocalIdentity.
   ///
   /// In en, this message translates to:
-  /// **'History is not linked to a signed-in account yet. Account ownership will be available when sign-in is added.'**
+  /// **'Your history is securely linked to your signed-in account.'**
   String get attemptHistoryLocalIdentity;
+
+  /// No description provided for @signIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get signIn;
+
+  /// No description provided for @register.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get register;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @displayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get displayName;
+
+  /// No description provided for @noAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'New to StudyHub?'**
+  String get noAccount;
+
+  /// No description provided for @haveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get haveAccount;
+
+  /// No description provided for @authWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue your learning journey'**
+  String get authWelcome;
+
+  /// No description provided for @authWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to keep attempts, saved sets, and contributions under your account.'**
+  String get authWelcomeBody;
+
+  /// No description provided for @authInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or password is incorrect.'**
+  String get authInvalidCredentials;
+
+  /// No description provided for @authInvalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address.'**
+  String get authInvalidEmail;
+
+  /// No description provided for @authPasswordLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain between 8 and 128 characters.'**
+  String get authPasswordLength;
+
+  /// No description provided for @authRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to complete this request. Try again.'**
+  String get authRequestFailed;
+
+  /// No description provided for @authSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Please sign in again.'**
+  String get authSessionExpired;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
+  /// No description provided for @logOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logOut;
+
+  /// No description provided for @editDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit display name'**
+  String get editDisplayName;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get saveChanges;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'App version'**
+  String get appVersion;
+
+  /// No description provided for @privacySecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy and security'**
+  String get privacySecurity;
+
+  /// No description provided for @privacySecurityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'StudyHub keeps credentials out of the app and verifies ownership on the backend.'**
+  String get privacySecurityNote;
+
+  /// No description provided for @savedQuestionSets.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved question sets'**
+  String get savedQuestionSets;
+
+  /// No description provided for @saveForLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Save for later'**
+  String get saveForLater;
+
+  /// No description provided for @removeFromSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from saved'**
+  String get removeFromSaved;
+
+  /// No description provided for @savedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved question sets yet.'**
+  String get savedEmpty;
+
+  /// No description provided for @savedEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a useful question set from its detail page to find it here.'**
+  String get savedEmptyBody;
+
+  /// No description provided for @savedAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved for later.'**
+  String get savedAdded;
+
+  /// No description provided for @savedRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from saved.'**
+  String get savedRemoved;
+
+  /// No description provided for @myContributions.
+  ///
+  /// In en, this message translates to:
+  /// **'My contributions'**
+  String get myContributions;
+
+  /// No description provided for @contributionDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get contributionDraft;
+
+  /// No description provided for @contributionApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get contributionApproved;
+
+  /// No description provided for @contributionRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get contributionRejected;
+
+  /// No description provided for @contributionStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get contributionStatus;
+
+  /// No description provided for @contributionRejectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Review note'**
+  String get contributionRejectionReason;
+
+  /// No description provided for @contributionNoItems.
+  ///
+  /// In en, this message translates to:
+  /// **'No contributions yet.'**
+  String get contributionNoItems;
+
+  /// No description provided for @contributionCreateDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a draft'**
+  String get contributionCreateDraft;
+
+  /// No description provided for @contributionSaveDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get contributionSaveDraft;
+
+  /// No description provided for @contributionDraftSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved.'**
+  String get contributionDraftSaved;
+
+  /// No description provided for @contributionEditDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit draft'**
+  String get contributionEditDraft;
+
+  /// No description provided for @contributionDeleteDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete draft'**
+  String get contributionDeleteDraft;
+
+  /// No description provided for @contributionDeleteDraftConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this draft permanently?'**
+  String get contributionDeleteDraftConfirm;
+
+  /// No description provided for @contributionDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft deleted.'**
+  String get contributionDeleted;
+
+  /// No description provided for @completedAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed attempts'**
+  String get completedAttempts;
+
+  /// No description provided for @submittedQuestionSets.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted question sets'**
+  String get submittedQuestionSets;
+
+  /// No description provided for @aboutStudyHubBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A mobile learning platform for structured study, safe quizzes, and community-created content.'**
+  String get aboutStudyHubBody;
 }
 
 class _AppLocalizationsDelegate

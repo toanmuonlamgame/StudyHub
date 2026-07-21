@@ -8,6 +8,7 @@ import type {
   PaginatedStudyMaterials,
   Question,
   QuestionSet,
+  QuestionSetListItem,
   QuizResult,
   SaveExamAttemptInput,
   SaveExamAttemptOutcome,
@@ -54,6 +55,7 @@ export interface LearningService {
     attemptId: string,
   ): Promise<ExamAttemptDetail | null>;
   createQuestionSetSubmission(
+    userId: string,
     input: QuestionSetSubmissionInput,
   ): Promise<QuestionSetSubmission>;
   createQuestionSetSubmissionForReview(
@@ -62,15 +64,23 @@ export interface LearningService {
     input: QuestionSetSubmissionInput,
   ): Promise<CreateQuestionSetSubmissionOutcome>;
   updateQuestionSetSubmission(
+    userId: string,
     submissionId: string,
     input: QuestionSetSubmissionInput,
   ): Promise<QuestionSetSubmission>;
   getQuestionSetSubmission(
+    userId: string,
     submissionId: string,
   ): Promise<QuestionSetSubmission | null>;
+  listQuestionSetSubmissions(userId: string): Promise<QuestionSetSubmission[]>;
+  deleteQuestionSetSubmission(userId: string, submissionId: string): Promise<void>;
   submitQuestionSetForReview(
+    userId: string,
     submissionId: string,
   ): Promise<QuestionSetSubmission>;
+  listBookmarkedQuestionSets(userId: string): Promise<QuestionSetListItem[]>;
+  bookmarkQuestionSet(userId: string, questionSetId: string): Promise<QuestionSetListItem>;
+  removeQuestionSetBookmark(userId: string, questionSetId: string): Promise<void>;
 }
 
 export class LearningResourceNotFoundError extends Error {}

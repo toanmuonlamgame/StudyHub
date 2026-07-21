@@ -45,6 +45,25 @@ Health check:
 GET http://localhost:3000/health
 ```
 
+## Authentication API
+
+```text
+POST  /auth/register
+POST  /auth/login
+GET   /auth/me
+PATCH /auth/me
+POST  /auth/logout
+```
+
+Passwords are salted and hashed with Node's built-in `scrypt`. Clients receive
+an opaque 30-day session token; PostgreSQL stores only its SHA-256 hash. Protected
+Learning routes require `Authorization: Bearer <token>` and derive ownership from
+the authenticated user. No JWT secret or hard-coded account is used.
+
+Migration `20260722120000_auth_and_bookmarks` creates users, expiring sessions,
+and duplicate-safe bookmarks. It is prepared but must be reviewed and applied
+manually before Prisma-mode authentication or Saved smoke testing.
+
 ## Learning API
 
 The Learning routes depend on a `LearningService` abstraction. The in-memory
@@ -75,9 +94,8 @@ stable `submissionId`, optional `startedAt`, and selected option IDs only. The
 backend recalculates the result, stores attempt/answer snapshots atomically, and
 uses `(userId, submissionId)` plus a canonical request fingerprint for safe
 idempotent retry. Reusing a key with changed request data returns `409`. List
-and detail reads are
-scoped to the centralized temporary `demo-user` identity boundary; Flutter does
-not provide a trusted user ID. Real authentication will replace that boundary.
+and detail reads are scoped to the authenticated user; Flutter does not provide
+or control the trusted user ID.
 
 Migration `20260717120000_exam_attempt_history` creates the attempt tables and
 indexes. It is intentionally not applied by automated tests and must be reviewed
@@ -282,15 +300,15 @@ material list/detail contract in Prisma mode as well as the existing quiz flow.
 
 ## Community Question Set Submissions
 
-The development contract supports draft create/read/update, submit-for-review,
+The authenticated contract supports draft create/read/update/delete/list,
+submit-for-review,
 and atomic final submission at
 `POST /learning/question-set-submissions/submit`. Flutter uses the atomic route
-after composing its draft locally. Draft endpoints are not production-safe
-ownership APIs until authentication and authorization exist.
+after composing its draft locally. Every draft operation checks creator ownership.
 
 The atomic request includes a client-generated `submissionId` (1-128
 non-whitespace characters after trimming). The backend derives the current
-temporary identity and never
+authenticated identity and never
 accepts a client user ID. Replaying the same ID with the same normalized content
 returns the same pending-review submission with HTTP `200`; the first creation
 returns HTTP `201`. Changed content returns
@@ -309,6 +327,22 @@ must be reviewed and applied manually. Migration
 client key/fingerprint fields and unique index. Normal tests remain memory-only.
 Prisma submission/retry smoke testing and a real Flutter-to-backend submission
 remain manual checks after both migrations are applied.
+
+Approved/published and rejected submissions are read-only for ordinary users.
+No public approve/reject route exists; moderation remains a future authorized
+Admin Dashboard or controlled backend operation.
+
+## Saved Question Sets
+
+```text
+GET    /learning/bookmarks
+PUT    /learning/bookmarks/:questionSetId
+DELETE /learning/bookmarks/:questionSetId
+```
+
+The database unique constraint on `(userId, questionSetId)` prevents duplicates.
+Saved responses reuse compact learner-safe Question Set metadata and never include
+questions, answers, or correctness fields.
 
 Unexpected server and stored-data integrity errors are logged by Fastify but
 return generic HTTP `500` messages. Prisma, connection, credential, and internal

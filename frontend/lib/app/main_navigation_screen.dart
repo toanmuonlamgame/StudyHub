@@ -8,7 +8,8 @@ import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/screens/subject_list_screen.dart';
 import '../features/materials/screens/study_material_list_screen.dart';
 import '../features/progress/progress_screen.dart';
-import '../features/settings/settings_placeholder_screen.dart';
+import '../features/settings/settings_screen.dart';
+import '../features/saved/screens/saved_question_sets_screen.dart';
 import '../l10n/app_localizations_x.dart';
 import 'app_navigation.dart';
 
@@ -121,9 +122,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       0 => _buildHome(),
       1 => SubjectListScreen(learningRepository: widget.learningRepository),
       2 => ProgressScreen(onStartLearning: () => _selectTab(1)),
-      3 => SettingsPlaceholderScreen(
+      3 => SettingsScreen(
         localeSelection: widget.localeSelection,
         onLocaleSelected: widget.onLocaleSelected,
+        contributionRepository: widget.contributionRepository,
       ),
       _ => throw RangeError.index(index, const [0, 1, 2, 3]),
     };
@@ -147,6 +149,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             learningRepository: widget.learningRepository,
             contributionRepository: widget.contributionRepository,
           ),
+        ),
+      ),
+      onOpenSaved: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => const SavedQuestionSetsScreen(),
         ),
       ),
     );

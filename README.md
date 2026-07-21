@@ -9,7 +9,7 @@ grows from a small learning loop into trusted community content.
 
 ## Current Status
 
-**Android MVP release-candidate preparation**
+**Essential MVP feature-completion checkpoint**
 
 Phase 1 is complete as a working learning foundation. See the
 [Phase 1 checkpoint](docs/PHASE_1_CHECKPOINT.md) for completed capabilities,
@@ -21,6 +21,8 @@ safety guarantees, limitations, and Phase 2 entry criteria.
 - PostgreSQL schema, Prisma migration, and repeatable seed foundation.
 - Selectable backend data source: in-memory by default or Prisma/PostgreSQL.
 - Automated memory/unit tests and an opt-in Prisma smoke-test script.
+- Email/password registration and login with expiring opaque sessions.
+- Account-owned attempts, contributions, and saved Question Sets.
 
 ## Implemented Features
 
@@ -49,11 +51,19 @@ safety guarantees, limitations, and Phase 2 entry criteria.
 - `AttemptRepository` with mock/API adapters for save, history, and result detail.
 - Compile-time mock/API selection through non-secret `dart-define` values.
 
+### Accounts And Community Content
+
+- Register, sign in, restore a session, edit a display name, and log out.
+- Save and remove Question Sets, then reopen them from Home or Settings.
+- Create, edit, delete, and submit owned contribution drafts.
+- Track `draft`, `pendingReview`, `approved`, and `rejected` states, including
+  rejection notes returned by a future controlled review process.
+
 ### Backend And Persistence
 
 - Fastify Learning API for Subjects, Topics, Question Sets, Questions, and quiz
   submission.
-- Backend-owned Exam attempt persistence with temporary demo identity ownership,
+- Backend-owned Exam attempt persistence with authenticated ownership,
   transaction-safe answer snapshots, and duplicate-request protection.
 - `LearningService` abstraction with `InMemoryLearningService` and
   `PrismaLearningService` implementations.
@@ -70,7 +80,7 @@ the backend calculates the score and answer review.
 
 ## Planned Features
 
-- Auth-backed progress sync and measured feedback polish.
+- Auth-backed cross-device progress sync and measured feedback polish.
 - User-uploaded Study Materials with binary storage, validation, ownership, and moderation.
 - AI-assisted question extraction with source provenance, citations, and human
   review before publication.
@@ -97,6 +107,7 @@ the backend calculates the score and answer review.
 
 ```text
 Flutter App
+  -> AuthController / authenticated session
   -> LearningRepository
      -> MockLearningRepository
      -> ApiLearningRepository
@@ -106,6 +117,9 @@ Flutter App
               -> PrismaLearningService
                  -> PostgreSQL
 ```
+
+Protected attempt, contribution, and bookmark routes derive identity from the
+verified bearer session. Flutter never sends a trusted user ID.
 
 The Flutter app never accesses PostgreSQL directly. Repositories isolate UI from
 data sources, while backend routes depend on service contracts rather than raw
@@ -192,6 +206,9 @@ The complete review standard is documented in
 - No API keys, passwords, tokens, or database credentials belong in the repo.
 - Local `.env` files are ignored and example configuration uses placeholders.
 - Flutter calls approved backend APIs and never calls the database directly.
+- Passwords are salted and hashed with Node's `scrypt`; opaque session tokens
+  are stored hashed in PostgreSQL and expire after a bounded lifetime.
+- Attempt history, contributions, and bookmarks are scoped to the authenticated user.
 - Correctness metadata is not exposed before quiz submission.
 - The backend owns scoring and remains the future source of truth for identity,
   permissions, moderation, credits, rewards, and content access.

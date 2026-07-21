@@ -1114,5 +1114,149 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attemptHistoryLocalIdentity =>
-      'History is not linked to a signed-in account yet. Account ownership will be available when sign-in is added.';
+      'Your history is securely linked to your signed-in account.';
+
+  @override
+  String get signIn => 'Sign in';
+
+  @override
+  String get register => 'Create account';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get displayName => 'Display name';
+
+  @override
+  String get noAccount => 'New to StudyHub?';
+
+  @override
+  String get haveAccount => 'Already have an account?';
+
+  @override
+  String get authWelcome => 'Continue your learning journey';
+
+  @override
+  String get authWelcomeBody =>
+      'Sign in to keep attempts, saved sets, and contributions under your account.';
+
+  @override
+  String get authInvalidCredentials => 'Email or password is incorrect.';
+
+  @override
+  String get authInvalidEmail => 'Enter a valid email address.';
+
+  @override
+  String get authPasswordLength =>
+      'Password must contain between 8 and 128 characters.';
+
+  @override
+  String get authRequestFailed => 'Unable to complete this request. Try again.';
+
+  @override
+  String get authSessionExpired =>
+      'Your session expired. Please sign in again.';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get logOut => 'Log out';
+
+  @override
+  String get editDisplayName => 'Edit display name';
+
+  @override
+  String get saveChanges => 'Save changes';
+
+  @override
+  String get appVersion => 'App version';
+
+  @override
+  String get privacySecurity => 'Privacy and security';
+
+  @override
+  String get privacySecurityNote =>
+      'StudyHub keeps credentials out of the app and verifies ownership on the backend.';
+
+  @override
+  String get savedQuestionSets => 'Saved question sets';
+
+  @override
+  String get saveForLater => 'Save for later';
+
+  @override
+  String get removeFromSaved => 'Remove from saved';
+
+  @override
+  String get savedEmpty => 'No saved question sets yet.';
+
+  @override
+  String get savedEmptyBody =>
+      'Save a useful question set from its detail page to find it here.';
+
+  @override
+  String get savedAdded => 'Saved for later.';
+
+  @override
+  String get savedRemoved => 'Removed from saved.';
+
+  @override
+  String get myContributions => 'My contributions';
+
+  @override
+  String get contributionDraft => 'Draft';
+
+  @override
+  String get contributionApproved => 'Approved';
+
+  @override
+  String get contributionRejected => 'Rejected';
+
+  @override
+  String get contributionStatus => 'Status';
+
+  @override
+  String get contributionRejectionReason => 'Review note';
+
+  @override
+  String get contributionNoItems => 'No contributions yet.';
+
+  @override
+  String get contributionCreateDraft => 'Create a draft';
+
+  @override
+  String get contributionSaveDraft => 'Save draft';
+
+  @override
+  String get contributionDraftSaved => 'Draft saved.';
+
+  @override
+  String get contributionEditDraft => 'Edit draft';
+
+  @override
+  String get contributionDeleteDraft => 'Delete draft';
+
+  @override
+  String get contributionDeleteDraftConfirm => 'Delete this draft permanently?';
+
+  @override
+  String get contributionDeleted => 'Draft deleted.';
+
+  @override
+  String get completedAttempts => 'Completed attempts';
+
+  @override
+  String get submittedQuestionSets => 'Submitted question sets';
+
+  @override
+  String get aboutStudyHubBody =>
+      'A mobile learning platform for structured study, safe quizzes, and community-created content.';
 }

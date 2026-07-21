@@ -300,7 +300,7 @@ test('PrismaLearningService creates a nested pending-review submission transacti
     description: 'Description',
     status: 'pendingReview',
     sourceType: 'community',
-    createdByUserId: null,
+    createdByUserId: 'test-user',
     submittedAt: createdAt,
     reviewedAt: null,
     publishedAt: null,
@@ -480,10 +480,14 @@ test('PrismaLearningService atomically guards draft submit transition', async ()
   };
   const service = createPrismaLearningService(fakePrisma);
 
-  const result = await service.submitQuestionSetForReview('submission_1');
+  const result = await service.submitQuestionSetForReview(
+    'test-user',
+    'submission_1',
+  );
 
   assert.deepEqual(transitionArgs.where, {
     id: 'submission_1',
+    createdByUserId: 'test-user',
     sourceType: 'community',
     status: 'draft',
   });

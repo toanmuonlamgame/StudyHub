@@ -184,6 +184,27 @@ class QuestionSetDraft {
     return issues;
   }
 
+  List<DraftValidationIssue> validateForDraft() {
+    final issues = <DraftValidationIssue>[];
+    if (subjectId.isEmpty) {
+      issues.add(
+        const DraftValidationIssue('subjectId', 'Subject is required.'),
+      );
+    }
+    if (title.trim().isEmpty) {
+      issues.add(const DraftValidationIssue('title', 'Title is required.'));
+    }
+    if (title.length > contributionTitleLengthMax) {
+      issues.add(const DraftValidationIssue('title', 'Title is too long.'));
+    }
+    if (description.length > contributionDescriptionLengthMax) {
+      issues.add(
+        const DraftValidationIssue('description', 'Description is too long.'),
+      );
+    }
+    return issues;
+  }
+
   static QuestionDraft newQuestion(int seed) => QuestionDraft(
     id: 'question-draft-$seed',
     answerOptions: [
