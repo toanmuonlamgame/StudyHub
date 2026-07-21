@@ -1331,4 +1331,89 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get openDetails => 'Xem chi tiết';
+
+  @override
+  String get studyReminders => 'Nhắc lịch học';
+
+  @override
+  String get enableReminders => 'Bật nhắc học hằng ngày';
+
+  @override
+  String get reminderTime => 'Giờ nhắc học';
+
+  @override
+  String get notificationPermission => 'Quyền thông báo';
+
+  @override
+  String get permissionGranted => 'Đã cho phép';
+
+  @override
+  String get permissionDenied =>
+      'Đã từ chối. Mở cài đặt hệ thống để cho phép nhắc học.';
+
+  @override
+  String get permissionPermanentlyDenied => 'Đã chặn trong cài đặt hệ thống.';
+
+  @override
+  String get permissionUnavailable => 'Không hỗ trợ trên nền tảng này.';
+
+  @override
+  String get openSettings => 'Mở cài đặt';
+
+  @override
+  String get studyReminderReason =>
+      'Một lời nhắc nhẹ mỗi ngày giúp bạn quay lại đúng giờ học đã chọn.';
+
+  @override
+  String get studyReminderNotificationTitle => 'Đã đến giờ học';
+
+  @override
+  String get studyReminderNotificationBody => 'Tiếp tục học cùng StudyHub.';
+
+  @override
+  String get notificationScheduleFailed =>
+      'Không thể đặt lịch nhắc. Vui lòng thử lại.';
+
+  @override
+  String get testNotification => 'Gửi thông báo thử';
+
+  @override
+  String get chooseImage => 'Chọn ảnh';
+
+  @override
+  String get takePhoto => 'Chụp ảnh';
+
+  @override
+  String get removeImage => 'Xóa ảnh';
+
+  @override
+  String get replaceImage => 'Thay ảnh';
+
+  @override
+  String get uploadingImage => 'Đang tải ảnh lên...';
+
+  @override
+  String get imageUploadFailed =>
+      'Tải ảnh thất bại. Phần chữ của bạn vẫn được giữ nguyên.';
+
+  @override
+  String get unsupportedFile => 'Chỉ hỗ trợ ảnh JPEG, PNG và WebP.';
+
+  @override
+  String get fileTooLarge => 'Ảnh phải có dung lượng không quá 5 MiB.';
+
+  @override
+  String get imageUnavailable => 'Không thể hiển thị ảnh';
+
+  @override
+  String get imagePreview => 'Xem ảnh';
+
+  @override
+  String get questionImageOptional => 'Ảnh câu hỏi (không bắt buộc)';
+
+  @override
+  String get explanationImageOptional => 'Ảnh giải thích (không bắt buộc)';
+
+  @override
+  String get continueStudying => 'Tiếp tục học';
 }

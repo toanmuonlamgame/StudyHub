@@ -193,6 +193,8 @@ model ExamAttemptAnswer {
   correctAnswerText      String
   isCorrect              Boolean
   explanation            String?
+  questionMedia          Json?
+  explanationMedia       Json?
   position               Int
   attempt                ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   createdAt              DateTime    @default(now())
@@ -202,15 +204,17 @@ model ExamAttemptAnswer {
 }
 
 model Question {
-  id            String         @id @default(cuid())
-  questionSetId String
-  text          String
-  explanation   String?
-  position      Int
-  questionSet   QuestionSet    @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
-  answerOptions AnswerOption[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id               String         @id @default(cuid())
+  questionSetId    String
+  text             String
+  explanation      String?
+  media            Json?
+  explanationMedia Json?
+  position         Int
+  questionSet      QuestionSet    @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+  answerOptions    AnswerOption[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   @@unique([questionSetId, position])
 }

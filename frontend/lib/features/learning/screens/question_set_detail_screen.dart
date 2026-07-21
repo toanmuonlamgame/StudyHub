@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
+import '../../../core/device_feedback.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../../saved/bookmark_scope.dart';
 import '../models/question_set.dart';
@@ -187,6 +189,7 @@ class _QuestionSetDetailScreenState extends State<QuestionSetDetailScreen> {
       _bookmarked = !_bookmarked;
       _bookmarkLoading = false;
     });
+    unawaited(DeviceFeedback.selection());
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

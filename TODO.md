@@ -5,6 +5,20 @@ Essential MVP feature completion is implemented in code. Authentication,
 account ownership, profile/settings, contribution management, and saved
 Question Sets are ready for migration and dedicated stabilization testing.
 
+## Post-MVP Mobile Capabilities
+- [x] Add opt-in daily study reminders with persisted time and no startup prompt.
+- [x] Centralize notification permission status, denial, and system-settings flow.
+- [x] Add optional question/explanation image DTOs, rendering, and creator attachment UI.
+- [x] Add authenticated local media storage with 5 MiB JPEG/PNG/WebP validation.
+- [x] Snapshot optional media metadata in completed Exam attempt answers.
+- [x] Add subtle haptics for meaningful learning and creator actions.
+- [ ] Review and apply migration `20260723120000_question_media_foundation` manually.
+- [ ] Smoke-test notification scheduling/taps after reboot on a physical Android 13+ device.
+- [ ] Smoke-test authenticated image upload and contribution retrieval in Prisma mode.
+- [ ] Replace local media storage with object storage before production deployment.
+- [ ] Add camera capture only after its permission and recovery UX are approved.
+- [ ] Add optimized thumbnails; keep GIF/video upload and playback deferred.
+
 ## Essential MVP Completion
 - [x] Add register, login, logout, current-user, profile-update, and expiring
   session contracts for memory and Prisma modes.

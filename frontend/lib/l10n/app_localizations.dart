@@ -2455,6 +2455,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View details'**
   String get openDetails;
+
+  /// No description provided for @studyReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Study reminders'**
+  String get studyReminders;
+
+  /// No description provided for @enableReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable daily reminder'**
+  String get enableReminders;
+
+  /// No description provided for @reminderTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder time'**
+  String get reminderTime;
+
+  /// No description provided for @notificationPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission'**
+  String get notificationPermission;
+
+  /// No description provided for @permissionGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed'**
+  String get permissionGranted;
+
+  /// No description provided for @permissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Denied. Open system settings to allow reminders.'**
+  String get permissionDenied;
+
+  /// No description provided for @permissionPermanentlyDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked in system settings.'**
+  String get permissionPermanentlyDenied;
+
+  /// No description provided for @permissionUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available on this platform.'**
+  String get permissionUnavailable;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get openSettings;
+
+  /// No description provided for @studyReminderReason.
+  ///
+  /// In en, this message translates to:
+  /// **'A quiet daily reminder helps you return to your planned study time.'**
+  String get studyReminderReason;
+
+  /// No description provided for @studyReminderNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to study'**
+  String get studyReminderNotificationTitle;
+
+  /// No description provided for @studyReminderNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue learning with StudyHub.'**
+  String get studyReminderNotificationBody;
+
+  /// No description provided for @notificationScheduleFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The reminder could not be scheduled. Try again.'**
+  String get notificationScheduleFailed;
+
+  /// No description provided for @testNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send test notification'**
+  String get testNotification;
+
+  /// No description provided for @chooseImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose image'**
+  String get chooseImage;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get takePhoto;
+
+  /// No description provided for @removeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove image'**
+  String get removeImage;
+
+  /// No description provided for @replaceImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace image'**
+  String get replaceImage;
+
+  /// No description provided for @uploadingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading image...'**
+  String get uploadingImage;
+
+  /// No description provided for @imageUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Image upload failed. Your text is still safe.'**
+  String get imageUploadFailed;
+
+  /// No description provided for @unsupportedFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Only JPEG, PNG, and WebP images are supported.'**
+  String get unsupportedFile;
+
+  /// No description provided for @fileTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Image must be 5 MiB or smaller.'**
+  String get fileTooLarge;
+
+  /// No description provided for @imageUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Image unavailable'**
+  String get imageUnavailable;
+
+  /// No description provided for @imagePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Image preview'**
+  String get imagePreview;
+
+  /// No description provided for @questionImageOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Question image (optional)'**
+  String get questionImageOptional;
+
+  /// No description provided for @explanationImageOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Explanation image (optional)'**
+  String get explanationImageOptional;
+
+  /// No description provided for @continueStudying.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue studying'**
+  String get continueStudying;
 }
 
 class _AppLocalizationsDelegate

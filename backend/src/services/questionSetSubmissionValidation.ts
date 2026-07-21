@@ -8,6 +8,7 @@ const DESCRIPTION_MAX = 2000;
 const QUESTION_MAX = 2000;
 const EXPLANATION_MAX = 4000;
 const ANSWER_MAX = 1000;
+const MEDIA_ALT_TEXT_MAX = 500;
 export const QUESTION_COUNT_MAX = 50;
 export const ANSWER_OPTION_COUNT_MAX = 8;
 
@@ -41,6 +42,12 @@ export function validateQuestionSetSubmission(
       `${questionPath}.explanation`,
       question.explanation ?? '',
       EXPLANATION_MAX,
+    );
+    validateMedia(fields, `${questionPath}.media`, question.media);
+    validateMedia(
+      fields,
+      `${questionPath}.explanationMedia`,
+      question.explanationMedia,
     );
 
     if (options.requireComplete && question.answerOptions.length < 2) {
@@ -84,6 +91,30 @@ export function validateQuestionSetSubmission(
   });
 
   return fields;
+}
+
+function validateMedia(
+  fields: SubmissionValidationFieldError[],
+  path: string,
+  media: QuestionSetSubmissionInput['questions'][number]['media'],
+): void {
+  if (media === undefined) return;
+  if (media.mediaType !== 'image') {
+    fields.push({ path: `${path}.mediaType`, message: 'Only image media is supported.' });
+  }
+  if (!/^\/media\/images\/[a-zA-Z0-9-]+\.(?:jpe?g|png|webp)$/.test(media.mediaUrl)) {
+    fields.push({ path: `${path}.mediaUrl`, message: 'Media URL is invalid.' });
+  }
+  if (media.thumbnailUrl !== undefined &&
+      !/^\/media\/images\/[a-zA-Z0-9-]+\.(?:jpe?g|png|webp)$/.test(media.thumbnailUrl)) {
+    fields.push({ path: `${path}.thumbnailUrl`, message: 'Thumbnail URL is invalid.' });
+  }
+  maximumText(fields, `${path}.altText`, media.altText ?? '', MEDIA_ALT_TEXT_MAX);
+  for (const [name, value] of [['width', media.width], ['height', media.height]] as const) {
+    if (value !== undefined && (!Number.isInteger(value) || value < 1 || value > 10000)) {
+      fields.push({ path: `${path}.${name}`, message: 'Must be an integer from 1 to 10000.' });
+    }
+  }
 }
 
 function requiredText(

@@ -11,6 +11,7 @@ void main() {
       attemptRepository: createAttemptRepositoryFromEnvironment(),
       authRepository: createAuthRepositoryFromEnvironment(),
       bookmarkRepository: createBookmarkRepositoryFromEnvironment(),
+      mediaRepository: createMediaRepositoryFromEnvironment(),
     ),
   );
 }

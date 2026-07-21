@@ -122,6 +122,20 @@ const answerOptionSubmissionSchema = {
   },
 } as const;
 
+const mediaAssetSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['mediaType', 'mediaUrl'],
+  properties: {
+    mediaType: { type: 'string', enum: ['image', 'gif', 'video'] },
+    mediaUrl: { type: 'string' },
+    thumbnailUrl: { type: 'string' },
+    altText: { type: 'string' },
+    width: { type: 'integer' },
+    height: { type: 'integer' },
+  },
+} as const;
+
 const questionSetSubmissionBodySchema = {
   type: 'object',
   additionalProperties: false,
@@ -140,6 +154,8 @@ const questionSetSubmissionBodySchema = {
         properties: {
           text: { type: 'string' },
           explanation: { type: 'string' },
+          media: mediaAssetSchema,
+          explanationMedia: mediaAssetSchema,
           answerOptions: { type: 'array', items: answerOptionSubmissionSchema },
         },
       },

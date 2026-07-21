@@ -13,6 +13,7 @@ import '../models/subject.dart';
 import '../models/topic.dart';
 import 'learning_repository.dart';
 import 'learning_result_json_mapper.dart';
+import 'media_asset_json_mapper.dart';
 import '../../materials/models/study_material.dart';
 
 class ApiLearningRepository implements LearningRepository {
@@ -156,10 +157,9 @@ class ApiLearningRepository implements LearningRepository {
     final body = await _get(
       'learning/question-sets/${Uri.encodeComponent(id)}/questions',
     );
-    return _readObjectList(
-      body,
-      'questions',
-    ).map(_questionFromJson).toList(growable: false);
+    return _readObjectList(body, 'questions')
+        .map((json) => _questionFromJson(json, baseUri: _baseUri))
+        .toList(growable: false);
   }
 
   @override
@@ -178,7 +178,10 @@ class ApiLearningRepository implements LearningRepository {
       requestTimeout,
     );
     final body = _decodeResponse(response, 'checkAnswer');
-    return _answerCheckResultFromJson(_readObject(body, 'result'));
+    return _answerCheckResultFromJson(
+      _readObject(body, 'result'),
+      baseUri: _baseUri,
+    );
   }
 
   @override
@@ -200,7 +203,10 @@ class ApiLearningRepository implements LearningRepository {
       requestTimeout,
     );
     final body = _decodeResponse(response, 'submitQuiz');
-    return quizResultFromJson(_readObject(body, 'result'));
+    return quizResultFromJson(
+      _readObject(body, 'result'),
+      mediaBaseUri: _baseUri,
+    );
   }
 
   Future<Map<String, dynamic>> _get(String path) async {
@@ -292,11 +298,12 @@ QuestionSet _questionSetFromJson(Map<String, dynamic> json) {
   );
 }
 
-Question _questionFromJson(Map<String, dynamic> json) {
+Question _questionFromJson(Map<String, dynamic> json, {Uri? baseUri}) {
   return Question(
     id: _readString(json, 'id'),
     questionSetId: _readString(json, 'questionSetId'),
     text: _readString(json, 'text'),
+    media: mediaAssetFromJson(json['media'], baseUri: baseUri),
     answerOptions: _readObjectList(
       json,
       'answerOptions',
@@ -311,7 +318,10 @@ AnswerOption _answerOptionFromJson(Map<String, dynamic> json) {
   );
 }
 
-AnswerCheckResult _answerCheckResultFromJson(Map<String, dynamic> json) {
+AnswerCheckResult _answerCheckResultFromJson(
+  Map<String, dynamic> json, {
+  Uri? baseUri,
+}) {
   return AnswerCheckResult(
     questionId: _readString(json, 'questionId'),
     selectedAnswerOptionId: _readString(json, 'selectedAnswerOptionId'),
@@ -320,6 +330,11 @@ AnswerCheckResult _answerCheckResultFromJson(Map<String, dynamic> json) {
     correctAnswerText: _readString(json, 'correctAnswerText'),
     isCorrect: _readBool(json, 'isCorrect'),
     explanation: _readNullableString(json, 'explanation'),
+    questionMedia: mediaAssetFromJson(json['questionMedia'], baseUri: baseUri),
+    explanationMedia: mediaAssetFromJson(
+      json['explanationMedia'],
+      baseUri: baseUri,
+    ),
   );
 }
 

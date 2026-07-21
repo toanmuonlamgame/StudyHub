@@ -262,3 +262,16 @@ Google sign-in remains disabled until provider-console configuration and secure
 backend ID-token verification are implemented. Facebook is hidden. See
 [`docs/SOCIAL_AUTH_SETUP.md`](../docs/SOCIAL_AUTH_SETUP.md); no client-only or
 fake provider login is used.
+
+## Notifications and question media
+
+Settings contains an opt-in daily study reminder with a persisted time. The app
+does not request notification permission at startup, remembers a denial, and
+links to system settings when permission is unavailable. Reminders use one
+quiet channel, inexact daily scheduling, and open the existing Home shell.
+
+Question and explanation images are optional. The creator uses Android's system
+photo picker, uploads through `MediaRepository`, and keeps all text when upload
+fails. Images render in a stable, bounded frame with loading/error states and a
+zoomable preview. API mode uses `POST /media/images`; mock mode keeps preview
+bytes in memory only. Camera, GIF playback, and video playback are deferred.

@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/app_motion.dart';
+import '../../../core/device_feedback.dart';
+import '../../media/widgets/study_media_image.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../models/answer_check_result.dart';
 import '../models/answer_option.dart';
@@ -376,6 +380,17 @@ class _QuizScreenState extends State<QuizScreen> {
                 const SizedBox(height: 4),
                 Text(l10n.yourAnswer(result.selectedAnswerText)),
                 Text(l10n.correctAnswer(result.correctAnswerText)),
+                if (result.explanation?.trim().isNotEmpty == true) ...[
+                  const SizedBox(height: 8),
+                  Text(result.explanation!),
+                ],
+                if (result.explanationMedia != null) ...[
+                  const SizedBox(height: 10),
+                  StudyMediaImage(
+                    media: result.explanationMedia!,
+                    maxHeight: 200,
+                  ),
+                ],
               ],
             ),
           ),
@@ -408,6 +423,7 @@ class _QuizScreenState extends State<QuizScreen> {
       return;
     }
 
+    unawaited(DeviceFeedback.selection());
     setState(() {
       _examSelectedAnswerIds[questionId] = answerOptionId;
     });
@@ -434,6 +450,7 @@ class _QuizScreenState extends State<QuizScreen> {
       _isCheckingPracticeAnswer = true;
       _practiceAnswerCheckFailed = false;
     });
+    unawaited(DeviceFeedback.selection());
 
     try {
       final result = await widget.learningRepository.checkAnswer(
@@ -458,6 +475,8 @@ class _QuizScreenState extends State<QuizScreen> {
             correctAnswerText: result.correctAnswerText,
             isCorrect: result.isCorrect,
             explanation: result.explanation,
+            questionMedia: result.questionMedia ?? question.media,
+            explanationMedia: result.explanationMedia,
           ),
         );
         _isCheckingPracticeAnswer = false;
@@ -675,6 +694,10 @@ class _QuestionCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(question.text, style: theme.textTheme.titleLarge),
+            if (question.media != null) ...[
+              const SizedBox(height: 14),
+              StudyMediaImage(media: question.media!),
+            ],
             const SizedBox(height: 20),
             RadioGroup<String>(
               groupValue: selectedAnswerId,

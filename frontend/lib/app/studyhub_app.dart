@@ -26,6 +26,16 @@ import 'main_navigation_screen.dart';
 import '../features/attempts/attempt_repository_scope.dart';
 import '../features/attempts/repositories/attempt_repository.dart';
 import '../features/attempts/repositories/mock_attempt_repository.dart';
+import '../core/device_permissions/device_permission_service.dart';
+import '../features/media/media_repository_scope.dart';
+import '../features/media/repositories/media_repository.dart';
+import '../features/media/repositories/mock_media_repository.dart';
+import '../features/notifications/controllers/study_reminder_controller.dart';
+import '../features/notifications/repositories/shared_preferences_study_reminder_store.dart';
+import '../features/notifications/repositories/study_reminder_store.dart';
+import '../features/notifications/services/local_study_notification_service.dart';
+import '../features/notifications/services/study_notification_service.dart';
+import '../features/notifications/study_reminder_scope.dart';
 
 class StudyHubApp extends StatefulWidget {
   const StudyHubApp({
@@ -39,6 +49,10 @@ class StudyHubApp extends StatefulWidget {
     this.localePreferenceStore = const LocalePreferenceStore(),
     this.progressStore,
     this.attemptRepository,
+    this.mediaRepository = const MockMediaRepository(),
+    this.studyReminderStore = const SharedPreferencesStudyReminderStore(),
+    this.notificationService,
+    this.permissionService = const PlatformDevicePermissionService(),
   });
 
   final LearningRepository learningRepository;
@@ -50,12 +64,16 @@ class StudyHubApp extends StatefulWidget {
   final LocalePreferenceStore localePreferenceStore;
   final ProgressStore? progressStore;
   final AttemptRepository? attemptRepository;
+  final MediaRepository mediaRepository;
+  final StudyReminderStore studyReminderStore;
+  final StudyNotificationService? notificationService;
+  final DevicePermissionService permissionService;
 
   @override
   State<StudyHubApp> createState() => _StudyHubAppState();
 }
 
-class _StudyHubAppState extends State<StudyHubApp> {
+class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
   late AppLocaleSelection _localeSelection;
   bool _localeSelectedInSession = false;
   late ProgressStore _progressStore;
@@ -68,10 +86,22 @@ class _StudyHubAppState extends State<StudyHubApp> {
   AuthController? _authController;
   final AppNavigationController _navigationController =
       AppNavigationController();
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  late StudyNotificationService _notificationService;
+  late StudyReminderController _reminderController;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _notificationService =
+        widget.notificationService ?? LocalStudyNotificationService();
+    _reminderController = StudyReminderController(
+      store: widget.studyReminderStore,
+      notifications: _notificationService,
+      permissions: widget.permissionService,
+    );
+    unawaited(_initializeReminders());
     _localeSelection =
         widget.initialLocaleSelection ?? AppLocaleSelection.system;
     _ownsProgressStore = widget.progressStore == null;
@@ -111,22 +141,30 @@ class _StudyHubAppState extends State<StudyHubApp> {
 
   @override
   Widget build(BuildContext context) {
-    final app = AttemptRepositoryScope(
-      repository: _attemptRepository,
-      child: BookmarkScope(
-        repository: _bookmarkRepository,
-        child: ProgressStoreScope(
-          progressStore: _progressStore,
-          child: AppNavigationScope(
-            controller: _navigationController,
-            child: MaterialApp(
-              title: 'StudyHub',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.light,
-              locale: _localeSelection.locale,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              home: _buildHome(),
+    final app = MediaRepositoryScope(
+      repository: widget.mediaRepository,
+      child: StudyReminderScope(
+        controller: _reminderController,
+        child: AttemptRepositoryScope(
+          repository: _attemptRepository,
+          child: BookmarkScope(
+            repository: _bookmarkRepository,
+            child: ProgressStoreScope(
+              progressStore: _progressStore,
+              child: AppNavigationScope(
+                controller: _navigationController,
+                child: MaterialApp(
+                  navigatorKey: _navigatorKey,
+                  title: 'StudyHub',
+                  debugShowCheckedModeBanner: false,
+                  theme: AppTheme.light,
+                  locale: _localeSelection.locale,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates:
+                      AppLocalizations.localizationsDelegates,
+                  home: _buildHome(),
+                ),
+              ),
             ),
           ),
         ),
@@ -166,6 +204,7 @@ class _StudyHubAppState extends State<StudyHubApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     if (_ownsProgressStore) {
       _progressStore.dispose();
     }
@@ -175,6 +214,7 @@ class _StudyHubAppState extends State<StudyHubApp> {
     if (_ownsBookmarkRepository) _bookmarkRepository.dispose();
     _authController?.dispose();
     _navigationController.dispose();
+    _reminderController.dispose();
     super.dispose();
   }
 
@@ -207,5 +247,31 @@ class _StudyHubAppState extends State<StudyHubApp> {
     }
     setState(() => _localeSelection = selection);
     unawaited(widget.localePreferenceStore.save(selection));
+  }
+
+  Future<void> _initializeReminders() async {
+    try {
+      final launchPayload = await _notificationService.initialize(
+        _handleNotificationTap,
+      );
+      await _reminderController.load();
+      if (launchPayload != null) _handleNotificationTap(launchPayload);
+    } catch (_) {
+      // Notifications are optional and never block app startup.
+    }
+  }
+
+  void _handleNotificationTap(String payload) {
+    _navigationController.selectTab(0);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigatorKey.currentState?.popUntil((route) => route.isFirst);
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_reminderController.refreshPermission());
+    }
   }
 }

@@ -259,6 +259,7 @@ export class InMemoryLearningService implements LearningService {
       correctAnswerText: correctAnswer.text,
       isCorrect: selectedAnswer.id === correctAnswer.id,
       explanation: getQuestionExplanation(questionId) ?? null,
+      ...(question.media === undefined ? {} : { questionMedia: question.media }),
     };
   }
 
@@ -321,6 +322,7 @@ export class InMemoryLearningService implements LearningService {
           correctAnswerText: correctAnswer.text,
           isCorrect: selectedAnswer?.id === correctAnswer.id,
           explanation: getQuestionExplanation(question.id) ?? null,
+          ...(question.media === undefined ? {} : { questionMedia: question.media }),
         };
       },
     );
@@ -676,6 +678,10 @@ function cloneSubmissionInput(
       ...(question.explanation?.trim()
         ? { explanation: question.explanation.trim() }
         : {}),
+      ...(question.media === undefined ? {} : { media: { ...question.media } }),
+      ...(question.explanationMedia === undefined
+        ? {}
+        : { explanationMedia: { ...question.explanationMedia } }),
       answerOptions: question.answerOptions.map((option) => ({
         text: option.text.trim(),
         isCorrect: option.isCorrect,

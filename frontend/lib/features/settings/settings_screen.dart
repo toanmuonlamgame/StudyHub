@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../app/app_navigation.dart';
 import '../../core/app_info.dart';
@@ -14,6 +15,8 @@ import '../contribution/screens/contribution_management_screen.dart';
 import '../learning/repositories/learning_repository.dart';
 import '../profile/profile_screen.dart';
 import '../saved/screens/saved_question_sets_screen.dart';
+import '../../core/device_permissions/device_permission_service.dart';
+import '../notifications/study_reminder_scope.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({
@@ -179,6 +182,10 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 24),
+          StudyHubSectionHeader(title: context.l10n.studyReminders),
+          const SizedBox(height: 10),
+          _ReminderSettingsCard(),
         ],
       ),
     );
@@ -206,6 +213,115 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
     if (confirmed == true) await authController.logout();
+  }
+}
+
+class _ReminderSettingsCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final controller = StudyReminderScope.of(context);
+    final l10n = context.l10n;
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        if (controller.loading) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+        final settings = controller.settings;
+        final permissionLabel = switch (controller.permissionState) {
+          DevicePermissionState.granted => l10n.permissionGranted,
+          DevicePermissionState.denied => l10n.permissionDenied,
+          DevicePermissionState.permanentlyDenied =>
+            l10n.permissionPermanentlyDenied,
+          DevicePermissionState.unavailable => l10n.permissionUnavailable,
+        };
+        return Card(
+          child: Column(
+            children: [
+              SwitchListTile(
+                secondary: const Icon(Icons.notifications_active_outlined),
+                title: Text(l10n.enableReminders),
+                subtitle: Text(l10n.studyReminderReason),
+                value: settings.enabled,
+                onChanged: (value) => controller.setEnabled(
+                  value,
+                  title: l10n.studyReminderNotificationTitle,
+                  body: l10n.studyReminderNotificationBody,
+                ),
+              ),
+              const Divider(height: 1, indent: 64),
+              ListTile(
+                enabled: settings.enabled,
+                leading: const Icon(Icons.schedule_outlined),
+                title: Text(l10n.reminderTime),
+                trailing: Text(
+                  TimeOfDay(
+                    hour: settings.hour,
+                    minute: settings.minute,
+                  ).format(context),
+                ),
+                onTap: () async {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay(
+                      hour: settings.hour,
+                      minute: settings.minute,
+                    ),
+                  );
+                  if (time != null && context.mounted) {
+                    await controller.setTime(
+                      time.hour,
+                      time.minute,
+                      title: l10n.studyReminderNotificationTitle,
+                      body: l10n.studyReminderNotificationBody,
+                    );
+                  }
+                },
+              ),
+              const Divider(height: 1, indent: 64),
+              ListTile(
+                leading: const Icon(Icons.admin_panel_settings_outlined),
+                title: Text(l10n.notificationPermission),
+                subtitle: Text(permissionLabel),
+                trailing:
+                    controller.permissionState ==
+                            DevicePermissionState.denied ||
+                        controller.permissionState ==
+                            DevicePermissionState.permanentlyDenied
+                    ? TextButton(
+                        onPressed: controller.openSettings,
+                        child: Text(l10n.openSettings),
+                      )
+                    : null,
+              ),
+              if (controller.error != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: Text(l10n.notificationScheduleFailed),
+                ),
+              if (kDebugMode)
+                ListTile(
+                  leading: const Icon(Icons.notification_add_outlined),
+                  title: Text(l10n.testNotification),
+                  onTap:
+                      controller.permissionState ==
+                          DevicePermissionState.granted
+                      ? () => controller.showTest(
+                          title: l10n.studyReminderNotificationTitle,
+                          body: l10n.studyReminderNotificationBody,
+                        )
+                      : null,
+                ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 

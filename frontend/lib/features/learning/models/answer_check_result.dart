@@ -1,3 +1,5 @@
+import 'media_asset.dart';
+
 class AnswerCheckResult {
   const AnswerCheckResult({
     required this.questionId,
@@ -7,6 +9,8 @@ class AnswerCheckResult {
     required this.correctAnswerText,
     required this.isCorrect,
     this.explanation,
+    this.questionMedia,
+    this.explanationMedia,
   });
 
   final String questionId;
@@ -16,4 +20,6 @@ class AnswerCheckResult {
   final String correctAnswerText;
   final bool isCorrect;
   final String? explanation;
+  final MediaAsset? questionMedia;
+  final MediaAsset? explanationMedia;
 }

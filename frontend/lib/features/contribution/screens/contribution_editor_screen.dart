@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -15,6 +16,10 @@ import '../repositories/contribution_repository.dart';
 import '../widgets/question_editor_card.dart';
 import 'paste_exam_screen.dart';
 import 'submission_confirmation_screen.dart';
+import '../../media/media_repository_scope.dart';
+import '../../media/services/image_selection_service.dart';
+import '../../media/widgets/study_media_image.dart';
+import '../../../core/device_feedback.dart';
 
 enum _EditorStep { details, questions, review }
 
@@ -26,6 +31,7 @@ class ContributionEditorScreen extends StatefulWidget {
     this.initialDraft = const QuestionSetDraft(),
     this.startWithQuestions = false,
     this.existingSubmissionId,
+    this.imageSelectionService,
   });
 
   final LearningRepository learningRepository;
@@ -33,6 +39,7 @@ class ContributionEditorScreen extends StatefulWidget {
   final QuestionSetDraft initialDraft;
   final bool startWithQuestions;
   final String? existingSubmissionId;
+  final ImageSelectionService? imageSelectionService;
 
   @override
   State<ContributionEditorScreen> createState() =>
@@ -53,10 +60,14 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   bool _isConfirmingSubmit = false;
   String? _loadError;
   List<DraftValidationIssue> _issues = const [];
+  late final ImageSelectionService _imageSelectionService;
+  final Set<String> _uploadingMedia = {};
 
   @override
   void initState() {
     super.initState();
+    _imageSelectionService =
+        widget.imageSelectionService ?? DeviceImageSelectionService();
     _draft = widget.initialDraft;
     _submissionId = _createSubmissionId();
     _titleController.text = _draft.title;
@@ -307,6 +318,24 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
                 ? null
                 : () => _duplicateQuestion(index),
             onRemove: () => _removeQuestion(index),
+            questionImageUploading: _uploadingMedia.contains(
+              '${_draft.questions[index].id}-question',
+            ),
+            explanationImageUploading: _uploadingMedia.contains(
+              '${_draft.questions[index].id}-explanation',
+            ),
+            onChooseQuestionImage: () =>
+                _chooseImage(index, explanation: false),
+            onChooseExplanationImage: () =>
+                _chooseImage(index, explanation: true),
+            onRemoveQuestionImage: () => _replaceQuestion(
+              index,
+              _draft.questions[index].copyWith(media: null),
+            ),
+            onRemoveExplanationImage: () => _replaceQuestion(
+              index,
+              _draft.questions[index].copyWith(explanationMedia: null),
+            ),
           ),
         ),
         OutlinedButton.icon(
@@ -369,6 +398,10 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
                     '${index + 1}. ${question.text}',
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
+                  if (question.media != null) ...[
+                    const SizedBox(height: 10),
+                    StudyMediaImage(media: question.media!),
+                  ],
                   const SizedBox(height: 8),
                   ...question.answerOptions.map(
                     (option) => ListTile(
@@ -385,6 +418,10 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
                           : null,
                     ),
                   ),
+                  if (question.explanationMedia != null) ...[
+                    const SizedBox(height: 10),
+                    StudyMediaImage(media: question.explanationMedia!),
+                  ],
                 ],
               ),
             ),
@@ -499,6 +536,8 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
       id: 'question-draft-$seed',
       text: source.text,
       explanation: source.explanation,
+      media: source.media,
+      explanationMedia: source.explanationMedia,
       answerOptions: List.generate(source.answerOptions.length, (optionIndex) {
         final option = source.answerOptions[optionIndex];
         return AnswerOptionDraft(
@@ -519,6 +558,37 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
     questions[index] = question;
     _draft = _draft.copyWith(questions: questions);
   });
+
+  Future<void> _chooseImage(int index, {required bool explanation}) async {
+    final file = await _imageSelectionService.chooseFromGallery();
+    if (file == null || !mounted) return;
+    final questionId = _draft.questions[index].id;
+    final slot = '$questionId-${explanation ? 'explanation' : 'question'}';
+    setState(() => _uploadingMedia.add(slot));
+    try {
+      final media = await MediaRepositoryScope.of(context).uploadImage(file);
+      if (!mounted) return;
+      final currentIndex = _draft.questions.indexWhere(
+        (question) => question.id == questionId,
+      );
+      if (currentIndex < 0) return;
+      final question = _draft.questions[currentIndex];
+      _replaceQuestion(
+        currentIndex,
+        explanation
+            ? question.copyWith(explanationMedia: media)
+            : question.copyWith(media: media),
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.imageUploadFailed)));
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingMedia.remove(slot));
+    }
+  }
 
   Future<void> _removeQuestion(int index) async {
     final confirmed = await showDialog<bool>(
@@ -590,6 +660,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
       if (!mounted) {
         return;
       }
+      unawaited(DeviceFeedback.success());
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
           builder: (_) =>
@@ -634,6 +705,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
           _draft,
         );
       }
+      unawaited(DeviceFeedback.success());
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.contributionDraftSaved)),
@@ -681,6 +753,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
       ),
     );
     if (discard == true && mounted) Navigator.of(context).pop();
+    if (discard == true) unawaited(DeviceFeedback.destructive());
   }
 
   Future<void> _confirmResetDraft() async {

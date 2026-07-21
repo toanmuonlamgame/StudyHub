@@ -1333,4 +1333,91 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openDetails => 'View details';
+
+  @override
+  String get studyReminders => 'Study reminders';
+
+  @override
+  String get enableReminders => 'Enable daily reminder';
+
+  @override
+  String get reminderTime => 'Reminder time';
+
+  @override
+  String get notificationPermission => 'Notification permission';
+
+  @override
+  String get permissionGranted => 'Allowed';
+
+  @override
+  String get permissionDenied =>
+      'Denied. Open system settings to allow reminders.';
+
+  @override
+  String get permissionPermanentlyDenied => 'Blocked in system settings.';
+
+  @override
+  String get permissionUnavailable => 'Not available on this platform.';
+
+  @override
+  String get openSettings => 'Open settings';
+
+  @override
+  String get studyReminderReason =>
+      'A quiet daily reminder helps you return to your planned study time.';
+
+  @override
+  String get studyReminderNotificationTitle => 'Time to study';
+
+  @override
+  String get studyReminderNotificationBody =>
+      'Continue learning with StudyHub.';
+
+  @override
+  String get notificationScheduleFailed =>
+      'The reminder could not be scheduled. Try again.';
+
+  @override
+  String get testNotification => 'Send test notification';
+
+  @override
+  String get chooseImage => 'Choose image';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get removeImage => 'Remove image';
+
+  @override
+  String get replaceImage => 'Replace image';
+
+  @override
+  String get uploadingImage => 'Uploading image...';
+
+  @override
+  String get imageUploadFailed =>
+      'Image upload failed. Your text is still safe.';
+
+  @override
+  String get unsupportedFile =>
+      'Only JPEG, PNG, and WebP images are supported.';
+
+  @override
+  String get fileTooLarge => 'Image must be 5 MiB or smaller.';
+
+  @override
+  String get imageUnavailable => 'Image unavailable';
+
+  @override
+  String get imagePreview => 'Image preview';
+
+  @override
+  String get questionImageOptional => 'Question image (optional)';
+
+  @override
+  String get explanationImageOptional => 'Explanation image (optional)';
+
+  @override
+  String get continueStudying => 'Continue studying';
 }

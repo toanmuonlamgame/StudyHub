@@ -108,7 +108,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('About StudyHub'), findsOneWidget);
     expect(find.text('Privacy and security'), findsOneWidget);
-    expect(find.byType(Switch), findsNothing);
+    await tester.scrollUntilVisible(
+      find.text('Study reminders'),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Study reminders'), findsOneWidget);
+    expect(find.byType(Switch), findsOneWidget);
   });
 
   testWidgets('home shortcuts switch tabs without eager subject loading', (

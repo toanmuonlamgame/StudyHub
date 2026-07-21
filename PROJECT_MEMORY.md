@@ -248,6 +248,17 @@ Only one AI should be the main editor for a task. Do not let Codex and Antigravi
 - Commit after each working milestone.
 
 ## Handoff Format
+## Post-MVP Device Capabilities
+- Study reminders are opt-in, device-local, persisted with a configurable time,
+  and navigate back to the existing Home shell.
+- Questions and explanations may contain optional typed media. Images are the
+  only active media type; GIF/video are future contract values.
+- Creator images cross `Flutter -> authenticated Fastify media API -> storage`.
+  Local uploads are development-only and production must use object storage.
+- Photo selection uses the system picker without broad storage permission.
+  Camera capture remains deferred.
+
+## Handoff Format
 When switching from one AI/tool to another, use:
 
 ```text

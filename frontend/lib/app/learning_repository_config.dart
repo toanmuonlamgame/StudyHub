@@ -16,6 +16,9 @@ import '../features/auth/repositories/mock_auth_repository.dart';
 import '../features/saved/repositories/api_bookmark_repository.dart';
 import '../features/saved/repositories/bookmark_repository.dart';
 import '../features/saved/repositories/mock_bookmark_repository.dart';
+import '../features/media/repositories/api_media_repository.dart';
+import '../features/media/repositories/media_repository.dart';
+import '../features/media/repositories/mock_media_repository.dart';
 
 const _learningSource = String.fromEnvironment(
   'STUDYHUB_LEARNING_SOURCE',
@@ -139,4 +142,15 @@ BookmarkRepository createBookmarkRepositoryFromEnvironment() {
           accessTokenProvider: sessionStore.loadAccessToken,
         )
       : MockBookmarkRepository();
+}
+
+MediaRepository createMediaRepositoryFromEnvironment() {
+  final config = resolveLearningRuntimeConfig();
+  const sessionStore = AuthSessionStore();
+  return config.source == 'api'
+      ? ApiMediaRepository(
+          baseUrl: config.apiBaseUrl,
+          accessTokenProvider: sessionStore.loadAccessToken,
+        )
+      : MockMediaRepository();
 }

@@ -356,3 +356,19 @@ and contribution routes derive ownership from the bearer session and never trust
 a body-supplied user ID. Social login is not active; a future Google exchange
 must verify the provider ID token server-side before issuing a StudyHub session.
 See [`docs/SOCIAL_AUTH_SETUP.md`](../docs/SOCIAL_AUTH_SETUP.md).
+
+## Local media boundary
+
+Authenticated clients upload optional question/explanation images with
+`POST /media/images` as multipart field `file`. Public image reads use
+`GET /media/images/:fileName`. The local adapter accepts validated JPEG, PNG,
+and WebP files up to 5 MiB, generates server-side UUID names, and writes beneath
+`backend/uploads/images` (or local `STUDYHUB_UPLOAD_DIR`). `uploads/` is ignored
+by Git. Production should replace `MediaStorage` with private object storage and
+a controlled delivery URL; no cloud credentials belong in this repository.
+
+Migration `20260723120000_question_media_foundation` adds nullable JSON media
+snapshots to questions and attempt answers. It is prepared only and must be
+reviewed/applied manually. GIF/video values are reserved by the typed contract,
+but current contribution validation and upload routes intentionally support
+images only.

@@ -105,10 +105,22 @@ export interface AnswerOption {
   text: string;
 }
 
+export type MediaType = 'image' | 'gif' | 'video';
+
+export interface MediaAsset {
+  mediaType: MediaType;
+  mediaUrl: string;
+  thumbnailUrl?: string;
+  altText?: string;
+  width?: number;
+  height?: number;
+}
+
 export interface Question {
   id: string;
   questionSetId: string;
   text: string;
+  media?: MediaAsset;
   answerOptions: AnswerOption[];
 }
 
@@ -122,6 +134,8 @@ export interface AnswerReview {
   correctAnswerText: string;
   isCorrect: boolean;
   explanation: string | null;
+  questionMedia?: MediaAsset;
+  explanationMedia?: MediaAsset;
 }
 
 export interface AnswerCheckResult {
@@ -132,6 +146,8 @@ export interface AnswerCheckResult {
   correctAnswerText: string;
   isCorrect: boolean;
   explanation: string | null;
+  questionMedia?: MediaAsset;
+  explanationMedia?: MediaAsset;
 }
 
 export interface QuizResult {

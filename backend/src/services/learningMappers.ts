@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client';
 
 import type {
   Question,
+  MediaAsset,
   QuestionSet,
   Subject,
   StudyMaterial,
@@ -60,8 +61,32 @@ export function mapQuestion(question: QuestionWithAnswerOptions): Question {
     id: question.id,
     questionSetId: question.questionSetId,
     text: question.text,
+    ...mapOptionalMedia('media' in question ? question.media : null, 'media'),
     answerOptions: question.answerOptions.map(({ id, text }) => ({ id, text })),
   };
+}
+
+export function readMediaAsset(value: Prisma.JsonValue | null): MediaAsset | undefined {
+  if (value === null) return undefined;
+  if (Array.isArray(value) || typeof value !== 'object') return undefined;
+  const mediaType = value.mediaType;
+  const mediaUrl = value.mediaUrl;
+  if ((mediaType !== 'image' && mediaType !== 'gif' && mediaType !== 'video') || typeof mediaUrl !== 'string') {
+    return undefined;
+  }
+  return {
+    mediaType,
+    mediaUrl,
+    ...(typeof value.thumbnailUrl === 'string' ? { thumbnailUrl: value.thumbnailUrl } : {}),
+    ...(typeof value.altText === 'string' ? { altText: value.altText } : {}),
+    ...(typeof value.width === 'number' ? { width: value.width } : {}),
+    ...(typeof value.height === 'number' ? { height: value.height } : {}),
+  };
+}
+
+function mapOptionalMedia(value: Prisma.JsonValue | null, key: 'media') {
+  const media = readMediaAsset(value);
+  return media === undefined ? {} : { [key]: media };
 }
 
 export function mapStudyMaterialListItem(

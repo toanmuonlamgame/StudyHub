@@ -3,12 +3,14 @@ import Fastify, { type FastifyInstance } from 'fastify';
 
 import { createAuthRoutes, createRequireUser, type RequireUser } from './routes/auth.js';
 import { createLearningRoutes } from './routes/learning.js';
+import { createMediaRoutes } from './routes/media.js';
 import type { AuthService } from './services/authService.js';
 import { InMemoryAuthService } from './services/inMemoryAuthService.js';
 import { InMemoryLearningService } from './services/inMemoryLearningService.js';
 import type { LearningService } from './services/learningService.js';
 import { createPrismaAuthService } from './services/prismaAuthService.js';
 import { createPrismaLearningService } from './services/prismaLearningService.js';
+import { LocalMediaStorage, type MediaStorage } from './services/mediaStorage.js';
 
 export interface BuildAppOptions {
   learningService?: LearningService;
@@ -17,6 +19,7 @@ export interface BuildAppOptions {
   isProduction?: boolean;
   corsOrigins?: string[];
   requireUser?: RequireUser;
+  mediaStorage?: MediaStorage;
 }
 
 const requestBodyLimitBytes = 1024 * 1024;
@@ -125,6 +128,13 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
       options.requireUser ?? createRequireUser(authService),
     ),
     { prefix: '/learning' },
+  );
+  app.register(
+    createMediaRoutes(
+      options.mediaStorage ?? new LocalMediaStorage(process.env.STUDYHUB_UPLOAD_DIR),
+      options.requireUser ?? createRequireUser(authService),
+    ),
+    { prefix: '/media' },
   );
 
   return app;

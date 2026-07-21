@@ -1,3 +1,5 @@
+import type { MediaAsset } from './learning.js';
+
 export type QuestionSetModerationStatus =
   | 'draft'
   | 'pendingReview'
@@ -14,6 +16,8 @@ export interface AnswerOptionSubmissionInput {
 export interface QuestionSubmissionInput {
   text: string;
   explanation?: string;
+  media?: MediaAsset;
+  explanationMedia?: MediaAsset;
   answerOptions: AnswerOptionSubmissionInput[];
 }
 

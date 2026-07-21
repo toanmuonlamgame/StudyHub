@@ -59,6 +59,9 @@ class QuestionSetDraft {
             'text': question.text.trim(),
             if (question.explanation.trim().isNotEmpty)
               'explanation': question.explanation.trim(),
+            if (question.media != null) 'media': question.media!.toJson(),
+            if (question.explanationMedia != null)
+              'explanationMedia': question.explanationMedia!.toJson(),
             'answerOptions': question.answerOptions
                 .map(
                   (option) => {

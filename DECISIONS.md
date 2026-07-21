@@ -745,3 +745,23 @@ store a provider client secret.
 
 Reason: this keeps navigation touch-friendly and predictable while preserving
 the backend as the only trusted identity source.
+
+## 2026-07-21 - Notifications And Device Permission Boundary
+Decision: daily study reminders are optional local notifications. Permission is
+requested only after the learner enables reminders, a denial is remembered, and
+the app never requests unused storage, camera, microphone, or exact-alarm access.
+
+Reason: notifications should support an explicit learning habit without startup
+friction, repeated prompts, spammy sound/vibration, or unnecessary permissions.
+
+## 2026-07-21 - Question Media And Storage Boundary
+Decision: questions, explanations, and Exam answer snapshots may carry optional
+typed `MediaAsset` metadata. Image is the only implemented type. JPEG, PNG, and
+WebP uploads are authenticated, capped at 5 MiB, validated by file signature,
+server-named, and stored behind `MediaStorage`.
+
+Rules:
+- Learner DTOs remain free of correctness data before submit/check-answer.
+- Flutter never stores raw local paths as public media URLs.
+- Local filesystem storage is development-only and uploaded files stay ignored.
+- Production must use object storage; GIF/video playback and camera remain future work.

@@ -1,8 +1,9 @@
 import '../models/answer_option.dart';
 import '../models/answer_review.dart';
 import '../models/quiz_result.dart';
+import 'media_asset_json_mapper.dart';
 
-QuizResult quizResultFromJson(Map<String, dynamic> json) {
+QuizResult quizResultFromJson(Map<String, dynamic> json, {Uri? mediaBaseUri}) {
   return QuizResult(
     questionSetId: _readString(json, 'questionSetId'),
     questionSetTitle: _readString(json, 'questionSetTitle'),
@@ -11,14 +12,16 @@ QuizResult quizResultFromJson(Map<String, dynamic> json) {
     wrongCount: _readInt(json, 'wrongAnswers'),
     unansweredCount: _readInt(json, 'unansweredAnswers'),
     percentageScore: _readDouble(json, 'percentageScore'),
-    answerReviews: _readObjectList(
-      json,
-      'answerReviews',
-    ).map(_answerReviewFromJson).toList(growable: false),
+    answerReviews: _readObjectList(json, 'answerReviews')
+        .map((item) => _answerReviewFromJson(item, mediaBaseUri: mediaBaseUri))
+        .toList(growable: false),
   );
 }
 
-AnswerReview _answerReviewFromJson(Map<String, dynamic> json) {
+AnswerReview _answerReviewFromJson(
+  Map<String, dynamic> json, {
+  Uri? mediaBaseUri,
+}) {
   return AnswerReview(
     questionId: _readString(json, 'questionId'),
     questionText: _readString(json, 'questionText'),
@@ -36,6 +39,14 @@ AnswerReview _answerReviewFromJson(Map<String, dynamic> json) {
     correctAnswerText: _readString(json, 'correctAnswerText'),
     isCorrect: _readBool(json, 'isCorrect'),
     explanation: _readNullableString(json, 'explanation'),
+    questionMedia: mediaAssetFromJson(
+      json['questionMedia'],
+      baseUri: mediaBaseUri,
+    ),
+    explanationMedia: mediaAssetFromJson(
+      json['explanationMedia'],
+      baseUri: mediaBaseUri,
+    ),
   );
 }
 

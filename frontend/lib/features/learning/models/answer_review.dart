@@ -1,4 +1,5 @@
 import 'answer_option.dart';
+import 'media_asset.dart';
 
 enum AnswerReviewStatus { correct, incorrect, unanswered }
 
@@ -13,6 +14,8 @@ class AnswerReview {
     required this.correctAnswerText,
     required this.isCorrect,
     this.explanation,
+    this.questionMedia,
+    this.explanationMedia,
   });
 
   final String questionId;
@@ -24,6 +27,8 @@ class AnswerReview {
   final String correctAnswerText;
   final bool isCorrect;
   final String? explanation;
+  final MediaAsset? questionMedia;
+  final MediaAsset? explanationMedia;
 
   AnswerReviewStatus get status {
     if (selectedAnswerOptionId == null) {

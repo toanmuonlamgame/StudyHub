@@ -14,6 +14,7 @@ import '../models/answer_option.dart';
 import '../models/answer_review.dart';
 import '../models/quiz_mode.dart';
 import '../models/quiz_result.dart';
+import '../../media/widgets/study_media_image.dart';
 import '../../attempts/attempt_repository_scope.dart';
 import '../../attempts/controllers/exam_attempt_save_controller.dart';
 import '../../attempts/models/exam_attempt.dart';
@@ -464,6 +465,10 @@ class _AnswerReviewCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(answerReview.questionText, style: theme.textTheme.titleMedium),
+          if (answerReview.questionMedia != null) ...[
+            const SizedBox(height: 12),
+            StudyMediaImage(media: answerReview.questionMedia!),
+          ],
           if (answerReview.answerOptions.isNotEmpty) ...[
             const SizedBox(height: 12),
             for (final option in answerReview.answerOptions) ...[
@@ -501,6 +506,10 @@ class _AnswerReviewCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(answerReview.explanation!),
+          ],
+          if (answerReview.explanationMedia != null) ...[
+            const SizedBox(height: 12),
+            StudyMediaImage(media: answerReview.explanationMedia!),
           ],
         ],
       ),

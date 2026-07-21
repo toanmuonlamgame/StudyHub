@@ -32,6 +32,7 @@ import {
   mapStudyMaterialListItem,
   mapSubject,
   mapTopic,
+  readMediaAsset,
 } from './learningMappers.js';
 import {
   ExamAttemptIdempotencyConflictError,
@@ -281,6 +282,12 @@ export class PrismaLearningService implements LearningService {
       correctAnswerText: correctAnswer.text,
       isCorrect: selectedAnswer.id === correctAnswer.id,
       explanation: question.explanation,
+      ...(readMediaAsset(question.media) === undefined
+        ? {}
+        : { questionMedia: readMediaAsset(question.media)! }),
+      ...(readMediaAsset(question.explanationMedia) === undefined
+        ? {}
+        : { explanationMedia: readMediaAsset(question.explanationMedia)! }),
     };
   }
 
@@ -346,6 +353,12 @@ export class PrismaLearningService implements LearningService {
           correctAnswerText: correctAnswer.text,
           isCorrect: selectedAnswer?.id === correctAnswer.id,
           explanation: question.explanation,
+          ...(readMediaAsset(question.media) === undefined
+            ? {}
+            : { questionMedia: readMediaAsset(question.media)! }),
+          ...(readMediaAsset(question.explanationMedia) === undefined
+            ? {}
+            : { explanationMedia: readMediaAsset(question.explanationMedia)! }),
         };
       },
     );
@@ -429,6 +442,8 @@ export class PrismaLearningService implements LearningService {
                 correctAnswerText: review.correctAnswerText,
                 isCorrect: review.isCorrect,
                 explanation: review.explanation,
+                questionMedia: review.questionMedia as Prisma.InputJsonValue | undefined,
+                explanationMedia: review.explanationMedia as Prisma.InputJsonValue | undefined,
                 position: index + 1,
               })),
             },
@@ -855,6 +870,12 @@ function mapExamAttemptDetail(row: ExamAttemptWithAnswers): ExamAttemptDetail {
     correctAnswerText: answer.correctAnswerText,
     isCorrect: answer.isCorrect,
     explanation: answer.explanation,
+    ...(readMediaAsset(answer.questionMedia) === undefined
+      ? {}
+      : { questionMedia: readMediaAsset(answer.questionMedia)! }),
+    ...(readMediaAsset(answer.explanationMedia) === undefined
+      ? {}
+      : { explanationMedia: readMediaAsset(answer.explanationMedia)! }),
   }));
   return {
     ...summary,
@@ -909,6 +930,8 @@ function questionCreateData(input: QuestionSetSubmissionInput) {
   return input.questions.map((question, questionIndex) => ({
     text: question.text.trim(),
     explanation: question.explanation?.trim() || null,
+    media: question.media as Prisma.InputJsonValue | undefined,
+    explanationMedia: question.explanationMedia as Prisma.InputJsonValue | undefined,
     position: questionIndex + 1,
     answerOptions: {
       create: question.answerOptions.map((option, optionIndex) => ({
@@ -939,6 +962,12 @@ function mapQuestionSetSubmission(row: any): QuestionSetSubmission {
     questions: row.questions.map((question: any) => ({
       text: question.text,
       ...(question.explanation === null ? {} : { explanation: question.explanation }),
+      ...(readMediaAsset(question.media) === undefined
+        ? {}
+        : { media: readMediaAsset(question.media)! }),
+      ...(readMediaAsset(question.explanationMedia) === undefined
+        ? {}
+        : { explanationMedia: readMediaAsset(question.explanationMedia)! }),
       answerOptions: question.answerOptions.map((option: any) => ({
         text: option.text,
         isCorrect: option.isCorrect,

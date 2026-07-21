@@ -9,6 +9,7 @@ import '../models/contribution_submission.dart';
 import '../models/question_draft.dart';
 import '../models/answer_option_draft.dart';
 import '../models/submission_confirmation.dart';
+import '../../learning/repositories/media_asset_json_mapper.dart';
 import 'contribution_repository.dart';
 
 class ApiContributionRepository implements ContributionRepository {
@@ -40,7 +41,12 @@ class ApiContributionRepository implements ContributionRepository {
       throw const ContributionSubmissionException('Malformed submission list.');
     }
     return submissions
-        .map((item) => _submissionFromJson(item as Map<String, dynamic>))
+        .map(
+          (item) => _submissionFromJson(
+            item as Map<String, dynamic>,
+            baseUri: _baseUri,
+          ),
+        )
         .toList(growable: false);
   }
 
@@ -186,17 +192,20 @@ class ApiContributionRepository implements ContributionRepository {
     return decoded;
   }
 
-  static ContributionSubmission _readSubmission(Map<String, dynamic> body) {
+  ContributionSubmission _readSubmission(Map<String, dynamic> body) {
     final value = body['submission'];
     if (value is! Map<String, dynamic>) {
       throw const ContributionSubmissionException(
         'Malformed submission response.',
       );
     }
-    return _submissionFromJson(value);
+    return _submissionFromJson(value, baseUri: _baseUri);
   }
 
-  static ContributionSubmission _submissionFromJson(Map<String, dynamic> json) {
+  static ContributionSubmission _submissionFromJson(
+    Map<String, dynamic> json, {
+    Uri? baseUri,
+  }) {
     final rawQuestions = json['questions'];
     if (rawQuestions is! List) {
       throw const ContributionSubmissionException(
@@ -216,6 +225,11 @@ class ApiContributionRepository implements ContributionRepository {
           id: 'submission-question-$questionIndex',
           text: question['text'] as String,
           explanation: question['explanation'] as String? ?? '',
+          media: mediaAssetFromJson(question['media'], baseUri: baseUri),
+          explanationMedia: mediaAssetFromJson(
+            question['explanationMedia'],
+            baseUri: baseUri,
+          ),
           answerOptions: [
             for (
               var optionIndex = 0;

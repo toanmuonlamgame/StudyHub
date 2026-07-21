@@ -48,7 +48,10 @@ class ApiAttemptRepository extends AttemptRepository {
       requestTimeout,
     );
     final body = _decodeResponse(response, 'saveExamAttempt');
-    final attempt = _attemptDetailFromJson(_readObject(body, 'attempt'));
+    final attempt = _attemptDetailFromJson(
+      _readObject(body, 'attempt'),
+      mediaBaseUri: _baseUri,
+    );
     notifyListeners();
     return attempt;
   }
@@ -82,7 +85,10 @@ class ApiAttemptRepository extends AttemptRepository {
       return null;
     }
     final body = _decodeResponse(response, 'getExamAttempt');
-    return _attemptDetailFromJson(_readObject(body, 'attempt'));
+    return _attemptDetailFromJson(
+      _readObject(body, 'attempt'),
+      mediaBaseUri: _baseUri,
+    );
   }
 
   Uri _endpoint(String path) => _baseUri.resolve(path);
@@ -142,7 +148,10 @@ ExamAttemptSummary _attemptSummaryFromJson(Map<String, dynamic> json) {
   );
 }
 
-ExamAttemptDetail _attemptDetailFromJson(Map<String, dynamic> json) {
+ExamAttemptDetail _attemptDetailFromJson(
+  Map<String, dynamic> json, {
+  Uri? mediaBaseUri,
+}) {
   final summary = _attemptSummaryFromJson(json);
   return ExamAttemptDetail(
     id: summary.id,
@@ -155,7 +164,10 @@ ExamAttemptDetail _attemptDetailFromJson(Map<String, dynamic> json) {
     wrongAnswers: summary.wrongAnswers,
     unansweredAnswers: summary.unansweredAnswers,
     percentageScore: summary.percentageScore,
-    result: quizResultFromJson(_readObject(json, 'result')),
+    result: quizResultFromJson(
+      _readObject(json, 'result'),
+      mediaBaseUri: mediaBaseUri,
+    ),
   );
 }
 

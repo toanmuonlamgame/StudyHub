@@ -4,6 +4,8 @@ import '../../../l10n/app_localizations_x.dart';
 import '../models/answer_option_draft.dart';
 import '../models/question_draft.dart';
 import '../models/question_set_draft.dart';
+import '../../media/widgets/study_media_image.dart';
+import '../../learning/models/media_asset.dart';
 
 class QuestionEditorCard extends StatelessWidget {
   const QuestionEditorCard({
@@ -14,6 +16,12 @@ class QuestionEditorCard extends StatelessWidget {
     required this.onChanged,
     required this.onDuplicate,
     required this.onRemove,
+    required this.questionImageUploading,
+    required this.explanationImageUploading,
+    required this.onChooseQuestionImage,
+    required this.onChooseExplanationImage,
+    required this.onRemoveQuestionImage,
+    required this.onRemoveExplanationImage,
   });
 
   final int index;
@@ -22,6 +30,12 @@ class QuestionEditorCard extends StatelessWidget {
   final ValueChanged<QuestionDraft> onChanged;
   final VoidCallback? onDuplicate;
   final VoidCallback onRemove;
+  final bool questionImageUploading;
+  final bool explanationImageUploading;
+  final VoidCallback onChooseQuestionImage;
+  final VoidCallback onChooseExplanationImage;
+  final VoidCallback onRemoveQuestionImage;
+  final VoidCallback onRemoveExplanationImage;
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +81,13 @@ class QuestionEditorCard extends StatelessWidget {
               ),
               onChanged: (value) => onChanged(question.copyWith(text: value)),
             ),
+            _MediaAttachmentField(
+              label: l10n.questionImageOptional,
+              media: question.media,
+              uploading: questionImageUploading,
+              onChoose: onChooseQuestionImage,
+              onRemove: onRemoveQuestionImage,
+            ),
             const SizedBox(height: 8),
             TextFormField(
               key: ValueKey('${question.id}-explanation'),
@@ -79,6 +100,13 @@ class QuestionEditorCard extends StatelessWidget {
               ),
               onChanged: (value) =>
                   onChanged(question.copyWith(explanation: value)),
+            ),
+            _MediaAttachmentField(
+              label: l10n.explanationImageOptional,
+              media: question.explanationMedia,
+              uploading: explanationImageUploading,
+              onChoose: onChooseExplanationImage,
+              onRemove: onRemoveExplanationImage,
             ),
             const SizedBox(height: 8),
             Text(
@@ -179,6 +207,68 @@ class QuestionEditorCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MediaAttachmentField extends StatelessWidget {
+  const _MediaAttachmentField({
+    required this.label,
+    required this.media,
+    required this.uploading,
+    required this.onChoose,
+    required this.onRemove,
+  });
+
+  final String label;
+  final MediaAsset? media;
+  final bool uploading;
+  final VoidCallback onChoose;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.labelLarge),
+          if (media != null) ...[
+            const SizedBox(height: 8),
+            StudyMediaImage(media: media!),
+          ],
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [
+              OutlinedButton.icon(
+                onPressed: uploading ? null : onChoose,
+                icon: uploading
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.add_photo_alternate_outlined),
+                label: Text(
+                  uploading
+                      ? l10n.uploadingImage
+                      : media == null
+                      ? l10n.chooseImage
+                      : l10n.replaceImage,
+                ),
+              ),
+              if (media != null)
+                TextButton.icon(
+                  onPressed: uploading ? null : onRemove,
+                  icon: const Icon(Icons.delete_outline),
+                  label: Text(l10n.removeImage),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

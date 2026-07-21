@@ -251,3 +251,12 @@ V1 proves the core learning loop. V2 adds trusted contribution, moderation, and
 Practice Mode foundations. V3 explores source-grounded AI study aids and later
 economy/monetization options. Useful complexity is added when the product and
 measurements justify it, not simply because a larger platform uses it.
+
+## Mobile capabilities
+
+StudyHub now has opt-in, device-local daily study reminders and optional image
+media for questions and explanations. Reminder permission is requested only
+after the learner enables the feature. Creator images use the system gallery
+picker and an authenticated backend upload boundary; JPEG, PNG, and WebP files
+are limited to 5 MiB. GIF and video remain typed future media, not active
+upload/playback features.
