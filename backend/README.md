@@ -64,6 +64,47 @@ Migration `20260722120000_auth_and_bookmarks` creates users, expiring sessions,
 and duplicate-safe bookmarks. It is prepared but must be reviewed and applied
 manually before Prisma-mode authentication or Saved smoke testing.
 
+## Admin API
+
+The React admin application uses authenticated `/admin` endpoints for dashboard
+statistics, contributions, Question Sets, Subjects, Topics, users, and media.
+Every route requires an active account with `role=admin`; React route guards are
+not treated as a security boundary. Responses omit password hashes and session
+tokens, and unexpected database errors use the existing sanitized `500` response.
+
+```text
+GET    /admin/dashboard
+GET    /admin/contributions
+GET    /admin/contributions/:id
+POST   /admin/contributions/:id/approve
+POST   /admin/contributions/:id/reject
+GET    /admin/question-sets
+GET    /admin/question-sets/:id
+PATCH  /admin/question-sets/:id
+GET    /admin/subjects
+POST   /admin/subjects
+PATCH  /admin/subjects/:id
+GET    /admin/topics
+POST   /admin/topics
+PATCH  /admin/topics/:id
+GET    /admin/users
+GET    /admin/users/:id
+PATCH  /admin/users/:id
+GET    /admin/media
+```
+
+Migration `20260722140000_admin_moderation_foundation` adds non-destructive role,
+account-status, archive, reviewer, and query-index fields. Review and apply it
+manually with the normal deployment migration workflow. Then create a normal
+account and promote only the intended local operator to `admin` with Prisma
+Studio or a controlled database operation. No default admin credential exists.
+
+Approvals and rejections use guarded transactions, so only a current
+`pendingReview` contribution can transition. Disabling an account revokes its
+sessions; the current admin cannot disable or demote itself, and the final active
+admin is protected. Archive is preferred to destructive deletion so attempts and
+historical references remain intact.
+
 ## Learning API
 
 The Learning routes depend on a `LearningService` abstraction. The in-memory

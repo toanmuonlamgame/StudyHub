@@ -1,6 +1,7 @@
 import type { AuthSessionResult, AuthUser, LoginInput, RegisterInput } from '../types/auth.js';
 import {
   AuthConflictError,
+  AccountDisabledError,
   type AuthService,
   AuthenticationRequiredError,
   InvalidCredentialsError,
@@ -37,6 +38,8 @@ export class InMemoryAuthService implements AuthService {
       email: normalized.email,
       displayName: normalized.displayName,
       passwordHash: await hashPassword(normalized.password),
+      role: 'user',
+      status: 'active',
       createdAt: new Date().toISOString(),
     };
     this.usersById.set(user.id, user);
@@ -51,6 +54,9 @@ export class InMemoryAuthService implements AuthService {
     if (user === undefined || !(await verifyPassword(normalized.password, user.passwordHash))) {
       throw new InvalidCredentialsError('Email or password is incorrect.');
     }
+    if (user.status === 'disabled') {
+      throw new AccountDisabledError('This account is disabled.');
+    }
     return this.createSession(user);
   }
 
@@ -63,7 +69,7 @@ export class InMemoryAuthService implements AuthService {
       return null;
     }
     const user = this.usersById.get(session.userId);
-    return user === undefined ? null : toAuthUser(user);
+    return user === undefined || user.status === 'disabled' ? null : toAuthUser(user);
   }
 
   async logout(accessToken: string): Promise<void> {
@@ -91,6 +97,8 @@ function toAuthUser(user: StoredUser): AuthUser {
     id: user.id,
     email: user.email,
     displayName: user.displayName,
+    role: user.role,
+    status: user.status,
     createdAt: user.createdAt,
   };
 }

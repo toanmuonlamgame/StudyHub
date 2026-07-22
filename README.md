@@ -20,6 +20,7 @@ safety guarantees, limitations, and Phase 2 entry criteria.
 - Flutter API mode through `ApiLearningRepository`.
 - PostgreSQL schema, Prisma migration, and repeatable seed foundation.
 - Selectable backend data source: in-memory by default or Prisma/PostgreSQL.
+- React + TypeScript Admin Dashboard with server-enforced moderation APIs.
 - Automated memory/unit tests and an opt-in Prisma smoke-test script.
 - Email/password registration and login with expiring opaque sessions.
 - Account-owned attempts, contributions, and saved Question Sets.
@@ -72,6 +73,17 @@ safety guarantees, limitations, and Phase 2 entry criteria.
 - Prisma migration, repeatable seed data, validation, and smoke-test tooling.
 - Fastify injection tests for routes and focused service/mapper tests.
 
+### Administration And Moderation
+
+- Responsive React admin application with protected routes and centralized
+  Vietnamese/English copy.
+- Real dashboard summaries, contribution review, safe Question Set archival,
+  taxonomy management, basic user controls, and media inspection.
+- Every admin API rechecks authenticated `admin` role and active account status;
+  ordinary users receive `403` regardless of the React UI.
+- Approve/reject transitions are transaction-protected and stale repeat actions
+  return conflicts. Rejection reasons remain available to contributors.
+
 ### Answer Safety
 
 Pre-submit question responses contain only question and option display data.
@@ -86,7 +98,7 @@ the backend calculates the score and answer review.
   review before publication.
 - More advanced ranked search and measured caching for growing public content.
 - User progress, targeted review, and carefully designed streaks.
-- React + TypeScript Admin Dashboard for future moderation workflows.
+- More advanced moderation history, permission roles, and operational analytics.
 - Study Credits and content unlocks in a later roadmap phase.
 - Google Cloud deployment after local product and security foundations are ready.
 
@@ -100,7 +112,7 @@ the backend calculates the score and answer review.
 | API framework | Fastify |
 | Database access | Prisma |
 | Database | PostgreSQL |
-| Future admin | React, TypeScript |
+| Admin dashboard | React, TypeScript, Vite |
 | Future deployment | Google Cloud |
 
 ## Architecture Overview
@@ -149,6 +161,17 @@ flutter run
 
 See [frontend/README.md](frontend/README.md) for Flutter mock/API configuration
 and Android emulator networking.
+
+### Admin
+
+```bash
+cd admin
+npm install
+npm run dev
+```
+
+See [admin/README.md](admin/README.md) for API configuration, role setup, build,
+and production SPA routing requirements.
 
 The complete build, environment, signing, migration, and physical-device
 checklist is in [Android MVP release readiness](docs/RELEASE_READINESS.md).

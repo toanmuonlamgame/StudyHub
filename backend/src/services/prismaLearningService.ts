@@ -66,6 +66,7 @@ export class PrismaLearningService implements LearningService {
 
   async getSubjects(): Promise<Subject[]> {
     const subjects = await this.prisma.subject.findMany({
+      where: { isArchived: false },
       orderBy: { name: 'asc' },
     });
 
@@ -76,7 +77,7 @@ export class PrismaLearningService implements LearningService {
     await this.requireSubject(subjectId);
 
     const topics = await this.prisma.topic.findMany({
-      where: { subjectId },
+      where: { subjectId, isArchived: false },
       orderBy: { name: 'asc' },
     });
 
@@ -87,7 +88,7 @@ export class PrismaLearningService implements LearningService {
     await this.requireSubject(subjectId);
 
     const questionSets = await this.prisma.questionSet.findMany({
-      where: { subjectId, status: 'published' },
+      where: { subjectId, status: 'published', isArchived: false },
       include: { _count: { select: { questions: true } } },
       orderBy: { title: 'asc' },
     });
@@ -106,6 +107,7 @@ export class PrismaLearningService implements LearningService {
     const questionSets = await this.prisma.questionSet.findMany({
       where: {
         status: 'published',
+        isArchived: false,
         ...(params.subjectId === undefined
           ? {}
           : { subjectId: params.subjectId }),
@@ -152,7 +154,7 @@ export class PrismaLearningService implements LearningService {
 
   async getQuestionSetById(questionSetId: string): Promise<QuestionSet | null> {
     const questionSet = await this.prisma.questionSet.findFirst({
-      where: { id: questionSetId, status: 'published' },
+      where: { id: questionSetId, status: 'published', isArchived: false },
       include: { _count: { select: { questions: true } } },
     });
 
@@ -247,7 +249,10 @@ export class PrismaLearningService implements LearningService {
     selectedAnswerOptionId: string,
   ): Promise<AnswerCheckResult> {
     const question = await this.prisma.question.findFirst({
-      where: { id: questionId, questionSet: { status: 'published' } },
+      where: {
+        id: questionId,
+        questionSet: { status: 'published', isArchived: false },
+      },
       include: { answerOptions: { orderBy: { position: 'asc' } } },
     });
 
@@ -296,7 +301,7 @@ export class PrismaLearningService implements LearningService {
     selectedAnswerOptionIdsByQuestionId: Record<string, string>,
   ): Promise<QuizResult> {
     const questionSet = await this.prisma.questionSet.findFirst({
-      where: { id: questionSetId, status: 'published' },
+      where: { id: questionSetId, status: 'published', isArchived: false },
       include: {
         questions: {
           include: { answerOptions: { orderBy: { position: 'asc' } } },
@@ -724,7 +729,7 @@ export class PrismaLearningService implements LearningService {
 
   async listBookmarkedQuestionSets(userId: string): Promise<QuestionSetListItem[]> {
     const rows = await this.prisma.bookmark.findMany({
-      where: { userId, questionSet: { status: 'published' } },
+      where: { userId, questionSet: { status: 'published', isArchived: false } },
       include: { questionSet: { include: { _count: { select: { questions: true } } } } },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
@@ -735,7 +740,7 @@ export class PrismaLearningService implements LearningService {
 
   async bookmarkQuestionSet(userId: string, questionSetId: string): Promise<QuestionSetListItem> {
     const questionSet = await this.prisma.questionSet.findFirst({
-      where: { id: questionSetId, status: 'published' },
+      where: { id: questionSetId, status: 'published', isArchived: false },
       include: { _count: { select: { questions: true } } },
     });
     if (questionSet === null) throw new LearningResourceNotFoundError('Question set not found.');
@@ -766,19 +771,19 @@ export class PrismaLearningService implements LearningService {
   ): Promise<void> {
     const subject = await this.prisma.subject.findUnique({
       where: { id: input.subjectId },
-      select: { id: true },
+      select: { id: true, isArchived: true },
     });
-    if (subject === null) {
+    if (subject === null || subject.isArchived === true) {
       throw new QuestionSetSubmissionValidationError([
         { path: 'subjectId', message: 'Subject does not exist.' },
       ]);
     }
     if (input.topicId !== undefined) {
-      const topic = await this.prisma.topic.findFirst({
-        where: { id: input.topicId, subjectId: input.subjectId },
-        select: { id: true },
+      const topic = await this.prisma.topic.findUnique({
+        where: { id: input.topicId },
+        select: { id: true, subjectId: true, isArchived: true },
       });
-      if (topic === null) {
+      if (topic === null || topic.subjectId !== input.subjectId || topic.isArchived === true) {
         throw new QuestionSetSubmissionValidationError([
           { path: 'topicId', message: 'Topic must belong to the selected subject.' },
         ]);
@@ -813,8 +818,8 @@ export class PrismaLearningService implements LearningService {
   }
 
   private async requireSubject(subjectId: string): Promise<void> {
-    const subject = await this.prisma.subject.findUnique({
-      where: { id: subjectId },
+    const subject = await this.prisma.subject.findFirst({
+      where: { id: subjectId, isArchived: false },
       select: { id: true },
     });
     if (subject === null) {
@@ -824,7 +829,7 @@ export class PrismaLearningService implements LearningService {
 
   private async requireQuestionSet(questionSetId: string): Promise<void> {
     const questionSet = await this.prisma.questionSet.findFirst({
-      where: { id: questionSetId, status: 'published' },
+      where: { id: questionSetId, status: 'published', isArchived: false },
       select: { id: true },
     });
     if (questionSet === null) {

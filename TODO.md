@@ -1,5 +1,20 @@
 # StudyHub TODO
 
+## Admin Dashboard Milestone (2026-07-22)
+
+- [x] Add React + TypeScript + Vite admin application foundation.
+- [x] Add protected admin session flow and responsive navigation shell.
+- [x] Add server-enforced active-admin boundary for every `/admin` API.
+- [x] Add real dashboard, contribution moderation, Question Set management,
+  taxonomy management, user controls, and media review.
+- [x] Add non-destructive Prisma role/status/archive migration (prepared only).
+- [x] Add database-independent admin API tests and production admin build.
+- [x] Review and apply the admin Prisma migration to local PostgreSQL.
+- [x] Promote one intended local account to `admin` without storing credentials in Git.
+- [ ] Smoke-test the React admin against Prisma mode, including approve/reject,
+  account disable/session revoke, archive visibility, and media review.
+- [ ] Add richer moderation history/audit records only when product needs justify it.
+
 ## Current Phase
 Essential MVP feature completion is implemented in code. Authentication,
 account ownership, profile/settings, contribution management, and saved

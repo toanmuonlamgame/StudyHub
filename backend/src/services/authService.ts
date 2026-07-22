@@ -28,6 +28,8 @@ export class InvalidCredentialsError extends Error {}
 
 export class AuthenticationRequiredError extends Error {}
 
+export class AccountDisabledError extends Error {}
+
 export function validateRegistration(input: RegisterInput): RegisterInput {
   const email = normalizeEmail(input.email);
   const displayName = input.displayName.trim();

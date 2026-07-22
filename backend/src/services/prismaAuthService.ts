@@ -4,6 +4,7 @@ import { getPrismaClient } from '../db/prisma.js';
 import type { AuthSessionResult, AuthUser, LoginInput, RegisterInput } from '../types/auth.js';
 import {
   AuthConflictError,
+  AccountDisabledError,
   type AuthService,
   AuthenticationRequiredError,
   InvalidCredentialsError,
@@ -55,6 +56,9 @@ export class PrismaAuthService implements AuthService {
     if (user === null || !(await verifyPassword(normalized.password, user.passwordHash))) {
       throw new InvalidCredentialsError('Email or password is incorrect.');
     }
+    if (user.status === 'disabled') {
+      throw new AccountDisabledError('This account is disabled.');
+    }
     return this.createSession(user);
   }
 
@@ -69,7 +73,7 @@ export class PrismaAuthService implements AuthService {
       await this.prisma.authSession.delete({ where: { id: session.id } });
       return null;
     }
-    return toAuthUser(session.user);
+    return session.user.status === 'disabled' ? null : toAuthUser(session.user);
   }
 
   async logout(accessToken: string): Promise<void> {
@@ -113,6 +117,8 @@ function toAuthUser(user: User): AuthUser {
     id: user.id,
     email: user.email,
     displayName: user.displayName,
+    role: user.role,
+    status: user.status,
     createdAt: user.createdAt.toISOString(),
   };
 }

@@ -765,3 +765,23 @@ Rules:
 - Flutter never stores raw local paths as public media URLs.
 - Local filesystem storage is development-only and uploaded files stay ignored.
 - Production must use object storage; GIF/video playback and camera remain future work.
+
+## 2026-07-22 - Admin Authorization And Moderation Boundary
+Decision: StudyHub uses a separate React + TypeScript admin application, while
+Fastify remains the only trusted authorization and moderation boundary.
+
+Rules:
+- Every `/admin` endpoint requires a verified, unexpired session for an active
+  user with `role=admin`; client-side protected routes are UX only.
+- No default administrator credential is stored in code or documentation.
+- Approve/reject actions use guarded transactions and only transition current
+  `pendingReview` contributions. Repeat or stale decisions return conflicts.
+- Rejections require a reason visible through the existing contributor lifecycle.
+- Question Sets, Subjects, and Topics use reversible archive state instead of
+  destructive deletion; learner queries exclude archived records.
+- Account disablement revokes sessions. An admin cannot disable/demote itself,
+  and the last active administrator cannot be removed.
+- Admin responses minimize user data and never return password hashes or tokens.
+
+Reason: an operational dashboard is useful only when role checks, moderation
+state, and history safety are enforced independently of the browser UI.

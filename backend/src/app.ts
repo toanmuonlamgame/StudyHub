@@ -2,19 +2,24 @@ import cors from '@fastify/cors';
 import Fastify, { type FastifyInstance } from 'fastify';
 
 import { createAuthRoutes, createRequireUser, type RequireUser } from './routes/auth.js';
+import { createAdminRoutes } from './routes/admin.js';
 import { createLearningRoutes } from './routes/learning.js';
 import { createMediaRoutes } from './routes/media.js';
 import type { AuthService } from './services/authService.js';
+import type { AdminService } from './services/adminService.js';
+import { InMemoryAdminService } from './services/inMemoryAdminService.js';
 import { InMemoryAuthService } from './services/inMemoryAuthService.js';
 import { InMemoryLearningService } from './services/inMemoryLearningService.js';
 import type { LearningService } from './services/learningService.js';
 import { createPrismaAuthService } from './services/prismaAuthService.js';
+import { createPrismaAdminService } from './services/prismaAdminService.js';
 import { createPrismaLearningService } from './services/prismaLearningService.js';
 import { LocalMediaStorage, type MediaStorage } from './services/mediaStorage.js';
 
 export interface BuildAppOptions {
   learningService?: LearningService;
   authService?: AuthService;
+  adminService?: AdminService;
   learningDataSource?: string;
   isProduction?: boolean;
   corsOrigins?: string[];
@@ -69,6 +74,12 @@ function createConfiguredAuthService(dataSource: string): AuthService {
   throw new Error(`Unsupported STUDYHUB_LEARNING_DATA_SOURCE: ${dataSource}.`);
 }
 
+function createConfiguredAdminService(dataSource: string): AdminService {
+  if (dataSource === 'memory') return new InMemoryAdminService();
+  if (dataSource === 'prisma') return createPrismaAdminService();
+  throw new Error(`Unsupported STUDYHUB_LEARNING_DATA_SOURCE: ${dataSource}.`);
+}
+
 export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const isProduction = options.isProduction ?? process.env.NODE_ENV === 'production';
   const configuredDataSource =
@@ -86,6 +97,8 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const learningService =
     options.learningService ?? createConfiguredLearningService(dataSource);
   const authService = options.authService ?? createConfiguredAuthService(dataSource);
+  const adminService = options.adminService ?? createConfiguredAdminService(dataSource);
+  const requireUser = options.requireUser ?? createRequireUser(authService);
   const configuredCorsOrigins = new Set(
     options.corsOrigins ?? readConfiguredCorsOrigins(),
   );
@@ -122,17 +135,18 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   }));
 
   app.register(createAuthRoutes(authService), { prefix: '/auth' });
+  app.register(createAdminRoutes(adminService, requireUser), { prefix: '/admin' });
   app.register(
     createLearningRoutes(
       learningService,
-      options.requireUser ?? createRequireUser(authService),
+      requireUser,
     ),
     { prefix: '/learning' },
   );
   app.register(
     createMediaRoutes(
       options.mediaStorage ?? new LocalMediaStorage(process.env.STUDYHUB_UPLOAD_DIR),
-      options.requireUser ?? createRequireUser(authService),
+      requireUser,
     ),
     { prefix: '/media' },
   );

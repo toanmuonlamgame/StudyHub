@@ -14,11 +14,14 @@ model Subject {
   program        String?
   major          String?
   description    String?
+  isArchived     Boolean         @default(false)
   topics         Topic[]
   questionSets   QuestionSet[]
   studyMaterials StudyMaterial[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  @@index([isArchived, name])
 }
 
 model User {
@@ -26,10 +29,24 @@ model User {
   email        String        @unique
   displayName  String
   passwordHash String
+  role         UserRole      @default(user)
+  status       UserStatus    @default(active)
   sessions     AuthSession[]
   bookmarks    Bookmark[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+
+  @@index([status, role, createdAt])
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum UserStatus {
+  active
+  disabled
 }
 
 model AuthSession {
@@ -48,6 +65,7 @@ model Topic {
   id             String          @id @default(cuid())
   subjectId      String
   name           String
+  isArchived     Boolean         @default(false)
   subject        Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   questionSets   QuestionSet[]
   studyMaterials StudyMaterial[]
@@ -55,6 +73,7 @@ model Topic {
   updatedAt      DateTime        @updatedAt
 
   @@index([subjectId, name])
+  @@index([subjectId, isArchived, name])
 }
 
 enum StudyMaterialType {
@@ -130,6 +149,8 @@ model QuestionSet {
   reviewedAt            DateTime?
   publishedAt           DateTime?
   rejectionReason       String?
+  isArchived            Boolean               @default(false)
+  reviewedByUserId      String?
   subject               Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   topic                 Topic?                @relation(fields: [topicId], references: [id], onDelete: SetNull)
   questions             Question[]
@@ -142,6 +163,7 @@ model QuestionSet {
   @@index([sourceType, status, createdAt, id])
   @@index([subjectId, status, createdAt, id])
   @@index([topicId, status, createdAt, id])
+  @@index([isArchived, status, createdAt, id])
 }
 
 model Bookmark {

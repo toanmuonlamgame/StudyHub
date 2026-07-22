@@ -4,7 +4,16 @@
 - Project name: StudyHub
 - Product type: mobile learning platform
 - Goal: learning project and internship portfolio
-- Current phase: essential MVP feature completion, before migration and dedicated stabilization
+- Current phase: essential MVP plus first admin moderation foundation, before migration and dedicated stabilization
+
+## Admin Foundation
+- The first React + TypeScript Admin Dashboard covers real dashboard metrics,
+  contribution moderation, Question Set archival, taxonomy, basic user controls,
+  and media review behind server-enforced active-admin APIs.
+- Admin roles, account status, archive state, and reviewer identity use a
+  non-destructive Prisma migration. It has been applied to local PostgreSQL and
+  one intended local account has been promoted without storing its credentials
+  in Git. Real Prisma-mode admin workflow smoke testing remains explicit.
 
 ## Product Purpose
 StudyHub is a mobile learning platform for organizing and studying learning content. The product should help users browse structured learning content, practice question sets, upload their own materials, and contribute useful community content.

@@ -2,12 +2,13 @@ import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
 
 import {
   AuthConflictError,
+  AccountDisabledError,
   type AuthService,
   AuthValidationError,
   AuthenticationRequiredError,
   InvalidCredentialsError,
 } from '../services/authService.js';
-import type { LoginInput, RegisterInput } from '../types/auth.js';
+import type { AuthUser, LoginInput, RegisterInput } from '../types/auth.js';
 
 interface UpdateProfileBody {
   displayName: string;
@@ -41,7 +42,7 @@ const updateProfileBodySchema = {
   properties: { displayName: { type: 'string', minLength: 1, maxLength: 80 } },
 } as const;
 
-export type RequireUser = (request: FastifyRequest) => Promise<{ id: string }>;
+export type RequireUser = (request: FastifyRequest) => Promise<AuthUser>;
 
 export function createAuthRoutes(authService: AuthService): FastifyPluginAsync {
   return async function authRoutes(app): Promise<void> {
@@ -132,6 +133,11 @@ export function sendAuthError(error: unknown, reply: FastifyReply): FastifyReply
   }
   if (error instanceof AuthenticationRequiredError) {
     return reply.code(401).send({ error: { code: 'AUTHENTICATION_REQUIRED', message: error.message } });
+  }
+  if (error instanceof AccountDisabledError) {
+    return reply.code(403).send({
+      error: { code: 'ACCOUNT_DISABLED', message: error.message },
+    });
   }
   throw error;
 }
