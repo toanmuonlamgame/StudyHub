@@ -1416,4 +1416,64 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get continueStudying => 'Tiếp tục học';
+
+  @override
+  String get advertisement => 'Quảng cáo';
+
+  @override
+  String get advertising => 'Quảng cáo';
+
+  @override
+  String get advertisingStatus => 'Trạng thái quảng cáo';
+
+  @override
+  String get adsEnabled => 'Quảng cáo đang bật';
+
+  @override
+  String get adsDisabled => 'Quảng cáo đã tắt';
+
+  @override
+  String get adsWaitingForConsent =>
+      'Chưa thể hiển thị quảng cáo khi yêu cầu đồng ý chưa hoàn tất';
+
+  @override
+  String get sessionAdFree => 'Đã tắt quảng cáo trong phiên này';
+
+  @override
+  String get testAdvertisingMode => 'Chế độ quảng cáo thử nghiệm';
+
+  @override
+  String get testAdvertisingModeBody =>
+      'Bản dựng này chỉ yêu cầu quảng cáo thử nghiệm của nhà cung cấp.';
+
+  @override
+  String get adPrivacy => 'Quyền riêng tư';
+
+  @override
+  String get adPrivacyBody =>
+      'StudyHub yêu cầu quảng cáo không cá nhân hóa. Cấu hình đồng ý cho production vẫn cần được hoàn thiện khi áp dụng.';
+
+  @override
+  String get removeAdsForSession => 'Tắt quảng cáo trong phiên này';
+
+  @override
+  String get removeAdsForSessionBody =>
+      'Bạn có thể xem một quảng cáo. Nội dung học vẫn dùng được nếu không xem.';
+
+  @override
+  String get watchAd => 'Xem quảng cáo';
+
+  @override
+  String get adUnavailable =>
+      'Quảng cáo hiện không khả dụng. Tiếp tục không có quảng cáo.';
+
+  @override
+  String get continueWithoutAd => 'Tiếp tục không có quảng cáo';
+
+  @override
+  String get rewardReceived =>
+      'Đã nhận phần thưởng. Quảng cáo được tắt trong phiên này.';
+
+  @override
+  String get unableToLoadAdvertisement => 'Không thể tải quảng cáo';
 }

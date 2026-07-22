@@ -10,6 +10,7 @@ import '../../progress/models/completed_learning_session.dart';
 import '../../progress/progress_store_scope.dart';
 import '../../progress/repositories/progress_store.dart';
 import '../../../l10n/app_localizations_x.dart';
+import '../../advertising/advertising_scope.dart';
 import '../models/answer_option.dart';
 import '../models/answer_review.dart';
 import '../models/quiz_mode.dart';
@@ -322,7 +323,18 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
             const SizedBox(height: 16),
             FilledButton.icon(
               key: const ValueKey('result-back-to-home'),
-              onPressed: () => returnToStudyHubHome(context),
+              onPressed: () {
+                final advertising = AdvertisingScope.maybeOf(context);
+                final shouldConsiderInterstitial =
+                    widget.recordLocalProgress &&
+                    result.quizMode == QuizMode.exam;
+                returnToStudyHubHome(context);
+                if (shouldConsiderInterstitial && advertising != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    unawaited(advertising.onCompletedLearningReturnedHome());
+                  });
+                }
+              },
               icon: const Icon(Icons.home_outlined),
               label: Text(l10n.backToHome),
             ),

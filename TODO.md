@@ -493,6 +493,17 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Run compact Android keyboard, large-text, and complete account-flow verification.
 - [ ] Configure and implement Google sign-in only after backend token exchange and provider clients are approved.
 
+## Advertising Boundary
+
+- [x] Add a centralized, globally disableable advertising boundary with banner,
+  interstitial, and optional session ad-free rewarded formats.
+- [x] Add test-mode IDs, frequency limits, non-personalized requests, Settings
+  visibility, localization, and service-level tests.
+- [ ] Configure provider production app/ad-unit IDs outside Git.
+- [ ] Integrate a real regional consent flow and inject its resolved status.
+- [ ] Verify provider console categories, store declarations, and physical-device
+  behavior before enabling production ads.
+
 ## Not Doing Yet
 - [ ] Do not create docs/ files until explicitly requested.
 - [ ] Do not write app code until the first milestone is approved.

@@ -17,6 +17,7 @@ import '../profile/profile_screen.dart';
 import '../saved/screens/saved_question_sets_screen.dart';
 import '../../core/device_permissions/device_permission_service.dart';
 import '../notifications/study_reminder_scope.dart';
+import '../advertising/advertising_scope.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({
@@ -186,6 +187,10 @@ class SettingsScreen extends StatelessWidget {
           StudyHubSectionHeader(title: context.l10n.studyReminders),
           const SizedBox(height: 10),
           _ReminderSettingsCard(),
+          const SizedBox(height: 24),
+          StudyHubSectionHeader(title: context.l10n.advertising),
+          const SizedBox(height: 10),
+          const _AdvertisingSettingsCard(),
         ],
       ),
     );
@@ -213,6 +218,94 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
     if (confirmed == true) await authController.logout();
+  }
+}
+
+class _AdvertisingSettingsCard extends StatefulWidget {
+  const _AdvertisingSettingsCard();
+
+  @override
+  State<_AdvertisingSettingsCard> createState() =>
+      _AdvertisingSettingsCardState();
+}
+
+class _AdvertisingSettingsCardState extends State<_AdvertisingSettingsCard> {
+  bool _rewardLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final service = AdvertisingScope.of(context);
+    final l10n = context.l10n;
+    return AnimatedBuilder(
+      animation: service,
+      builder: (context, _) {
+        final status = service.sessionAdFree
+            ? l10n.sessionAdFree
+            : service.adsEnabled
+            ? service.canRequestAds
+                  ? l10n.adsEnabled
+                  : l10n.adsWaitingForConsent
+            : l10n.adsDisabled;
+        return Card(
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.ads_click_outlined),
+                title: Text(l10n.advertisingStatus),
+                subtitle: Text(status),
+              ),
+              if (service.isTestMode) ...[
+                const Divider(height: 1, indent: 64),
+                ListTile(
+                  leading: const Icon(Icons.science_outlined),
+                  title: Text(l10n.testAdvertisingMode),
+                  subtitle: Text(l10n.testAdvertisingModeBody),
+                ),
+              ],
+              const Divider(height: 1, indent: 64),
+              ListTile(
+                leading: const Icon(Icons.privacy_tip_outlined),
+                title: Text(l10n.adPrivacy),
+                subtitle: Text(l10n.adPrivacyBody),
+              ),
+              if (service.shouldShowAds) ...[
+                const Divider(height: 1, indent: 64),
+                ListTile(
+                  leading: const Icon(Icons.ondemand_video_outlined),
+                  title: Text(l10n.removeAdsForSession),
+                  subtitle: Text(l10n.removeAdsForSessionBody),
+                  trailing: _rewardLoading
+                      ? const SizedBox.square(
+                          dimension: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : FilledButton.tonal(
+                          onPressed: _watchRewardedAd,
+                          child: Text(l10n.watchAd),
+                        ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _watchRewardedAd() async {
+    if (_rewardLoading) return;
+    setState(() => _rewardLoading = true);
+    final service = AdvertisingScope.of(context);
+    final rewarded = await service.earnSessionAdFreeReward();
+    if (!mounted) return;
+    setState(() => _rewardLoading = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          rewarded ? context.l10n.rewardReceived : context.l10n.adUnavailable,
+        ),
+      ),
+    );
   }
 }
 

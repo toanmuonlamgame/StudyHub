@@ -7,6 +7,10 @@ import '../core/app_theme.dart';
 import '../core/locale_preference_store.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/repositories/mock_learning_repository.dart';
+import '../features/advertising/advertising_config.dart';
+import '../features/advertising/advertising_scope.dart';
+import '../features/advertising/advertising_service.dart';
+import '../features/advertising/advertising_provider.dart';
 import '../features/contribution/repositories/contribution_repository.dart';
 import '../features/contribution/repositories/mock_contribution_repository.dart';
 import '../features/auth/auth_controller.dart';
@@ -53,6 +57,7 @@ class StudyHubApp extends StatefulWidget {
     this.studyReminderStore = const SharedPreferencesStudyReminderStore(),
     this.notificationService,
     this.permissionService = const PlatformDevicePermissionService(),
+    this.advertisingService,
   });
 
   final LearningRepository learningRepository;
@@ -68,6 +73,7 @@ class StudyHubApp extends StatefulWidget {
   final StudyReminderStore studyReminderStore;
   final StudyNotificationService? notificationService;
   final DevicePermissionService permissionService;
+  final AdvertisingService? advertisingService;
 
   @override
   State<StudyHubApp> createState() => _StudyHubAppState();
@@ -89,11 +95,20 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StudyNotificationService _notificationService;
   late StudyReminderController _reminderController;
+  late AdvertisingService _advertisingService;
+  late bool _ownsAdvertisingService;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _ownsAdvertisingService = widget.advertisingService == null;
+    _advertisingService =
+        widget.advertisingService ??
+        AdvertisingService(
+          config: const AdvertisingConfig(mode: AdvertisingMode.disabled),
+          provider: const UnavailableAdvertisingProvider(),
+        );
     _notificationService =
         widget.notificationService ?? LocalStudyNotificationService();
     _reminderController = StudyReminderController(
@@ -127,6 +142,7 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
   @override
   void didUpdateWidget(covariant StudyHubApp oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _updateAdvertisingService(oldWidget);
     if (identical(oldWidget.progressStore, widget.progressStore)) {
       _updateAttemptRepository(oldWidget);
       return;
@@ -141,28 +157,31 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final app = MediaRepositoryScope(
-      repository: widget.mediaRepository,
-      child: StudyReminderScope(
-        controller: _reminderController,
-        child: AttemptRepositoryScope(
-          repository: _attemptRepository,
-          child: BookmarkScope(
-            repository: _bookmarkRepository,
-            child: ProgressStoreScope(
-              progressStore: _progressStore,
-              child: AppNavigationScope(
-                controller: _navigationController,
-                child: MaterialApp(
-                  navigatorKey: _navigatorKey,
-                  title: 'StudyHub',
-                  debugShowCheckedModeBanner: false,
-                  theme: AppTheme.light,
-                  locale: _localeSelection.locale,
-                  supportedLocales: AppLocalizations.supportedLocales,
-                  localizationsDelegates:
-                      AppLocalizations.localizationsDelegates,
-                  home: _buildHome(),
+    final app = AdvertisingScope(
+      service: _advertisingService,
+      child: MediaRepositoryScope(
+        repository: widget.mediaRepository,
+        child: StudyReminderScope(
+          controller: _reminderController,
+          child: AttemptRepositoryScope(
+            repository: _attemptRepository,
+            child: BookmarkScope(
+              repository: _bookmarkRepository,
+              child: ProgressStoreScope(
+                progressStore: _progressStore,
+                child: AppNavigationScope(
+                  controller: _navigationController,
+                  child: MaterialApp(
+                    navigatorKey: _navigatorKey,
+                    title: 'StudyHub',
+                    debugShowCheckedModeBanner: false,
+                    theme: AppTheme.light,
+                    locale: _localeSelection.locale,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                    home: _buildHome(),
+                  ),
                 ),
               ),
             ),
@@ -215,6 +234,7 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
     _authController?.dispose();
     _navigationController.dispose();
     _reminderController.dispose();
+    if (_ownsAdvertisingService) _advertisingService.dispose();
     super.dispose();
   }
 
@@ -227,6 +247,20 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
     }
     _ownsAttemptRepository = widget.attemptRepository == null;
     _attemptRepository = widget.attemptRepository ?? MockAttemptRepository();
+  }
+
+  void _updateAdvertisingService(StudyHubApp oldWidget) {
+    if (identical(oldWidget.advertisingService, widget.advertisingService)) {
+      return;
+    }
+    if (_ownsAdvertisingService) _advertisingService.dispose();
+    _ownsAdvertisingService = widget.advertisingService == null;
+    _advertisingService =
+        widget.advertisingService ??
+        AdvertisingService(
+          config: const AdvertisingConfig(mode: AdvertisingMode.disabled),
+          provider: const UnavailableAdvertisingProvider(),
+        );
   }
 
   Future<void> _loadStoredLocale() async {

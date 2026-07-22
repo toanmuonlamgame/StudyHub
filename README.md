@@ -283,3 +283,13 @@ after the learner enables the feature. Creator images use the system gallery
 picker and an authenticated backend upload boundary; JPEG, PNG, and WebP files
 are limited to 5 MiB. GIF and video remain typed future media, not active
 upload/playback features.
+
+## Configurable advertising boundary
+
+StudyHub now has a provider-neutral Flutter advertising boundary for banner,
+interstitial, and rewarded formats. Advertising is disabled by default, never
+appears inside authentication, contribution, quiz, or answer-review content,
+and uses non-personalized requests. Test mode uses Google's official sample ad
+units; production requires separately supplied unit IDs, an Android app ID, and
+a real regional consent decision. See [frontend/README.md](frontend/README.md)
+for configuration and placement rules.

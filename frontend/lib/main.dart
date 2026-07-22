@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app/learning_repository_config.dart';
+import 'app/advertising_config.dart';
 import 'app/studyhub_app.dart';
 
 void main() {
@@ -12,6 +13,7 @@ void main() {
       authRepository: createAuthRepositoryFromEnvironment(),
       bookmarkRepository: createBookmarkRepositoryFromEnvironment(),
       mediaRepository: createMediaRepositoryFromEnvironment(),
+      advertisingService: createAdvertisingServiceFromEnvironment(),
     ),
   );
 }

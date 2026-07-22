@@ -785,3 +785,19 @@ Rules:
 
 Reason: an operational dashboard is useful only when role checks, moderation
 state, and history safety are enforced independently of the browser UI.
+
+## 2026-07-22 - Configurable Advertising Boundary
+
+- Flutter advertising uses a centralized, provider-neutral service; SDK calls
+  stay inside the Google Mobile Ads adapter.
+- Runtime modes are `disabled`, `test`, and `production`. Disabled is the safe
+  default, test uses official sample IDs, and production fails configuration
+  validation when ad-unit IDs are missing.
+- Production ad requests remain unavailable until a real consent integration
+  reports `granted` or `notRequired`; StudyHub does not claim compliance through
+  a fake consent dialog or build flag.
+- Banners are limited to low-interruption browsing surfaces. Interstitials are
+  considered only after returning Home from completed Exam results and use
+  completion, cooldown, session, and daily limits.
+- Rewarded ads can only disable banner/interstitial ads for the current session.
+  They never unlock exams, answers, results, history, or user content.

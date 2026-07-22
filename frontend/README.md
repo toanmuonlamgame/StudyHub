@@ -275,3 +275,43 @@ photo picker, uploads through `MediaRepository`, and keeps all text when upload
 fails. Images render in a stable, bounded frame with loading/error states and a
 zoomable preview. API mode uses `POST /media/images`; mock mode keeps preview
 bytes in memory only. Camera, GIF playback, and video playback are deferred.
+
+## Advertising boundary
+
+Advertising is centralized under `lib/features/advertising/`. UI screens depend
+on `AdvertisingService`, while Google Mobile Ads remains isolated in one
+provider adapter. Supported modes are `disabled` (default), `test`, and
+`production`.
+
+Run Android with official provider test ads:
+
+```powershell
+flutter run --dart-define=STUDYHUB_AD_MODE=test
+```
+
+Production additionally requires `STUDYHUB_AD_BANNER_ID`,
+`STUDYHUB_AD_INTERSTITIAL_ID`, and `STUDYHUB_AD_REWARDED_ID` as dart-defines.
+Supply the Android app ID outside Git with the Gradle environment property:
+
+```powershell
+$env:ORG_GRADLE_PROJECT_STUDYHUB_ADMOB_APP_ID = "<provider-app-id>"
+$env:ORG_GRADLE_PROJECT_STUDYHUB_AD_BUILD_MODE = "production"
+```
+
+Production requests remain blocked while consent status is unresolved. A real
+provider consent flow must set `AdvertisingConsentStatus.granted` or
+`notRequired`; compile-time flags are not treated as legal consent. The current
+requests are non-personalized.
+
+Allowed placements are a non-critical Home section and the end of History.
+Interstitials are considered only after an Exam result returns to Home: at
+least 3 completed exams, a 10-minute cooldown, at most 2 per session and 3 per
+local day. Rewarded ads optionally disable banners/interstitials for the current
+session and grant the reward only after the provider completion callback.
+
+Ads are prohibited in auth, contribution forms, question/answer UI, result
+review cards, and before results or persistence completes. Loading failures,
+offline/no-fill cases, and unsupported platforms never block navigation.
+The native provider is configured for Android in this milestone. iOS requires
+separate provider registration and `Info.plist` configuration before it is
+allowed to initialize.

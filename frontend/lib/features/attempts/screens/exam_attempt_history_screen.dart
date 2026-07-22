@@ -6,6 +6,8 @@ import '../../../l10n/app_localizations_x.dart';
 import '../../learning/screens/quiz_result_screen.dart';
 import '../models/exam_attempt.dart';
 import '../repositories/attempt_repository.dart';
+import '../../advertising/advertising_service.dart';
+import '../../advertising/widgets/studyhub_banner_ad.dart';
 
 class ExamAttemptHistoryScreen extends StatefulWidget {
   const ExamAttemptHistoryScreen({
@@ -220,7 +222,7 @@ class _AttemptList extends StatelessWidget {
         AppSpacing.xl,
         AppSpacing.section,
       ),
-      itemCount: attempts.length + 1,
+      itemCount: attempts.length + 2,
       separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
       itemBuilder: (context, index) {
         if (index == 0) {
@@ -233,6 +235,9 @@ class _AttemptList extends StatelessWidget {
               ),
             ),
           );
+        }
+        if (index == attempts.length + 1) {
+          return const StudyHubBannerAd(placement: BannerPlacement.history);
         }
         final attempt = attempts[index - 1];
         return Card(

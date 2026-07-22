@@ -2617,6 +2617,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue studying'**
   String get continueStudying;
+
+  /// No description provided for @advertisement.
+  ///
+  /// In en, this message translates to:
+  /// **'Advertisement'**
+  String get advertisement;
+
+  /// No description provided for @advertising.
+  ///
+  /// In en, this message translates to:
+  /// **'Advertising'**
+  String get advertising;
+
+  /// No description provided for @advertisingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Advertising status'**
+  String get advertisingStatus;
+
+  /// No description provided for @adsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads enabled'**
+  String get adsEnabled;
+
+  /// No description provided for @adsDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads disabled'**
+  String get adsDisabled;
+
+  /// No description provided for @adsWaitingForConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads unavailable until consent requirements are resolved'**
+  String get adsWaitingForConsent;
+
+  /// No description provided for @sessionAdFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads disabled for this session'**
+  String get sessionAdFree;
+
+  /// No description provided for @testAdvertisingMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Test advertising mode'**
+  String get testAdvertisingMode;
+
+  /// No description provided for @testAdvertisingModeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only provider test ads are requested in this build.'**
+  String get testAdvertisingModeBody;
+
+  /// No description provided for @adPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get adPrivacy;
+
+  /// No description provided for @adPrivacyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'StudyHub requests non-personalized ads. Production consent configuration is still required where applicable.'**
+  String get adPrivacyBody;
+
+  /// No description provided for @removeAdsForSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove ads for this session'**
+  String get removeAdsForSession;
+
+  /// No description provided for @removeAdsForSessionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Optionally watch one ad. Learning content stays available without it.'**
+  String get removeAdsForSessionBody;
+
+  /// No description provided for @watchAd.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch ad'**
+  String get watchAd;
+
+  /// No description provided for @adUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad unavailable. Continue without ad.'**
+  String get adUnavailable;
+
+  /// No description provided for @continueWithoutAd.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without ad'**
+  String get continueWithoutAd;
+
+  /// No description provided for @rewardReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward received. Ads are off for this session.'**
+  String get rewardReceived;
+
+  /// No description provided for @unableToLoadAdvertisement.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load advertisement'**
+  String get unableToLoadAdvertisement;
 }
 
 class _AppLocalizationsDelegate

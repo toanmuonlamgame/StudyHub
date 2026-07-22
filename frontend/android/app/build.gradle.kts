@@ -4,6 +4,21 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val studyHubTestAdMobAppId = "ca-app-pub-3940256099942544~3347511713"
+val studyHubProductionAdMobAppId = providers.gradleProperty("STUDYHUB_ADMOB_APP_ID").orNull
+val studyHubAdBuildMode = providers
+    .gradleProperty("STUDYHUB_AD_BUILD_MODE")
+    .getOrElse("disabled")
+
+if (studyHubAdBuildMode !in setOf("disabled", "test", "production")) {
+    throw GradleException("Unsupported STUDYHUB_AD_BUILD_MODE: $studyHubAdBuildMode")
+}
+if (studyHubAdBuildMode == "production" && studyHubProductionAdMobAppId.isNullOrBlank()) {
+    throw GradleException(
+        "Production advertising builds require -PSTUDYHUB_ADMOB_APP_ID."
+    )
+}
+
 android {
     namespace = "com.toanmuonlamgame.studyhub"
     compileSdk = flutter.compileSdkVersion
@@ -23,6 +38,12 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["studyHubAdMobAppId"] =
+            if (studyHubAdBuildMode == "production") {
+                studyHubProductionAdMobAppId!!
+            } else {
+                studyHubTestAdMobAppId
+            }
     }
 
     buildTypes {

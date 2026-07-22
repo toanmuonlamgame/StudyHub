@@ -279,3 +279,11 @@ Handoff summary:
 - Known issues:
 - Recommended next step:
 ```
+## Advertising Boundary
+
+- Advertising is an optional, removable Flutter boundary and is globally
+  disabled by default. It supports low-interruption banners, tightly limited
+  post-Exam interstitials, and a rewarded session ad-free option.
+- Ads never gate learning content or appear in auth, contribution, active quiz,
+  or answer-review content. Production requests require real provider IDs and a
+  resolved consent decision; test builds use only official sample IDs.

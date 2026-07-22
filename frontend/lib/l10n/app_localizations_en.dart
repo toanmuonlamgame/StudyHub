@@ -1420,4 +1420,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueStudying => 'Continue studying';
+
+  @override
+  String get advertisement => 'Advertisement';
+
+  @override
+  String get advertising => 'Advertising';
+
+  @override
+  String get advertisingStatus => 'Advertising status';
+
+  @override
+  String get adsEnabled => 'Ads enabled';
+
+  @override
+  String get adsDisabled => 'Ads disabled';
+
+  @override
+  String get adsWaitingForConsent =>
+      'Ads unavailable until consent requirements are resolved';
+
+  @override
+  String get sessionAdFree => 'Ads disabled for this session';
+
+  @override
+  String get testAdvertisingMode => 'Test advertising mode';
+
+  @override
+  String get testAdvertisingModeBody =>
+      'Only provider test ads are requested in this build.';
+
+  @override
+  String get adPrivacy => 'Privacy';
+
+  @override
+  String get adPrivacyBody =>
+      'StudyHub requests non-personalized ads. Production consent configuration is still required where applicable.';
+
+  @override
+  String get removeAdsForSession => 'Remove ads for this session';
+
+  @override
+  String get removeAdsForSessionBody =>
+      'Optionally watch one ad. Learning content stays available without it.';
+
+  @override
+  String get watchAd => 'Watch ad';
+
+  @override
+  String get adUnavailable => 'Ad unavailable. Continue without ad.';
+
+  @override
+  String get continueWithoutAd => 'Continue without ad';
+
+  @override
+  String get rewardReceived => 'Reward received. Ads are off for this session.';
+
+  @override
+  String get unableToLoadAdvertisement => 'Unable to load advertisement';
 }

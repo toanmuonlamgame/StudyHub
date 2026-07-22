@@ -4,6 +4,8 @@ import '../../../core/widgets/studyhub_ui.dart';
 import '../../auth/auth_scope.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../widgets/home_hub_widgets.dart';
+import '../../advertising/advertising_service.dart';
+import '../../advertising/widgets/studyhub_banner_ad.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
@@ -113,6 +115,8 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+                const SizedBox(height: 20),
+                const StudyHubBannerAd(placement: BannerPlacement.home),
               ],
             ),
           ),
