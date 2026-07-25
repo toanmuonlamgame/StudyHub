@@ -801,3 +801,18 @@ state, and history safety are enforced independently of the browser UI.
   completion, cooldown, session, and daily limits.
 - Rewarded ads can only disable banner/interstitial ads for the current session.
   They never unlock exams, answers, results, history, or user content.
+
+## 2026-07-25 - Account Identity And My Exams Boundary
+
+- The primary learner navigation is Home, Explore, My Exams, and Profile.
+  Attempt History moves into the Completed section of My Exams.
+- My Exams composes the existing contribution, attempt, and bookmark
+  repositories. It does not duplicate scoring, moderation, or bookmark logic.
+- Authenticated identity is centralized in `AuthController`/`AuthService`.
+  Backend routes derive user ownership from the bearer session and do not accept
+  a trusted user ID from Flutter.
+- Avatar files cross the existing authenticated media boundary. The User stores
+  only a nullable validated media URL/reference; image bytes, credentials, and
+  local file paths do not belong in the profile record.
+- Logout is local-first: remove the token and protected UI immediately, reset
+  user-specific local state, then attempt backend session invalidation.

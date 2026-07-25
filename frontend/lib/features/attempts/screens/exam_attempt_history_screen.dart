@@ -14,10 +14,12 @@ class ExamAttemptHistoryScreen extends StatefulWidget {
     super.key,
     required this.repository,
     required this.onStartLearning,
+    this.embedded = false,
   });
 
   final AttemptRepository repository;
   final VoidCallback onStartLearning;
+  final bool embedded;
 
   @override
   State<ExamAttemptHistoryScreen> createState() =>
@@ -56,31 +58,34 @@ class _ExamAttemptHistoryScreenState extends State<ExamAttemptHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.attemptHistory)),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: FutureBuilder<List<ExamAttemptSummary>>(
-              future: _attemptsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return _HistoryError(onRetry: _reload);
-                }
-                final attempts = snapshot.data ?? const [];
-                if (attempts.isEmpty) {
-                  return _HistoryEmpty(onStartLearning: widget.onStartLearning);
-                }
-                return _AttemptList(attempts: attempts, onOpen: _openAttempt);
-              },
-            ),
+    final body = SafeArea(
+      top: !widget.embedded,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: FutureBuilder<List<ExamAttemptSummary>>(
+            future: _attemptsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return _HistoryError(onRetry: _reload);
+              }
+              final attempts = snapshot.data ?? const [];
+              if (attempts.isEmpty) {
+                return _HistoryEmpty(onStartLearning: widget.onStartLearning);
+              }
+              return _AttemptList(attempts: attempts, onOpen: _openAttempt);
+            },
           ),
         ),
       ),
+    );
+    if (widget.embedded) return body;
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.attemptHistory)),
+      body: body,
     );
   }
 

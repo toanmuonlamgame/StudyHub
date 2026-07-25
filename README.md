@@ -293,3 +293,16 @@ and uses non-personalized requests. Test mode uses Google's official sample ad
 units; production requires separately supplied unit IDs, an Android app ID, and
 a real regional consent decision. See [frontend/README.md](frontend/README.md)
 for configuration and placement rules.
+
+## Account and My Exams
+
+The mobile shell now uses **Home**, **Explore**, **My Exams**, and **Profile**.
+My Exams combines the signed-in learner's uploaded contributions, completed
+attempts, and saved question sets without duplicating their domain logic.
+Profile shows backend-owned identity and real activity counts, supports a
+validated gallery avatar through the existing media boundary, and performs a
+local-first logout that cannot reopen protected routes with Back.
+
+Attempts, bookmarks, submissions, and profile updates are scoped from the
+authenticated bearer session. Flutter route guards are presentation support;
+Fastify remains the ownership and authorization boundary.

@@ -440,5 +440,21 @@
   "adUnavailable": "Quảng cáo hiện không khả dụng. Tiếp tục không có quảng cáo.",
   "continueWithoutAd": "Tiếp tục không có quảng cáo",
   "rewardReceived": "Đã nhận phần thưởng. Quảng cáo được tắt trong phiên này.",
-  "unableToLoadAdvertisement": "Không thể tải quảng cáo"
+  "unableToLoadAdvertisement": "Không thể tải quảng cáo",
+  "exploreTab": "Kh\u00e1m ph\u00e1",
+  "myExams": "\u0110\u1ec1 c\u1ee7a t\u00f4i",
+  "uploaded": "\u0110\u00e3 t\u1ea3i l\u00ean",
+  "saved": "\u0110\u00e3 l\u01b0u",
+  "personalLearningLibrary": "Th\u01b0 vi\u1ec7n h\u1ecdc t\u1eadp c\u00e1 nh\u00e2n",
+  "personalInformation": "Th\u00f4ng tin c\u00e1 nh\u00e2n",
+  "editProfile": "Ch\u1ec9nh s\u1eeda h\u1ed3 s\u01a1",
+  "savedExams": "\u0110\u1ec1 \u0111\u00e3 l\u01b0u",
+  "completedExams": "\u0110\u1ec1 \u0111\u00e3 ho\u00e0n th\u00e0nh",
+  "securityAccount": "B\u1ea3o m\u1eadt v\u00e0 t\u00e0i kho\u1ea3n",
+  "avatarPreview": "Xem tr\u01b0\u1edbc \u1ea3nh \u0111\u1ea1i di\u1ec7n",
+  "changeAvatar": "\u0110\u1ed5i \u1ea3nh \u0111\u1ea1i di\u1ec7n",
+  "removeAvatar": "X\u00f3a \u1ea3nh \u0111\u1ea1i di\u1ec7n",
+  "avatarUpdateFailed": "Kh\u00f4ng th\u1ec3 c\u1eadp nh\u1eadt \u1ea3nh \u0111\u1ea1i di\u1ec7n. H\u00e3y th\u1eed l\u1ea1i.",
+  "administrator": "Qu\u1ea3n tr\u1ecb vi\u00ean",
+  "learner": "Ng\u01b0\u1eddi h\u1ecdc"
 }

@@ -315,3 +315,19 @@ offline/no-fill cases, and unsupported platforms never block navigation.
 The native provider is configured for Android in this milestone. iOS requires
 separate provider registration and `Info.plist` configuration before it is
 allowed to initialize.
+
+## Profile and My Exams
+
+The mobile shell uses Home, Explore, My Exams, and Profile. My Exams embeds the
+existing Uploaded contribution lifecycle, Completed attempt history/review, and
+Saved bookmark list behind their repository boundaries. It does not recalculate
+scores or maintain a second bookmark state.
+
+Profile uses the authenticated `AuthUser` for display name, email, role, and
+avatar. Gallery images are previewed, validated as JPEG/PNG/WebP up to 5 MiB,
+uploaded through `MediaRepository`, and then saved as a safe profile media
+reference. Initials and image-error fallbacks remain available. Logout clears
+the persisted session, resets protected navigation and local user-specific
+progress, and attempts backend invalidation without blocking local logout.
+Production avatar delivery still requires object storage configuration outside
+Git.

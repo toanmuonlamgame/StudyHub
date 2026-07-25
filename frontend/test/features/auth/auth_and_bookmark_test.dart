@@ -74,6 +74,28 @@ void main() {
     expect(await store.load(), isNull);
   });
 
+  test(
+    'avatar updates and removal persist through the authenticated session',
+    () async {
+      final repository = MockAuthRepository();
+      const store = AuthSessionStore();
+      final controller = AuthController(repository: repository, store: store);
+      await controller.register(
+        email: 'learner@example.com',
+        password: 'strong-password',
+        displayName: 'Learner',
+      );
+
+      expect(
+        await controller.updateAvatar('https://cdn.example.com/avatar.webp'),
+        isTrue,
+      );
+      expect(controller.user?.avatarUrl, 'https://cdn.example.com/avatar.webp');
+      expect(await controller.removeAvatar(), isTrue);
+      expect(controller.user?.avatarUrl, isNull);
+    },
+  );
+
   test('saving the same Question Set twice creates one bookmark', () async {
     final repository = MockBookmarkRepository();
     const questionSet = QuestionSet(

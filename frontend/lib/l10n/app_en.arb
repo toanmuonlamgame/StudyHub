@@ -440,5 +440,21 @@
   "adUnavailable": "Ad unavailable. Continue without ad.",
   "continueWithoutAd": "Continue without ad",
   "rewardReceived": "Reward received. Ads are off for this session.",
-  "unableToLoadAdvertisement": "Unable to load advertisement"
+  "unableToLoadAdvertisement": "Unable to load advertisement",
+  "exploreTab": "Explore",
+  "myExams": "My Exams",
+  "uploaded": "Uploaded",
+  "saved": "Saved",
+  "personalLearningLibrary": "Your personal learning library",
+  "personalInformation": "Personal information",
+  "editProfile": "Edit profile",
+  "savedExams": "Saved exams",
+  "completedExams": "Completed exams",
+  "securityAccount": "Security and account",
+  "avatarPreview": "Preview avatar",
+  "changeAvatar": "Change avatar",
+  "removeAvatar": "Remove avatar",
+  "avatarUpdateFailed": "Avatar could not be updated. Try again.",
+  "administrator": "Administrator",
+  "learner": "Learner"
 }

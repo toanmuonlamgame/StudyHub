@@ -226,11 +226,23 @@ Widget _localizedResult({
   );
 }
 
-Future<void> _openProgress(WidgetTester tester, String label) async {
+Future<void> _openProgress(WidgetTester tester, String _) async {
   await tester.pumpAndSettle();
-  await tester.tap(
-    find.descendant(of: find.byType(NavigationBar), matching: find.text(label)),
-  );
+  final action = find.byKey(const ValueKey('home-quick-progress'));
+  final scrollable = find
+      .descendant(
+        of: find.byKey(const ValueKey('home-hub-list')),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        ),
+      )
+      .first;
+  await tester.scrollUntilVisible(action, 300, scrollable: scrollable);
+  await tester.ensureVisible(action);
+  await tester.pump();
+  await tester.tap(action);
   await tester.pumpAndSettle();
 }
 

@@ -398,6 +398,23 @@ a body-supplied user ID. Social login is not active; a future Google exchange
 must verify the provider ID token server-side before issuing a StudyHub session.
 See [`docs/SOCIAL_AUTH_SETUP.md`](../docs/SOCIAL_AUTH_SETUP.md).
 
+Profile endpoints include:
+
+```text
+GET    /auth/me
+PATCH  /auth/me
+PUT    /auth/me/avatar
+DELETE /auth/me/avatar
+POST   /auth/logout
+```
+
+Avatar updates accept only a validated HTTP(S) media reference without embedded
+credentials or fragments. The prepared
+`20260725120000_user_avatar` migration adds nullable `User.avatarUrl`; it is not
+applied automatically. Current-user attempts, bookmarks, and contributions
+remain separate scoped endpoints so clients do not load one oversized profile
+payload.
+
 ## Local media boundary
 
 Authenticated clients upload optional question/explanation images with

@@ -13,6 +13,11 @@ abstract interface class AuthRepository {
   Future<void> logout(String accessToken);
 }
 
+abstract interface class ProfileAvatarRepository {
+  Future<AuthUser> updateAvatar(String accessToken, String avatarUrl);
+  Future<AuthUser> removeAvatar(String accessToken);
+}
+
 class AuthRequestException implements Exception {
   const AuthRequestException(this.message, {this.code, this.field});
   final String message;

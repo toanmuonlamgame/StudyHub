@@ -2725,6 +2725,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to load advertisement'**
   String get unableToLoadAdvertisement;
+
+  /// No description provided for @exploreTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get exploreTab;
+
+  /// No description provided for @myExams.
+  ///
+  /// In en, this message translates to:
+  /// **'My Exams'**
+  String get myExams;
+
+  /// No description provided for @uploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded'**
+  String get uploaded;
+
+  /// No description provided for @saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
+
+  /// No description provided for @personalLearningLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Your personal learning library'**
+  String get personalLearningLibrary;
+
+  /// No description provided for @personalInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal information'**
+  String get personalInformation;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get editProfile;
+
+  /// No description provided for @savedExams.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved exams'**
+  String get savedExams;
+
+  /// No description provided for @completedExams.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed exams'**
+  String get completedExams;
+
+  /// No description provided for @securityAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Security and account'**
+  String get securityAccount;
+
+  /// No description provided for @avatarPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview avatar'**
+  String get avatarPreview;
+
+  /// No description provided for @changeAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Change avatar'**
+  String get changeAvatar;
+
+  /// No description provided for @removeAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove avatar'**
+  String get removeAvatar;
+
+  /// No description provided for @avatarUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar could not be updated. Try again.'**
+  String get avatarUpdateFailed;
+
+  /// No description provided for @administrator.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrator'**
+  String get administrator;
+
+  /// No description provided for @learner.
+  ///
+  /// In en, this message translates to:
+  /// **'Learner'**
+  String get learner;
 }
 
 class _AppLocalizationsDelegate

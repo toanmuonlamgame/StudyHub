@@ -30,6 +30,7 @@ test('register, current user, profile update, logout, and invalid session', asyn
   const me = await app.inject({ method: 'GET', url: '/auth/me', headers });
   assert.equal(me.statusCode, 200);
   assert.equal(me.json().user.displayName, accountA.displayName);
+  assert.equal(me.json().user.avatarUrl, null);
 
   const updated = await app.inject({
     method: 'PATCH',
@@ -39,6 +40,36 @@ test('register, current user, profile update, logout, and invalid session', asyn
   });
   assert.equal(updated.statusCode, 200);
   assert.equal(updated.json().user.displayName, 'Updated learner');
+
+  const avatar = await app.inject({
+    method: 'PUT',
+    url: '/auth/me/avatar',
+    headers,
+    payload: { avatarUrl: 'https://cdn.example.com/media/images/avatar.webp' },
+  });
+  assert.equal(avatar.statusCode, 200);
+  assert.equal(
+    avatar.json().user.avatarUrl,
+    'https://cdn.example.com/media/images/avatar.webp',
+  );
+  assert.equal(
+    (
+      await app.inject({
+        method: 'PUT',
+        url: '/auth/me/avatar',
+        headers,
+        payload: { avatarUrl: 'javascript:alert(1)' },
+      })
+    ).statusCode,
+    400,
+  );
+  const removedAvatar = await app.inject({
+    method: 'DELETE',
+    url: '/auth/me/avatar',
+    headers,
+  });
+  assert.equal(removedAvatar.statusCode, 200);
+  assert.equal(removedAvatar.json().user.avatarUrl, null);
 
   assert.equal((await app.inject({ method: 'POST', url: '/auth/logout', headers })).statusCode, 204);
   assert.equal((await app.inject({ method: 'GET', url: '/auth/me', headers })).statusCode, 401);

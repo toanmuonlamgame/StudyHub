@@ -2,7 +2,7 @@ import '../models/auth_session.dart';
 import '../models/auth_user.dart';
 import 'auth_repository.dart';
 
-class MockAuthRepository implements AuthRepository {
+class MockAuthRepository implements AuthRepository, ProfileAvatarRepository {
   final Map<String, ({AuthUser user, String password})> _users = {};
   final Map<String, AuthUser> _sessions = {};
   int _nextId = 1;
@@ -68,6 +68,28 @@ class MockAuthRepository implements AuthRepository {
   ) async {
     final current = await getCurrentUser(accessToken);
     final updated = current.copyWith(displayName: displayName.trim());
+    _sessions[accessToken] = updated;
+    _users[current.email] = (
+      user: updated,
+      password: _users[current.email]!.password,
+    );
+    return updated;
+  }
+
+  @override
+  Future<AuthUser> updateAvatar(String accessToken, String avatarUrl) =>
+      _updateUser(accessToken, (user) => user.copyWith(avatarUrl: avatarUrl));
+
+  @override
+  Future<AuthUser> removeAvatar(String accessToken) =>
+      _updateUser(accessToken, (user) => user.copyWith(removeAvatar: true));
+
+  Future<AuthUser> _updateUser(
+    String accessToken,
+    AuthUser Function(AuthUser user) update,
+  ) async {
+    final current = await getCurrentUser(accessToken);
+    final updated = update(current);
     _sessions[accessToken] = updated;
     _users[current.email] = (
       user: updated,

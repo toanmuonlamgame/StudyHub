@@ -90,6 +90,7 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
   late BookmarkRepository _bookmarkRepository;
   late bool _ownsBookmarkRepository;
   AuthController? _authController;
+  bool _wasAuthenticated = false;
   final AppNavigationController _navigationController =
       AppNavigationController();
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
@@ -132,6 +133,7 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
         repository: widget.authRepository!,
         store: widget.authSessionStore,
       );
+      _authController!.addListener(_handleAuthChanged);
       unawaited(_authController!.restore());
     }
     if (widget.initialLocaleSelection == null) {
@@ -231,7 +233,9 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
       _attemptRepository.dispose();
     }
     if (_ownsBookmarkRepository) _bookmarkRepository.dispose();
-    _authController?.dispose();
+    _authController
+      ?..removeListener(_handleAuthChanged)
+      ..dispose();
     _navigationController.dispose();
     _reminderController.dispose();
     if (_ownsAdvertisingService) _advertisingService.dispose();
@@ -300,6 +304,20 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _navigatorKey.currentState?.popUntil((route) => route.isFirst);
     });
+  }
+
+  void _handleAuthChanged() {
+    final controller = _authController;
+    if (controller == null) return;
+    final authenticated = controller.isAuthenticated;
+    if (_wasAuthenticated && !authenticated) {
+      _navigationController.selectTab(0);
+      unawaited(_progressStore.clearHistory());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigatorKey.currentState?.popUntil((route) => route.isFirst);
+      });
+    }
+    _wasAuthenticated = authenticated;
   }
 
   @override

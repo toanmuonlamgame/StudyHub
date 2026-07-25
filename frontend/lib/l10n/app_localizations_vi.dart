@@ -1476,4 +1476,53 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get unableToLoadAdvertisement => 'Không thể tải quảng cáo';
+
+  @override
+  String get exploreTab => 'Khám phá';
+
+  @override
+  String get myExams => 'Đề của tôi';
+
+  @override
+  String get uploaded => 'Đã tải lên';
+
+  @override
+  String get saved => 'Đã lưu';
+
+  @override
+  String get personalLearningLibrary => 'Thư viện học tập cá nhân';
+
+  @override
+  String get personalInformation => 'Thông tin cá nhân';
+
+  @override
+  String get editProfile => 'Chỉnh sửa hồ sơ';
+
+  @override
+  String get savedExams => 'Đề đã lưu';
+
+  @override
+  String get completedExams => 'Đề đã hoàn thành';
+
+  @override
+  String get securityAccount => 'Bảo mật và tài khoản';
+
+  @override
+  String get avatarPreview => 'Xem trước ảnh đại diện';
+
+  @override
+  String get changeAvatar => 'Đổi ảnh đại diện';
+
+  @override
+  String get removeAvatar => 'Xóa ảnh đại diện';
+
+  @override
+  String get avatarUpdateFailed =>
+      'Không thể cập nhật ảnh đại diện. Hãy thử lại.';
+
+  @override
+  String get administrator => 'Quản trị viên';
+
+  @override
+  String get learner => 'Người học';
 }

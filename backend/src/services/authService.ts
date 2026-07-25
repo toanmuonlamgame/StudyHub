@@ -11,6 +11,7 @@ export interface AuthService {
   authenticate(accessToken: string): Promise<AuthUser | null>;
   logout(accessToken: string): Promise<void>;
   updateDisplayName(userId: string, displayName: string): Promise<AuthUser>;
+  updateAvatar(userId: string, avatarUrl: string | null): Promise<AuthUser>;
 }
 
 export class AuthValidationError extends Error {
@@ -68,6 +69,29 @@ export function validateDisplayName(displayName: string): string {
     );
   }
   return normalized;
+}
+
+export function validateAvatarUrl(avatarUrl: string | null): string | null {
+  if (avatarUrl === null) return null;
+  const normalized = avatarUrl.trim();
+  if (normalized.length === 0 || normalized.length > 2048) {
+    throw new AuthValidationError('Avatar URL is invalid.');
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(normalized);
+  } catch {
+    throw new AuthValidationError('Avatar URL is invalid.');
+  }
+  if (
+    !['http:', 'https:'].includes(parsed.protocol) ||
+    parsed.username.length > 0 ||
+    parsed.password.length > 0 ||
+    parsed.hash.length > 0
+  ) {
+    throw new AuthValidationError('Avatar URL is invalid.');
+  }
+  return parsed.toString();
 }
 
 function normalizeEmail(email: string): string {

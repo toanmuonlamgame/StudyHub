@@ -1478,4 +1478,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unableToLoadAdvertisement => 'Unable to load advertisement';
+
+  @override
+  String get exploreTab => 'Explore';
+
+  @override
+  String get myExams => 'My Exams';
+
+  @override
+  String get uploaded => 'Uploaded';
+
+  @override
+  String get saved => 'Saved';
+
+  @override
+  String get personalLearningLibrary => 'Your personal learning library';
+
+  @override
+  String get personalInformation => 'Personal information';
+
+  @override
+  String get editProfile => 'Edit profile';
+
+  @override
+  String get savedExams => 'Saved exams';
+
+  @override
+  String get completedExams => 'Completed exams';
+
+  @override
+  String get securityAccount => 'Security and account';
+
+  @override
+  String get avatarPreview => 'Preview avatar';
+
+  @override
+  String get changeAvatar => 'Change avatar';
+
+  @override
+  String get removeAvatar => 'Remove avatar';
+
+  @override
+  String get avatarUpdateFailed => 'Avatar could not be updated. Try again.';
+
+  @override
+  String get administrator => 'Administrator';
+
+  @override
+  String get learner => 'Learner';
 }

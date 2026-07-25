@@ -10,9 +10,14 @@ import '../../learning/screens/question_set_detail_screen.dart';
 import '../bookmark_scope.dart';
 
 class SavedQuestionSetsScreen extends StatefulWidget {
-  const SavedQuestionSetsScreen({super.key, required this.learningRepository});
+  const SavedQuestionSetsScreen({
+    super.key,
+    required this.learningRepository,
+    this.embedded = false,
+  });
 
   final LearningRepository learningRepository;
+  final bool embedded;
 
   @override
   State<SavedQuestionSetsScreen> createState() =>
@@ -31,9 +36,8 @@ class _SavedQuestionSetsScreenState extends State<SavedQuestionSetsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(context.l10n.savedQuestionSets)),
-    body: FutureBuilder<List<QuestionSet>>(
+  Widget build(BuildContext context) {
+    final body = FutureBuilder<List<QuestionSet>>(
       future: _items,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
@@ -100,8 +104,13 @@ class _SavedQuestionSetsScreenState extends State<SavedQuestionSetsScreen> {
           ),
         );
       },
-    ),
-  );
+    );
+    if (widget.embedded) return SafeArea(top: false, child: body);
+    return Scaffold(
+      appBar: AppBar(title: Text(context.l10n.savedQuestionSets)),
+      body: body,
+    );
+  }
 
   void _reload() =>
       setState(() => _items = BookmarkScope.of(context).listBookmarks());

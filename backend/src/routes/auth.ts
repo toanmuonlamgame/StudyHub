@@ -14,6 +14,10 @@ interface UpdateProfileBody {
   displayName: string;
 }
 
+interface UpdateAvatarBody {
+  avatarUrl: string;
+}
+
 const registerBodySchema = {
   type: 'object',
   additionalProperties: false,
@@ -40,6 +44,13 @@ const updateProfileBodySchema = {
   additionalProperties: false,
   required: ['displayName'],
   properties: { displayName: { type: 'string', minLength: 1, maxLength: 80 } },
+} as const;
+
+const updateAvatarBodySchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['avatarUrl'],
+  properties: { avatarUrl: { type: 'string', minLength: 1, maxLength: 2048 } },
 } as const;
 
 export type RequireUser = (request: FastifyRequest) => Promise<AuthUser>;
@@ -97,6 +108,34 @@ export function createAuthRoutes(authService: AuthService): FastifyPluginAsync {
         }
       },
     );
+
+    app.put<{ Body: UpdateAvatarBody }>(
+      '/me/avatar',
+      { schema: { body: updateAvatarBodySchema } },
+      async (request, reply) => {
+        try {
+          const token = requireBearerToken(request);
+          const user = await authService.authenticate(token);
+          if (user === null) throw new AuthenticationRequiredError('Authentication required.');
+          return {
+            user: await authService.updateAvatar(user.id, request.body.avatarUrl),
+          };
+        } catch (error) {
+          return sendAuthError(error, reply);
+        }
+      },
+    );
+
+    app.delete('/me/avatar', async (request, reply) => {
+      try {
+        const token = requireBearerToken(request);
+        const user = await authService.authenticate(token);
+        if (user === null) throw new AuthenticationRequiredError('Authentication required.');
+        return { user: await authService.updateAvatar(user.id, null) };
+      } catch (error) {
+        return sendAuthError(error, reply);
+      }
+    });
 
     app.post('/logout', async (request, reply) => {
       try {

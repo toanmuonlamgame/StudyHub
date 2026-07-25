@@ -9,6 +9,7 @@ import {
   AuthenticationRequiredError,
   InvalidCredentialsError,
   validateDisplayName,
+  validateAvatarUrl,
   validateLogin,
   validateRegistration,
 } from './authService.js';
@@ -95,6 +96,18 @@ export class PrismaAuthService implements AuthService {
     return toAuthUser(user);
   }
 
+  async updateAvatar(userId: string, avatarUrl: string | null): Promise<AuthUser> {
+    const result = await this.prisma.user.updateMany({
+      where: { id: userId },
+      data: { avatarUrl: validateAvatarUrl(avatarUrl) },
+    });
+    if (result.count !== 1) {
+      throw new AuthenticationRequiredError('Authentication required.');
+    }
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    return toAuthUser(user);
+  }
+
   private async createSession(
     user: User,
     client: PrismaClient | Prisma.TransactionClient = this.prisma,
@@ -117,6 +130,7 @@ function toAuthUser(user: User): AuthUser {
     id: user.id,
     email: user.email,
     displayName: user.displayName,
+    avatarUrl: user.avatarUrl,
     role: user.role,
     status: user.status,
     createdAt: user.createdAt.toISOString(),

@@ -88,23 +88,25 @@ void main() {
     );
 
     expect(_navigationLabel('Home'), findsOneWidget);
-    expect(_navigationLabel('Learn'), findsOneWidget);
-    expect(_navigationLabel('Progress'), findsOneWidget);
-    expect(_navigationLabel('Settings'), findsOneWidget);
+    expect(_navigationLabel('Explore'), findsOneWidget);
+    expect(_navigationLabel('My Exams'), findsOneWidget);
+    expect(_navigationLabel('Profile'), findsOneWidget);
 
-    await tester.tap(_navigationLabel('Learn'));
+    await tester.tap(_navigationLabel('Explore'));
     await tester.pumpAndSettle();
     expect(find.text('Choose a subject'), findsOneWidget);
 
-    await tester.tap(_navigationLabel('Progress'));
+    await tester.tap(_navigationLabel('My Exams'));
     await tester.pumpAndSettle();
-    expect(find.text('Your learning overview'), findsOneWidget);
-    expect(find.text('No progress yet'), findsOneWidget);
-    expect(find.text('Start learning'), findsOneWidget);
+    expect(find.text('Your personal learning library'), findsOneWidget);
+    expect(find.text('Uploaded'), findsWidgets);
+    expect(find.text('Completed'), findsWidgets);
+    expect(find.text('Saved'), findsWidgets);
     expect(find.textContaining('streak'), findsNothing);
-    expect(find.text('0'), findsNothing);
 
-    await tester.tap(_navigationLabel('Settings'));
+    await tester.tap(_navigationLabel('Profile'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
     expect(find.text('About StudyHub'), findsOneWidget);
     expect(find.text('Privacy and security'), findsOneWidget);
@@ -133,18 +135,46 @@ void main() {
     expect(find.text('Your learning overview'), findsOneWidget);
     expect(repository.subjectLoadCount, 0);
 
-    await tester.tap(_navigationLabel('Home'));
+    await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
-    await tester.tap(_navigationLabel('Settings'));
+    await tester.tap(_navigationLabel('Profile'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
     expect(find.text('Language'), findsOneWidget);
     expect(repository.subjectLoadCount, 0);
 
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.tap(_navigationLabel('Home'));
     await tester.pumpAndSettle();
     await _startLearningFromHome(tester);
     expect(find.text('Choose a subject'), findsOneWidget);
     expect(repository.subjectLoadCount, 1);
+  });
+
+  testWidgets('My Exams and Profile fit a compact large-text surface', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 700);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
+    await tester.tap(_navigationLabel('My Exams'));
+    await tester.pumpAndSettle();
+    expect(find.text('Your personal learning library'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(_navigationLabel('Profile'));
+    await tester.pumpAndSettle();
+    expect(find.text('Personal information'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Home labels active destinations honestly', (
@@ -171,8 +201,7 @@ void main() {
       const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
     );
 
-    await tester.tap(_navigationLabel('Progress'));
-    await tester.pumpAndSettle();
+    await _tapHomeShortcut(tester, 'progress');
     final progressCta = find.byKey(const ValueKey('progress-start-learning'));
     await tester.scrollUntilVisible(
       progressCta,
@@ -221,7 +250,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
-    await tester.tap(_navigationLabel('Learn'));
+    await tester.tap(_navigationLabel('Explore'));
     await tester.pumpAndSettle();
     expect(find.text('Choose a subject'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -234,15 +263,18 @@ void main() {
       const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
     );
 
-    await tester.tap(_navigationLabel('Settings'));
+    await tester.tap(_navigationLabel('Profile'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Tiếng Việt'));
     await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
 
     expect(find.text('Trang chủ'), findsOneWidget);
-    expect(find.text('Học tập'), findsOneWidget);
-    expect(find.text('Cài đặt'), findsWidgets);
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    expect(find.text('Khám phá'), findsOneWidget);
+    expect(find.text('Hồ sơ'), findsWidgets);
 
     await tester.tap(_navigationLabel('Trang chủ'));
     await tester.pumpAndSettle();
@@ -268,7 +300,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Bắt đầu buổi học'), findsOneWidget);
-    expect(find.text('Học tập'), findsOneWidget);
+    expect(find.text('Khám phá'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -278,7 +310,9 @@ void main() {
     await tester.pumpWidget(
       const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
     );
-    await tester.tap(_navigationLabel('Settings'));
+    await tester.tap(_navigationLabel('Profile'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Tiếng Việt'));
     await tester.pumpAndSettle();
@@ -287,8 +321,8 @@ void main() {
     await tester.pumpWidget(const StudyHubApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('Học tập'), findsOneWidget);
-    expect(_navigationLabel('Cài đặt'), findsOneWidget);
+    expect(find.text('Khám phá'), findsOneWidget);
+    expect(_navigationLabel('Hồ sơ'), findsOneWidget);
   });
 
   testWidgets('browses subjects and question sets to open a quiz', (

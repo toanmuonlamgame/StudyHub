@@ -117,10 +117,23 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 100));
 
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Profile'),
+      ),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pump(const Duration(milliseconds: 400));
-    await tester.fling(find.byType(ListView), const Offset(0, -1600), 1200);
-    await tester.pump(const Duration(milliseconds: 500));
+    for (var i = 0; i < 3; i++) {
+      await tester.flingFrom(
+        const Offset(400, 500),
+        const Offset(0, -1200),
+        1600,
+      );
+      await tester.pump(const Duration(milliseconds: 400));
+    }
 
     expect(find.text('Advertising'), findsOneWidget);
     expect(find.text('Ads disabled'), findsOneWidget);

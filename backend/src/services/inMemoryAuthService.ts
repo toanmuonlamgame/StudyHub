@@ -6,6 +6,7 @@ import {
   AuthenticationRequiredError,
   InvalidCredentialsError,
   validateDisplayName,
+  validateAvatarUrl,
   validateLogin,
   validateRegistration,
 } from './authService.js';
@@ -37,6 +38,7 @@ export class InMemoryAuthService implements AuthService {
       id: `user_${this.nextUserNumber++}`,
       email: normalized.email,
       displayName: normalized.displayName,
+      avatarUrl: null,
       passwordHash: await hashPassword(normalized.password),
       role: 'user',
       status: 'active',
@@ -84,6 +86,14 @@ export class InMemoryAuthService implements AuthService {
     return toAuthUser(updated);
   }
 
+  async updateAvatar(userId: string, avatarUrl: string | null): Promise<AuthUser> {
+    const user = this.usersById.get(userId);
+    if (user === undefined) throw new AuthenticationRequiredError('Authentication required.');
+    const updated = { ...user, avatarUrl: validateAvatarUrl(avatarUrl) };
+    this.usersById.set(userId, updated);
+    return toAuthUser(updated);
+  }
+
   private createSession(user: StoredUser): AuthSessionResult {
     const accessToken = createAccessToken();
     const expiresAt = new Date(Date.now() + sessionDurationMs);
@@ -97,6 +107,7 @@ function toAuthUser(user: StoredUser): AuthUser {
     id: user.id,
     email: user.email,
     displayName: user.displayName,
+    avatarUrl: user.avatarUrl,
     role: user.role,
     status: user.status,
     createdAt: user.createdAt,

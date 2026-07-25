@@ -8,7 +8,8 @@ import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/screens/subject_list_screen.dart';
 import '../features/materials/screens/study_material_list_screen.dart';
 import '../features/progress/progress_screen.dart';
-import '../features/settings/settings_screen.dart';
+import '../features/my_exams/my_exams_screen.dart';
+import '../features/profile/profile_screen.dart';
 import '../features/saved/screens/saved_question_sets_screen.dart';
 import '../l10n/app_localizations_x.dart';
 import 'app_navigation.dart';
@@ -92,17 +93,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             NavigationDestination(
               icon: const Icon(Icons.menu_book_outlined),
               selectedIcon: const Icon(Icons.menu_book_rounded),
-              label: l10n.learnTab,
+              label: l10n.exploreTab,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.insights_outlined),
-              selectedIcon: const Icon(Icons.insights_rounded),
-              label: l10n.progressTab,
+              icon: const Icon(Icons.folder_copy_outlined),
+              selectedIcon: const Icon(Icons.folder_copy_rounded),
+              label: l10n.myExams,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.settings_outlined),
-              selectedIcon: const Icon(Icons.settings_rounded),
-              label: l10n.settingsTab,
+              icon: const Icon(Icons.person_outline_rounded),
+              selectedIcon: const Icon(Icons.person_rounded),
+              label: l10n.profile,
             ),
           ],
         ),
@@ -130,12 +131,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return switch (index) {
       0 => _buildHome(),
       1 => SubjectListScreen(learningRepository: widget.learningRepository),
-      2 => ProgressScreen(onStartLearning: () => _selectTab(1)),
-      3 => SettingsScreen(
+      2 => MyExamsScreen(
         learningRepository: widget.learningRepository,
+        contributionRepository: widget.contributionRepository,
+      ),
+      3 => ProfileScreen(
+        learningRepository: widget.learningRepository,
+        contributionRepository: widget.contributionRepository,
         localeSelection: widget.localeSelection,
         onLocaleSelected: widget.onLocaleSelected,
-        contributionRepository: widget.contributionRepository,
       ),
       _ => throw RangeError.index(index, const [0, 1, 2, 3]),
     };
@@ -144,7 +148,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget _buildHome() {
     return HomeScreen(
       onStartLearning: () => _selectTab(1),
-      onOpenProgress: () => _selectTab(2),
+      onOpenProgress: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (progressContext) => ProgressScreen(
+            onStartLearning: () {
+              _selectTab(1);
+              Navigator.of(progressContext).pop();
+            },
+          ),
+        ),
+      ),
       onOpenStudyMaterials: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => StudyMaterialListScreen(

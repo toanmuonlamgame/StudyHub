@@ -93,6 +93,43 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateAvatar(String avatarUrl) => _updateAvatar(
+    (repository, token) => repository.updateAvatar(token, avatarUrl),
+  );
+
+  Future<bool> removeAvatar() =>
+      _updateAvatar((repository, token) => repository.removeAvatar(token));
+
+  Future<bool> _updateAvatar(
+    Future<AuthUser> Function(ProfileAvatarRepository repository, String token)
+    request,
+  ) async {
+    final session = _session;
+    final repository = _repository;
+    if (session == null || repository is! ProfileAvatarRepository) return false;
+    final avatarRepository = repository as ProfileAvatarRepository;
+    _errorCode = null;
+    try {
+      final user = await request(avatarRepository, session.accessToken);
+      _session = AuthSession(
+        user: user,
+        accessToken: session.accessToken,
+        expiresAt: session.expiresAt,
+      );
+      await _store.save(_session!);
+      notifyListeners();
+      return true;
+    } on AuthRequestException catch (error) {
+      _errorCode = error.code ?? 'REQUEST_FAILED';
+      notifyListeners();
+      return false;
+    } catch (_) {
+      _errorCode = 'REQUEST_FAILED';
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     final token = _session?.accessToken;
     _session = null;

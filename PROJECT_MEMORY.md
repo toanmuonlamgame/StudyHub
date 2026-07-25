@@ -287,3 +287,18 @@ Handoff summary:
 - Ads never gate learning content or appear in auth, contribution, active quiz,
   or answer-review content. Production requests require real provider IDs and a
   resolved consent decision; test builds use only official sample IDs.
+
+## Account And Personal Learning Area
+
+- The primary mobile shell is Home, Explore, My Exams, and Profile.
+- My Exams is the personal content area for Uploaded, Completed, and Saved
+  question sets; History is no longer a separate top-level destination.
+- Profile identity comes from the authenticated backend user. Avatar media is
+  selected through the system gallery, uploaded through `MediaRepository`, and
+  stored as a safe nullable URL/reference on the user.
+- Attempts, bookmarks, and contributions remain owned by the authenticated user
+  and ownership is enforced by Fastify services, never by Flutter route guards.
+- Logout clears the local session and user-specific local progress, resets the
+  top-level navigation, and invalidates the backend session when reachable.
+- Production avatar media still requires object storage; local storage remains
+  a development adapter.

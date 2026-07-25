@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/widgets/studyhub_ui.dart';
 import '../../../l10n/app_localizations_x.dart';
@@ -13,10 +14,12 @@ class ContributionManagementScreen extends StatefulWidget {
     super.key,
     required this.learningRepository,
     required this.contributionRepository,
+    this.embedded = false,
   });
 
   final LearningRepository learningRepository;
   final ContributionRepository contributionRepository;
+  final bool embedded;
 
   @override
   State<ContributionManagementScreen> createState() =>
@@ -35,70 +38,86 @@ class _ContributionManagementScreenState
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(context.l10n.myContributions)),
-    floatingActionButton: FloatingActionButton.extended(
-      onPressed: _create,
-      icon: const Icon(Icons.add_rounded),
-      label: Text(context.l10n.contributionCreateDraft),
-    ),
-    body: FutureBuilder<List<ContributionSubmission>>(
+  Widget build(BuildContext context) {
+    final body = FutureBuilder<List<ContributionSubmission>>(
       future: _submissions,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return StudyHubStateView(
-            icon: Icons.cloud_off_outlined,
-            title: context.l10n.contributionLoadError,
-            message: context.l10n.checkConnectionBody,
-            tone: StudyHubStateTone.error,
-            action: FilledButton.icon(
-              onPressed: () => setState(_reload),
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(context.l10n.tryAgain),
-            ),
-          );
-        }
-        final submissions = snapshot.data ?? const [];
-        if (submissions.isEmpty) {
-          return StudyHubStateView(
-            icon: Icons.post_add_outlined,
-            title: context.l10n.contributionNoItems,
-            message: context.l10n.contributionEmptyBody,
-          );
-        }
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 680),
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
-              itemCount: submissions.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final submission = submissions[index];
-                final busy = _busyIds.contains(submission.id);
-                return _SubmissionCard(
-                  submission: submission,
-                  statusLabel: _statusLabel(submission.status),
-                  busy: busy,
-                  onOpen: () => _open(submission),
-                  onEdit: submission.canEdit ? () => _edit(submission) : null,
-                  onDelete: submission.canEdit
-                      ? () => _delete(submission)
-                      : null,
-                  onSubmit: submission.canEdit
-                      ? () => _submit(submission)
-                      : null,
-                );
-              },
-            ),
-          ),
-        );
-      },
-    ),
+      builder: _buildSubmissions,
+    );
+    if (widget.embedded) {
+      return Scaffold(
+        body: SafeArea(top: false, child: body),
+        floatingActionButton: _createButton(),
+      );
+    }
+    return Scaffold(
+      appBar: AppBar(title: Text(context.l10n.myContributions)),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _create,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(context.l10n.contributionCreateDraft),
+      ),
+      body: body,
+    );
+  }
+
+  Widget _createButton() => FloatingActionButton.small(
+    onPressed: _create,
+    tooltip: context.l10n.contributionCreateDraft,
+    child: const Icon(Icons.add_rounded),
   );
+
+  Widget _buildSubmissions(
+    BuildContext context,
+    AsyncSnapshot<List<ContributionSubmission>> snapshot,
+  ) {
+    if (snapshot.connectionState != ConnectionState.done) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (snapshot.hasError) {
+      return StudyHubStateView(
+        icon: Icons.cloud_off_outlined,
+        title: context.l10n.contributionLoadError,
+        message: context.l10n.checkConnectionBody,
+        tone: StudyHubStateTone.error,
+        action: FilledButton.icon(
+          onPressed: () => setState(_reload),
+          icon: const Icon(Icons.refresh_rounded),
+          label: Text(context.l10n.tryAgain),
+        ),
+      );
+    }
+    final submissions = snapshot.data ?? const [];
+    if (submissions.isEmpty) {
+      return StudyHubStateView(
+        icon: Icons.post_add_outlined,
+        title: context.l10n.contributionNoItems,
+        message: context.l10n.contributionEmptyBody,
+      );
+    }
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 680),
+        child: ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+          itemCount: submissions.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 10),
+          itemBuilder: (context, index) {
+            final submission = submissions[index];
+            final busy = _busyIds.contains(submission.id);
+            return _SubmissionCard(
+              submission: submission,
+              statusLabel: _statusLabel(submission.status),
+              busy: busy,
+              onOpen: () => _open(submission),
+              onEdit: submission.canEdit ? () => _edit(submission) : null,
+              onDelete: submission.canEdit ? () => _delete(submission) : null,
+              onSubmit: submission.canEdit ? () => _submit(submission) : null,
+            );
+          },
+        ),
+      ),
+    );
+  }
 
   void _reload() =>
       _submissions = widget.contributionRepository.listSubmissions();
@@ -246,6 +265,9 @@ class _SubmissionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dateFormat = DateFormat.yMMMd(
+      Localizations.localeOf(context).toLanguageTag(),
+    );
     final (statusIcon, statusColor) = switch (submission.status) {
       ContributionStatus.draft => (
         Icons.edit_note_rounded,
@@ -296,6 +318,26 @@ class _SubmissionCard extends StatelessWidget {
                   submission.draft.questions.length,
                 ),
               ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 12,
+                runSpacing: 4,
+                children: [
+                  _SubmissionMetadata(
+                    icon: Icons.school_outlined,
+                    label: submission.draft.subjectId,
+                  ),
+                  if (submission.draft.topicId case final topicId?)
+                    _SubmissionMetadata(
+                      icon: Icons.topic_outlined,
+                      label: topicId,
+                    ),
+                  _SubmissionMetadata(
+                    icon: Icons.calendar_today_outlined,
+                    label: dateFormat.format(submission.createdAt.toLocal()),
+                  ),
+                ],
+              ),
               if (submission.rejectionReason case final reason?) ...[
                 const SizedBox(height: 8),
                 Text(
@@ -344,4 +386,31 @@ class _SubmissionCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SubmissionMetadata extends StatelessWidget {
+  const _SubmissionMetadata({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(
+        icon,
+        size: 16,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      const SizedBox(width: 4),
+      Flexible(
+        child: Text(
+          label,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ),
+    ],
+  );
 }

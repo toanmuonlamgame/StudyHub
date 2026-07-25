@@ -7,7 +7,7 @@ import '../models/auth_session.dart';
 import '../models/auth_user.dart';
 import 'auth_repository.dart';
 
-class ApiAuthRepository implements AuthRepository {
+class ApiAuthRepository implements AuthRepository, ProfileAvatarRepository {
   ApiAuthRepository({
     required String baseUrl,
     http.Client? client,
@@ -74,6 +74,31 @@ class ApiAuthRepository implements AuthRepository {
       requestTimeout,
     );
     if (response.statusCode != 204) _throwResponseError(response);
+  }
+
+  @override
+  Future<AuthUser> updateAvatar(String accessToken, String avatarUrl) async {
+    final response = await withApiTimeout(
+      _client.put(
+        _baseUri.resolve('auth/me/avatar'),
+        headers: _authHeaders(accessToken),
+        body: jsonEncode({'avatarUrl': avatarUrl}),
+      ),
+      requestTimeout,
+    );
+    return _readUser(_decodeSuccess(response));
+  }
+
+  @override
+  Future<AuthUser> removeAvatar(String accessToken) async {
+    final response = await withApiTimeout(
+      _client.delete(
+        _baseUri.resolve('auth/me/avatar'),
+        headers: _authHeaders(accessToken),
+      ),
+      requestTimeout,
+    );
+    return _readUser(_decodeSuccess(response));
   }
 
   Future<AuthSession> _sessionRequest(

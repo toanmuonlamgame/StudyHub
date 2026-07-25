@@ -487,11 +487,23 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [x] Expose History, Saved, Contributions, Settings, and logout from the account experience.
 - [x] Make Saved typed, retryable, removable, and reopenable in the learner flow.
 - [x] Add contribution single-flight actions and read-only status/detail review.
-- [x] Keep the four-tab mobile shell and expose secondary destinations without overcrowding it.
+- [x] Use the four-tab shell: Home, Explore, My Exams, and Profile.
 - [x] Document the secure Google provider setup boundary; keep unavailable social login disabled.
 - [ ] Apply pending Prisma migrations and run database smoke tests manually.
 - [ ] Run compact Android keyboard, large-text, and complete account-flow verification.
 - [ ] Configure and implement Google sign-in only after backend token exchange and provider clients are approved.
+
+## Account And My Exams Completion
+- [x] Show authenticated profile identity, role, account actions, and real summary counts.
+- [x] Add gallery avatar selection, preview, validation, replace/remove, and image fallback.
+- [x] Centralize Uploaded, Completed, and Saved content under My Exams.
+- [x] Preserve contribution lifecycle actions, attempt review, and bookmark removal.
+- [x] Reset protected navigation and local user-specific progress state on logout.
+- [x] Keep ownership checks server-side for attempts, bookmarks, and submissions.
+- [ ] Review and apply the nullable `User.avatarUrl` migration manually.
+- [ ] Replace local media storage with production object storage before release.
+- [ ] Add server-side paginated `/me/*` aliases only when current protected lists grow
+  beyond the existing scoped Learning API contracts.
 
 ## Advertising Boundary
 
