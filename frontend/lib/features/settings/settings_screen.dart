@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../app/app_navigation.dart';
 import '../../core/app_info.dart';
 import '../../core/app_locale.dart';
+import '../../core/text_size_preferences.dart';
 import '../../core/widgets/studyhub_ui.dart';
 import '../../l10n/app_localizations_x.dart';
 import '../attempts/attempt_repository_scope.dart';
@@ -20,6 +23,10 @@ import '../notifications/study_reminder_scope.dart';
 import '../advertising/advertising_scope.dart';
 
 class SettingsScreen extends StatelessWidget {
+  static const _supportEmail = String.fromEnvironment('STUDYHUB_SUPPORT_EMAIL');
+  static const _privacyUrl = String.fromEnvironment('STUDYHUB_PRIVACY_URL');
+  static const _termsUrl = String.fromEnvironment('STUDYHUB_TERMS_URL');
+  static const _updatesUrl = String.fromEnvironment('STUDYHUB_UPDATES_URL');
   const SettingsScreen({
     super.key,
     required this.localeSelection,
@@ -37,6 +44,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authController = AuthScope.maybeOf(context);
     final user = authController?.user;
+    final textSize = TextSizePreferences.maybeOf(context);
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.settingsTab)),
       body: ListView(
@@ -132,6 +140,52 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
+          if (textSize != null) ...[
+            StudyHubSectionHeader(title: context.l10n.appearance),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<ThemeMode>(
+              initialValue: textSize.themeMode,
+              isExpanded: true,
+              decoration: InputDecoration(labelText: context.l10n.appearance),
+              items: [
+                for (final mode in ThemeMode.values)
+                  DropdownMenuItem(
+                    value: mode,
+                    child: Text(switch (mode) {
+                      ThemeMode.system => context.l10n.textSizeSystem,
+                      ThemeMode.light => context.l10n.lightAppearance,
+                      ThemeMode.dark => context.l10n.darkAppearance,
+                    }),
+                  ),
+              ],
+              onChanged: (mode) {
+                if (mode != null) textSize.onThemeChanged(mode);
+              },
+            ),
+            const SizedBox(height: 24),
+            StudyHubSectionHeader(title: context.l10n.textSize),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<AppTextSize>(
+              initialValue: textSize.value,
+              isExpanded: true,
+              decoration: InputDecoration(labelText: context.l10n.textSize),
+              items: [
+                for (final size in AppTextSize.values)
+                  DropdownMenuItem(
+                    value: size,
+                    child: Text(switch (size) {
+                      AppTextSize.system => context.l10n.textSizeSystem,
+                      AppTextSize.large => context.l10n.textSizeLarge,
+                      AppTextSize.extraLarge => context.l10n.textSizeExtraLarge,
+                    }),
+                  ),
+              ],
+              onChanged: (size) {
+                if (size != null) textSize.onChanged(size);
+              },
+            ),
+            const SizedBox(height: 24),
+          ],
           StudyHubSectionHeader(title: context.l10n.languageSection),
           const SizedBox(height: 10),
           Card(
@@ -179,7 +233,77 @@ class SettingsScreen extends StatelessWidget {
                   leading: const Icon(Icons.security_outlined),
                   title: Text(context.l10n.privacySecurity),
                   subtitle: Text(context.l10n.privacySecurityNote),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _showInfo(
+                    context,
+                    context.l10n.privacySecurity,
+                    context.l10n.studyHubPrivacyBody,
+                    _privacyUrl,
+                  ),
                 ),
+                ListTile(
+                  leading: const Icon(Icons.rule_outlined),
+                  title: Text(context.l10n.studyHubUsageRules),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _showInfo(
+                    context,
+                    context.l10n.studyHubUsageRules,
+                    context.l10n.studyHubUsageBody,
+                    _termsUrl,
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.newspaper_outlined),
+                  title: Text(context.l10n.studyHubUpdates),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _showInfo(
+                    context,
+                    context.l10n.studyHubUpdates,
+                    context.l10n.studyHubUpdatesBody,
+                    _updatesUrl,
+                  ),
+                ),
+                if (RegExp(
+                  r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+                ).hasMatch(_supportEmail)) ...[
+                  const Divider(height: 1, indent: 64),
+                  ListTile(
+                    leading: const Icon(Icons.support_agent_outlined),
+                    title: Text(context.l10n.contactSupport),
+                    subtitle: Text(_supportEmail),
+                    onTap: () => _openLink(
+                      context,
+                      Uri(
+                        scheme: 'mailto',
+                        path: _supportEmail,
+                        query:
+                            'subject=${Uri.encodeComponent(context.l10n.reportIssueEmail)}',
+                      ),
+                    ),
+                    trailing: IconButton(
+                      tooltip: context.l10n.copySupportEmail,
+                      icon: const Icon(Icons.copy_outlined),
+                      onPressed: () async {
+                        try {
+                          await Clipboard.setData(
+                            const ClipboardData(text: _supportEmail),
+                          );
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(context.l10n.supportEmailCopied),
+                            ),
+                          );
+                        } catch (_) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: SelectableText(_supportEmail)),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -192,6 +316,61 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 10),
           const _AdvertisingSettingsCard(),
         ],
+      ),
+    );
+  }
+
+  Future<void> _openLink(BuildContext context, Uri uri) async {
+    try {
+      if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+    } catch (_) {
+      // The platform may not have an email or browser handler.
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.unableToOpenPublicLink)),
+    );
+  }
+
+  void _showInfo(
+    BuildContext context,
+    String title,
+    String body,
+    String publicUrl,
+  ) {
+    final uri = Uri.tryParse(publicUrl);
+    final canOpen =
+        uri != null &&
+        uri.scheme == 'https' &&
+        uri.host.isNotEmpty &&
+        uri.userInfo.isEmpty;
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: Text(title)),
+          body: SafeArea(
+            top: false,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: ListView(
+                  padding: const EdgeInsets.all(20),
+                  children: [
+                    SelectableText(body),
+                    if (canOpen) ...[
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: () => _openLink(context, uri),
+                        icon: const Icon(Icons.open_in_new),
+                        label: Text(context.l10n.openOfficialPage),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

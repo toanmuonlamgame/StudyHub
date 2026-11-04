@@ -12,12 +12,14 @@ import {
   validateAvatarUrl,
   validateLogin,
   validateRegistration,
+  validateNewPassword,
 } from './authService.js';
 import {
   createAccessToken,
   hashAccessToken,
   hashPassword,
   verifyPassword,
+  missingAccountHash,
 } from './authCrypto.js';
 
 const sessionDurationMs = 30 * 24 * 60 * 60 * 1000;
@@ -54,13 +56,41 @@ export class PrismaAuthService implements AuthService {
   async login(input: LoginInput): Promise<AuthSessionResult> {
     const normalized = validateLogin(input);
     const user = await this.prisma.user.findUnique({ where: { email: normalized.email } });
-    if (user === null || !(await verifyPassword(normalized.password, user.passwordHash))) {
+    const valid = await verifyPassword(normalized.password, user?.passwordHash ?? missingAccountHash);
+    if (user === null || !valid) {
       throw new InvalidCredentialsError('Email or password is incorrect.');
     }
     if (user.status === 'disabled') {
       throw new AccountDisabledError('This account is disabled.');
     }
-    return this.createSession(user);
+    return this.prisma.$transaction(async (tx) => {
+      // Serialize issuing a session against password changes on this user.
+      const stillCurrent = await tx.user.updateMany({
+        where: { id: user.id, passwordHash: user.passwordHash, status: 'active' },
+        data: { passwordHash: user.passwordHash },
+      });
+      if (stillCurrent.count !== 1) {
+        throw new InvalidCredentialsError('Email or password is incorrect.');
+      }
+      return this.createSession(user, tx);
+    });
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    validateNewPassword(currentPassword, newPassword);
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !(await verifyPassword(currentPassword, user.passwordHash))) {
+      throw new InvalidCredentialsError('Current password is incorrect.');
+    }
+    const passwordHash = await hashPassword(newPassword);
+    await this.prisma.$transaction(async (tx) => {
+      const changed = await tx.user.updateMany({
+        where: { id: userId, passwordHash: user.passwordHash, status: 'active' },
+        data: { passwordHash },
+      });
+      if (changed.count !== 1) throw new InvalidCredentialsError('Current password is incorrect.');
+      await tx.authSession.deleteMany({ where: { userId } });
+    });
   }
 
   async authenticate(accessToken: string): Promise<AuthUser | null> {
@@ -71,7 +101,7 @@ export class PrismaAuthService implements AuthService {
     });
     if (session === null) return null;
     if (session.expiresAt.getTime() <= Date.now()) {
-      await this.prisma.authSession.delete({ where: { id: session.id } });
+      await this.prisma.authSession.deleteMany({ where: { id: session.id } });
       return null;
     }
     return session.user.status === 'disabled' ? null : toAuthUser(session.user);

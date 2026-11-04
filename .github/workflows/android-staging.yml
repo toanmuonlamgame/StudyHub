@@ -20,6 +20,10 @@ jobs:
         working-directory: frontend
     env:
       STUDYHUB_STAGING_ORIGIN: ${{ inputs.api_origin }}
+      STUDYHUB_SUPPORT_EMAIL: ${{ vars.STUDYHUB_SUPPORT_EMAIL }}
+      STUDYHUB_PRIVACY_URL: ${{ vars.STUDYHUB_PRIVACY_URL }}
+      STUDYHUB_TERMS_URL: ${{ vars.STUDYHUB_TERMS_URL }}
+      STUDYHUB_UPDATES_URL: ${{ vars.STUDYHUB_UPDATES_URL }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -49,7 +53,11 @@ jobs:
         run: |
           flutter build apk --release --no-pub --split-per-abi \
             --dart-define=STUDYHUB_LEARNING_SOURCE=api \
-            "--dart-define=STUDYHUB_API_BASE_URL=$STUDYHUB_STAGING_ORIGIN"
+            "--dart-define=STUDYHUB_API_BASE_URL=$STUDYHUB_STAGING_ORIGIN" \
+            "--dart-define=STUDYHUB_SUPPORT_EMAIL=$STUDYHUB_SUPPORT_EMAIL" \
+            "--dart-define=STUDYHUB_PRIVACY_URL=$STUDYHUB_PRIVACY_URL" \
+            "--dart-define=STUDYHUB_TERMS_URL=$STUDYHUB_TERMS_URL" \
+            "--dart-define=STUDYHUB_UPDATES_URL=$STUDYHUB_UPDATES_URL"
       - uses: actions/upload-artifact@v4
         with:
           name: studyhub-staging-arm64

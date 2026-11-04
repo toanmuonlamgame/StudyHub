@@ -13,6 +13,7 @@ class QuestionSetDraft {
   const QuestionSetDraft({
     this.subjectId = '',
     this.topicId,
+    this.language,
     this.title = '',
     this.description = '',
     this.questions = const [],
@@ -20,12 +21,14 @@ class QuestionSetDraft {
 
   final String subjectId;
   final String? topicId;
+  final String? language;
   final String title;
   final String description;
   final List<QuestionDraft> questions;
 
   bool get isEmpty =>
       subjectId.isEmpty &&
+      language == null &&
       title.trim().isEmpty &&
       description.trim().isEmpty &&
       questions.isEmpty;
@@ -33,6 +36,7 @@ class QuestionSetDraft {
   QuestionSetDraft copyWith({
     String? subjectId,
     Object? topicId = _unchanged,
+    Object? language = _unchanged,
     String? title,
     String? description,
     List<QuestionDraft>? questions,
@@ -43,6 +47,9 @@ class QuestionSetDraft {
           ? this.topicId
           : topicId as String?,
       title: title ?? this.title,
+      language: identical(language, _unchanged)
+          ? this.language
+          : language as String?,
       description: description ?? this.description,
       questions: questions ?? this.questions,
     );
@@ -51,6 +58,7 @@ class QuestionSetDraft {
   Map<String, Object?> toJson() => {
     'subjectId': subjectId,
     if (topicId != null) 'topicId': topicId,
+    if (language != null) 'language': language,
     'title': title.trim(),
     'description': description.trim(),
     'questions': questions

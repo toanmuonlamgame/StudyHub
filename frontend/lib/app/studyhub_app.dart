@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../core/app_locale.dart';
 import '../core/app_theme.dart';
+import '../core/text_size_preferences.dart';
 import '../core/locale_preference_store.dart';
 import '../features/learning/repositories/learning_repository.dart';
 import '../features/learning/repositories/mock_learning_repository.dart';
@@ -82,6 +83,10 @@ class StudyHubApp extends StatefulWidget {
 class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
   late AppLocaleSelection _localeSelection;
   bool _localeSelectedInSession = false;
+  AppTextSize _textSize = AppTextSize.system;
+  bool _textSizeSelected = false;
+  ThemeMode _themeMode = ThemeMode.system;
+  bool _themeSelected = false;
   late ProgressStore _progressStore;
   late bool _ownsProgressStore;
   late AttemptRepository _attemptRepository;
@@ -102,6 +107,8 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    unawaited(_loadTextSize());
+    unawaited(_loadTheme());
     WidgetsBinding.instance.addObserver(this);
     _ownsAdvertisingService = widget.advertisingService == null;
     _advertisingService =
@@ -178,10 +185,26 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
                     title: 'StudyHub',
                     debugShowCheckedModeBanner: false,
                     theme: AppTheme.light,
+                    darkTheme: AppTheme.dark,
+                    themeMode: _themeMode,
                     locale: _localeSelection.locale,
                     supportedLocales: AppLocalizations.supportedLocales,
                     localizationsDelegates:
                         AppLocalizations.localizationsDelegates,
+                    builder: (context, child) => TextSizePreferences(
+                      value: _textSize,
+                      onChanged: _selectTextSize,
+                      themeMode: _themeMode,
+                      onThemeChanged: _selectTheme,
+                      child: MediaQuery.withClampedTextScaling(
+                        minScaleFactor: switch (_textSize) {
+                          AppTextSize.system => 0,
+                          AppTextSize.large => 1.15,
+                          AppTextSize.extraLarge => 1.30,
+                        },
+                        child: child!,
+                      ),
+                    ),
                     home: _buildHome(),
                   ),
                 ),
@@ -213,6 +236,32 @@ class _StudyHubAppState extends State<StudyHubApp> with WidgetsBindingObserver {
             : AuthScreen(controller: controller);
       },
     );
+  }
+
+  Future<void> _loadTextSize() async {
+    final value = await TextSizePreferences.load();
+    if (mounted && !_textSizeSelected && value != _textSize) {
+      setState(() => _textSize = value);
+    }
+  }
+
+  void _selectTextSize(AppTextSize value) {
+    _textSizeSelected = true;
+    setState(() => _textSize = value);
+    unawaited(TextSizePreferences.save(value));
+  }
+
+  Future<void> _loadTheme() async {
+    final value = await TextSizePreferences.loadTheme();
+    if (mounted && !_themeSelected && value != _themeMode) {
+      setState(() => _themeMode = value);
+    }
+  }
+
+  void _selectTheme(ThemeMode value) {
+    _themeSelected = true;
+    setState(() => _themeMode = value);
+    unawaited(TextSizePreferences.saveTheme(value));
   }
 
   Widget _buildMainNavigation() => MainNavigationScreen(

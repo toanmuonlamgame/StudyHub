@@ -14,10 +14,14 @@ class SavedQuestionSetsScreen extends StatefulWidget {
     super.key,
     required this.learningRepository,
     this.embedded = false,
+    this.collectionIds,
+    this.collectionTitle,
   });
 
   final LearningRepository learningRepository;
   final bool embedded;
+  final Set<String>? collectionIds;
+  final String? collectionTitle;
 
   @override
   State<SavedQuestionSetsScreen> createState() =>
@@ -56,7 +60,11 @@ class _SavedQuestionSetsScreenState extends State<SavedQuestionSetsScreen> {
             ),
           );
         }
-        final items = snapshot.data ?? const <QuestionSet>[];
+        final saved = snapshot.data ?? const <QuestionSet>[];
+        final collection = widget.collectionIds;
+        final items = collection == null
+            ? saved
+            : saved.where((item) => collection.contains(item.id)).toList();
         if (items.isEmpty) {
           return StudyHubStateView(
             icon: Icons.bookmark_border_rounded,
@@ -85,18 +93,22 @@ class _SavedQuestionSetsScreenState extends State<SavedQuestionSetsScreen> {
                     onTap: removing || _openingId != null
                         ? null
                         : () => _openQuestionSet(item),
-                    trailing: IconButton(
-                      tooltip: context.l10n.removeFromSaved,
-                      onPressed: removing || opening
-                          ? null
-                          : () => _remove(item),
-                      icon: removing || opening
-                          ? const SizedBox.square(
-                              dimension: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.bookmark_remove_outlined),
-                    ),
+                    trailing: collection != null
+                        ? const Icon(Icons.chevron_right)
+                        : IconButton(
+                            tooltip: context.l10n.removeFromSaved,
+                            onPressed: removing || opening
+                                ? null
+                                : () => _remove(item),
+                            icon: removing || opening
+                                ? const SizedBox.square(
+                                    dimension: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.bookmark_remove_outlined),
+                          ),
                   ),
                 );
               },
@@ -107,7 +119,9 @@ class _SavedQuestionSetsScreenState extends State<SavedQuestionSetsScreen> {
     );
     if (widget.embedded) return SafeArea(top: false, child: body);
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.savedQuestionSets)),
+      appBar: AppBar(
+        title: Text(widget.collectionTitle ?? context.l10n.savedQuestionSets),
+      ),
       body: body,
     );
   }

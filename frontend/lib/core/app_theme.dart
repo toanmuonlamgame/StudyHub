@@ -5,6 +5,36 @@ import 'app_design_tokens.dart';
 class AppTheme {
   const AppTheme._();
 
+  static ThemeData get dark {
+    final colors = ColorScheme.fromSeed(
+      seedColor: AppColors.brand,
+      secondary: const Color(0xFF8AD6BC),
+      tertiary: const Color(0xFFF4BD8C),
+      brightness: Brightness.dark,
+    );
+    final base = ThemeData(colorScheme: colors, useMaterial3: true);
+    return base.copyWith(
+      navigationBarTheme: NavigationBarThemeData(
+        height: 76,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        indicatorColor: colors.primaryContainer,
+      ),
+      filledButtonTheme: light.filledButtonTheme,
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colors.surfaceContainerLow,
+        border: const OutlineInputBorder(),
+      ),
+      cardTheme: CardThemeData(
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
   static ThemeData get light {
     const primary = AppColors.brand;
     const success = AppColors.teal;

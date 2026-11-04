@@ -57,9 +57,36 @@ export type RequireUser = (request: FastifyRequest) => Promise<AuthUser>;
 
 export function createAuthRoutes(authService: AuthService): FastifyPluginAsync {
   return async function authRoutes(app): Promise<void> {
+    // Bound memory and reject excess work before password hashing.
+    const windows = new Map<string, { count: number; until: number }>();
+    let nextCleanup = 0;
+    const limit = (action: string, maximum: number) =>
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const now = Date.now();
+        if (now >= nextCleanup) {
+          for (const [key, window] of windows) {
+            if (window.until <= now) windows.delete(key);
+          }
+          nextCleanup = now + 60_000;
+        }
+        const key = `${action}:${request.ip}`;
+        let window = windows.get(key);
+        if (!window || window.until <= now) {
+          if (!window && windows.size >= 10_000) {
+            return rejectAuthRate(reply, 60);
+          }
+          window = { count: 0, until: now + 60_000 };
+          windows.set(key, window);
+        }
+        if (window.count >= maximum) {
+          return rejectAuthRate(reply, Math.ceil((window.until - now) / 1000));
+        }
+        window.count++;
+      };
+
     app.post<{ Body: RegisterInput }>(
       '/register',
-      { schema: { body: registerBodySchema } },
+      { onRequest: limit('register', 5), schema: { body: registerBodySchema } },
       async (request, reply) => {
         try {
           return reply.code(201).send(await authService.register(request.body));
@@ -71,7 +98,7 @@ export function createAuthRoutes(authService: AuthService): FastifyPluginAsync {
 
     app.post<{ Body: LoginInput }>(
       '/login',
-      { schema: { body: loginBodySchema } },
+      { onRequest: limit('login', 10), schema: { body: loginBodySchema } },
       async (request, reply) => {
         try {
           return await authService.login(request.body);
@@ -137,6 +164,31 @@ export function createAuthRoutes(authService: AuthService): FastifyPluginAsync {
       }
     });
 
+    app.put<{ Body: { currentPassword: string; newPassword: string } }>(
+      '/me/password',
+      {
+        onRequest: limit('password', 5),
+        schema: { body: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['currentPassword', 'newPassword'],
+          properties: {
+            currentPassword: { type: 'string', minLength: 1, maxLength: 128 },
+            newPassword: { type: 'string', minLength: 8, maxLength: 128 },
+          },
+        } },
+      },
+      async (request, reply) => {
+        try {
+          const user = await createRequireUser(authService)(request);
+          await authService.changePassword(user.id, request.body.currentPassword, request.body.newPassword);
+          return reply.code(204).send();
+        } catch (error) {
+          return sendAuthError(error, reply);
+        }
+      },
+    );
+
     app.post('/logout', async (request, reply) => {
       try {
         const token = requireBearerToken(request);
@@ -147,6 +199,12 @@ export function createAuthRoutes(authService: AuthService): FastifyPluginAsync {
       }
     });
   };
+}
+
+function rejectAuthRate(reply: FastifyReply, retryAfter: number): FastifyReply {
+  return reply.header('Retry-After', retryAfter).code(429).send({
+    error: { code: 'AUTH_RATE_LIMITED', message: 'Try again later.' },
+  });
 }
 
 export function createRequireUser(authService: AuthService): RequireUser {

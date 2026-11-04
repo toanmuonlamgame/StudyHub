@@ -105,7 +105,7 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     options.corsOrigins ?? readConfiguredCorsOrigins(),
   );
   const app = Fastify({
-    logger: true,
+    logger: { redact: ['req.headers.authorization', 'req.headers.cookie'] },
     bodyLimit: requestBodyLimitBytes,
     ajv: { customOptions: { removeAdditional: false } },
   });

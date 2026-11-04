@@ -3163,6 +3163,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide keyboard'**
   String get contributionHideKeyboard;
+
+  /// No description provided for @textSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get textSize;
+
+  /// No description provided for @textSizeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get textSizeSystem;
+
+  /// No description provided for @textSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get textSizeLarge;
+
+  /// No description provided for @textSizeExtraLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra large'**
+  String get textSizeExtraLarge;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePassword;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get currentPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @changePasswordValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different password of 8–128 characters and make sure both entries match.'**
+  String get changePasswordValidation;
+
+  /// No description provided for @changePasswordFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Password could not be changed. Check your current password or try again later.'**
+  String get changePasswordFailed;
+
+  /// No description provided for @changePasswordSignInAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'You will need to sign in again on all devices.'**
+  String get changePasswordSignInAgain;
+
+  /// No description provided for @recentExams.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently viewed'**
+  String get recentExams;
+
+  /// No description provided for @noRecentExams.
+  ///
+  /// In en, this message translates to:
+  /// **'No recently viewed exams'**
+  String get noRecentExams;
+
+  /// No description provided for @clearRecentExams.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear recent exams?'**
+  String get clearRecentExams;
+
+  /// No description provided for @lightAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get lightAppearance;
+
+  /// No description provided for @darkAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get darkAppearance;
+
+  /// No description provided for @contactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get contactSupport;
+
+  /// No description provided for @copySupportEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy support email'**
+  String get copySupportEmail;
+
+  /// No description provided for @supportEmailCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Support email copied'**
+  String get supportEmailCopied;
+
+  /// No description provided for @examCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam collections'**
+  String get examCollections;
+
+  /// No description provided for @newExamCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New collection'**
+  String get newExamCollection;
+
+  /// No description provided for @collectionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection name'**
+  String get collectionName;
+
+  /// No description provided for @collectionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections yet'**
+  String get collectionEmpty;
+
+  /// No description provided for @collectionLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections are stored on this device.'**
+  String get collectionLocal;
+
+  /// No description provided for @collectionChooseSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Select saved exams'**
+  String get collectionChooseSaved;
+
+  /// No description provided for @deleteExamCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this collection?'**
+  String get deleteExamCollection;
+
+  /// No description provided for @schoolFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get schoolFilter;
+
+  /// No description provided for @allSchools.
+  ///
+  /// In en, this message translates to:
+  /// **'All schools'**
+  String get allSchools;
+
+  /// No description provided for @studyHubUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'StudyHub updates'**
+  String get studyHubUpdates;
+
+  /// No description provided for @studyHubUpdatesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Five English mini-games, recently viewed exams, and adjustable text size and appearance are available in this build.'**
+  String get studyHubUpdatesBody;
+
+  /// No description provided for @studyHubPrivacyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account, saved exams, and submissions are handled by the StudyHub backend in API mode. This device also stores settings and recent activity. Do not include passwords or other private information in shared content.'**
+  String get studyHubPrivacyBody;
+
+  /// No description provided for @studyHubUsageRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage rules'**
+  String get studyHubUsageRules;
+
+  /// No description provided for @studyHubUsageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only share questions, files, and links you have permission to share. Do not post personal information or harmful content. Community submissions may be reviewed before becoming public.'**
+  String get studyHubUsageBody;
+
+  /// No description provided for @editCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit collection'**
+  String get editCollection;
+
+  /// No description provided for @examLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam language'**
+  String get examLanguage;
+
+  /// No description provided for @examLanguageUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get examLanguageUnknown;
+
+  /// No description provided for @chinese.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese'**
+  String get chinese;
+
+  /// No description provided for @otherExamLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Other language'**
+  String get otherExamLanguage;
+
+  /// No description provided for @reportIssueEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Report an issue by email'**
+  String get reportIssueEmail;
+
+  /// No description provided for @unableToOpenPublicLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open the link.'**
+  String get unableToOpenPublicLink;
+
+  /// No description provided for @openOfficialPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Open official page'**
+  String get openOfficialPage;
 }
 
 class _AppLocalizationsDelegate

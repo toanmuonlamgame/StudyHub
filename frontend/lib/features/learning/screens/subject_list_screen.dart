@@ -19,6 +19,7 @@ class SubjectListScreen extends StatefulWidget {
 
 class _SubjectListScreenState extends State<SubjectListScreen> {
   late Future<List<Subject>> _subjectsFuture;
+  String? _school;
 
   @override
   void initState() {
@@ -57,6 +58,20 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
               );
             }
 
+            final schools =
+                subjects
+                    .map((subject) => subject.school?.trim())
+                    .whereType<String>()
+                    .where((school) => school.isNotEmpty)
+                    .toSet()
+                    .toList()
+                  ..sort();
+            final selected = schools.contains(_school) ? _school : null;
+            final visible = selected == null
+                ? subjects
+                : subjects
+                      .where((subject) => subject.school?.trim() == selected)
+                      .toList();
             return ListView.separated(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.screenHorizontal,
@@ -64,14 +79,49 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                 AppSpacing.screenHorizontal,
                 AppSpacing.screenBottom,
               ),
-              itemCount: subjects.length + 1,
+              itemCount: visible.length + 1,
               separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  return const _SubjectListHeader();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const _SubjectListHeader(),
+                      if (schools.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          key: ValueKey(selected),
+                          isExpanded: true,
+                          initialValue: selected ?? '',
+                          decoration: InputDecoration(
+                            labelText: l10n.schoolFilter,
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                              value: '',
+                              child: Text(l10n.allSchools),
+                            ),
+                            for (final school in schools)
+                              DropdownMenuItem(
+                                value: school,
+                                child: Text(
+                                  school,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                          onChanged: (school) => setState(
+                            () => _school = school?.isEmpty == true
+                                ? null
+                                : school,
+                          ),
+                        ),
+                      ],
+                    ],
+                  );
                 }
 
-                final subject = subjects[index - 1];
+                final subject = visible[index - 1];
                 return _SubjectCard(
                   subject: subject,
                   onTap: () => _openSubject(context, subject),

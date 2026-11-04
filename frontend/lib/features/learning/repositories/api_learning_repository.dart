@@ -63,6 +63,7 @@ class ApiLearningRepository implements LearningRepository {
   Future<PaginatedResult<QuestionSet>> listQuestionSets({
     String? subjectId,
     String? topicId,
+    String? language,
     String? q,
     int limit = 20,
     String? cursor,
@@ -72,6 +73,7 @@ class ApiLearningRepository implements LearningRepository {
       'limit': limit.toString(),
       'subjectId': ?subjectId,
       'topicId': ?topicId,
+      'language': ?language,
       'cursor': ?cursor,
     };
     if (normalizedQuery != null && normalizedQuery.isNotEmpty) {
@@ -289,6 +291,7 @@ QuestionSet _questionSetFromJson(Map<String, dynamic> json) {
     id: _readString(json, 'id'),
     subjectId: _readString(json, 'subjectId'),
     topicId: _readNullableString(json, 'topicId'),
+    language: _readNullableString(json, 'language'),
     title: _readString(json, 'title'),
     description: _readString(json, 'description'),
     questionCount: _readInt(json, 'questionCount'),

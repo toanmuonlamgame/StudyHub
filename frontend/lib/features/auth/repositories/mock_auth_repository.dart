@@ -2,10 +2,34 @@ import '../models/auth_session.dart';
 import '../models/auth_user.dart';
 import 'auth_repository.dart';
 
-class MockAuthRepository implements AuthRepository, ProfileAvatarRepository {
+class MockAuthRepository
+    implements
+        AuthRepository,
+        ProfileAvatarRepository,
+        PasswordChangeRepository {
   final Map<String, ({AuthUser user, String password})> _users = {};
   final Map<String, AuthUser> _sessions = {};
   int _nextId = 1;
+
+  @override
+  Future<void> changePassword(
+    String token,
+    String currentPassword,
+    String newPassword,
+  ) async {
+    final user = _sessions[token];
+    final record = user == null ? null : _users[user.email];
+    if (user == null || record == null || record.password != currentPassword) {
+      throw const AuthRequestException('Invalid credentials.');
+    }
+    if (newPassword == currentPassword ||
+        newPassword.length < 8 ||
+        newPassword.length > 128) {
+      throw const AuthRequestException('Invalid new password.');
+    }
+    _users[user.email] = (user: record.user, password: newPassword);
+    _sessions.removeWhere((_, sessionUser) => sessionUser.id == user.id);
+  }
 
   @override
   Future<AuthSession> register({

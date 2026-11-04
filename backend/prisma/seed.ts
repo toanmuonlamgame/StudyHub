@@ -49,6 +49,7 @@ async function seedQuestionSets() {
     const data = {
       subjectId: questionSet.subjectId,
       topicId: questionSet.topicId ?? null,
+      language: questionSet.language ?? null,
       title: questionSet.title,
       description: questionSet.description,
     };

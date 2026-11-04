@@ -59,6 +59,7 @@ export const topics: Topic[] = [
 export const questionSets: QuestionSet[] = [
   {
     id: 'question_set_js_basics',
+    language: 'en',
     subjectId: 'subject_javascript',
     topicId: 'topic_js_syntax',
     title: 'JavaScript Basics Check',
@@ -67,6 +68,7 @@ export const questionSets: QuestionSet[] = [
   },
   {
     id: 'question_set_js_functions',
+    language: 'en',
     subjectId: 'subject_javascript',
     topicId: 'topic_js_functions',
     title: 'JavaScript Functions',
@@ -75,6 +77,7 @@ export const questionSets: QuestionSet[] = [
   },
   {
     id: 'question_set_java_oop',
+    language: 'en',
     subjectId: 'subject_java',
     topicId: 'topic_java_classes',
     title: 'Java OOP Essentials',
@@ -83,6 +86,7 @@ export const questionSets: QuestionSet[] = [
   },
   {
     id: 'question_set_database',
+    language: 'en',
     subjectId: 'subject_database',
     topicId: 'topic_database_sql',
     title: 'Database Fundamentals',

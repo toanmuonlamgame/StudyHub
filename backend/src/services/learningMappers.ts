@@ -51,6 +51,7 @@ export function mapQuestionSet(
       ? {}
       : { topicId: questionSet.topicId }),
     title: questionSet.title,
+    ...(questionSet.language == null ? {} : { language: questionSet.language }),
     description: questionSet.description,
     questionCount: questionSet._count.questions,
   };

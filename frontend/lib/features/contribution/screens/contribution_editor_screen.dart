@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../../learning/models/subject.dart';
+import '../../learning/models/exam_language.dart';
 import '../../learning/models/topic.dart';
 import '../../learning/repositories/learning_repository.dart';
 import '../models/answer_option_draft.dart';
@@ -329,6 +330,27 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
           onChanged: (value) {
             setState(() => _draft = _draft.copyWith(title: value));
           },
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
+          isExpanded: true,
+          initialValue: examLanguageCodes.contains(_draft.language)
+              ? _draft.language
+              : '',
+          decoration: InputDecoration(labelText: l10n.examLanguage),
+          items: [
+            DropdownMenuItem(value: '', child: Text(l10n.examLanguageUnknown)),
+            for (final code in examLanguageCodes)
+              DropdownMenuItem(
+                value: code,
+                child: Text(examLanguageLabel(l10n, code)),
+              ),
+          ],
+          onChanged: (value) => setState(
+            () => _draft = _draft.copyWith(
+              language: value == null || value.isEmpty ? null : value,
+            ),
+          ),
         ),
         const SizedBox(height: 12),
         TextField(

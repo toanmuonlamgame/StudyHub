@@ -10,6 +10,7 @@ export interface AuthService {
   login(input: LoginInput): Promise<AuthSessionResult>;
   authenticate(accessToken: string): Promise<AuthUser | null>;
   logout(accessToken: string): Promise<void>;
+  changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void>;
   updateDisplayName(userId: string, displayName: string): Promise<AuthUser>;
   updateAvatar(userId: string, avatarUrl: string | null): Promise<AuthUser>;
 }
@@ -30,6 +31,12 @@ export class InvalidCredentialsError extends Error {}
 export class AuthenticationRequiredError extends Error {}
 
 export class AccountDisabledError extends Error {}
+
+export function validateNewPassword(current: string, next: string): void {
+  if (next.length < 8 || next.length > 128 || next === current) {
+    throw new AuthValidationError('Use a different password with 8 to 128 characters.', 'password');
+  }
+}
 
 export function validateRegistration(input: RegisterInput): RegisterInput {
   const email = normalizeEmail(input.email);

@@ -13,6 +13,20 @@ import 'package:frontend/l10n/app_localizations.dart';
 const _subject = Subject(id: 'subject_javascript', name: 'JavaScript Basics');
 
 void main() {
+  testWidgets('exam language filters the catalog and can be cleared', (
+    tester,
+  ) async {
+    await _pumpQuestionSets(tester, const MockLearningRepository());
+    await tester.tap(find.text('All languages'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Chinese').last);
+    await tester.pumpAndSettle();
+    expect(find.text('JavaScript Basics Check'), findsNothing);
+    await tester.tap(find.text('All languages'));
+    await tester.pumpAndSettle();
+    expect(find.text('JavaScript Basics Check'), findsOneWidget);
+  });
+
   testWidgets('debounces repository search and clearing restores the list', (
     WidgetTester tester,
   ) async {
@@ -215,6 +229,7 @@ class _TrackingSearchRepository extends MockLearningRepository {
   Future<PaginatedResult<QuestionSet>> listQuestionSets({
     String? subjectId,
     String? topicId,
+    String? language,
     String? q,
     int limit = 20,
     String? cursor,
@@ -240,6 +255,7 @@ class _StaleSearchRepository extends MockLearningRepository {
   Future<PaginatedResult<QuestionSet>> listQuestionSets({
     String? subjectId,
     String? topicId,
+    String? language,
     String? q,
     int limit = 20,
     String? cursor,
@@ -274,6 +290,7 @@ class _SearchErrorRepository extends MockLearningRepository {
   Future<PaginatedResult<QuestionSet>> listQuestionSets({
     String? subjectId,
     String? topicId,
+    String? language,
     String? q,
     int limit = 20,
     String? cursor,
@@ -319,6 +336,7 @@ class _PagingRepository extends MockLearningRepository {
   Future<PaginatedResult<QuestionSet>> listQuestionSets({
     String? subjectId,
     String? topicId,
+    String? language,
     String? q,
     int limit = 20,
     String? cursor,

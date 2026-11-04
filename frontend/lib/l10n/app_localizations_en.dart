@@ -1714,4 +1714,133 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contributionHideKeyboard => 'Hide keyboard';
+
+  @override
+  String get textSize => 'Text size';
+
+  @override
+  String get textSizeSystem => 'System default';
+
+  @override
+  String get textSizeLarge => 'Large';
+
+  @override
+  String get textSizeExtraLarge => 'Extra large';
+
+  @override
+  String get changePassword => 'Change password';
+
+  @override
+  String get currentPassword => 'Current password';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get confirmNewPassword => 'Confirm new password';
+
+  @override
+  String get changePasswordValidation =>
+      'Use a different password of 8–128 characters and make sure both entries match.';
+
+  @override
+  String get changePasswordFailed =>
+      'Password could not be changed. Check your current password or try again later.';
+
+  @override
+  String get changePasswordSignInAgain =>
+      'You will need to sign in again on all devices.';
+
+  @override
+  String get recentExams => 'Recently viewed';
+
+  @override
+  String get noRecentExams => 'No recently viewed exams';
+
+  @override
+  String get clearRecentExams => 'Clear recent exams?';
+
+  @override
+  String get lightAppearance => 'Light';
+
+  @override
+  String get darkAppearance => 'Dark';
+
+  @override
+  String get contactSupport => 'Support';
+
+  @override
+  String get copySupportEmail => 'Copy support email';
+
+  @override
+  String get supportEmailCopied => 'Support email copied';
+
+  @override
+  String get examCollections => 'Exam collections';
+
+  @override
+  String get newExamCollection => 'New collection';
+
+  @override
+  String get collectionName => 'Collection name';
+
+  @override
+  String get collectionEmpty => 'No collections yet';
+
+  @override
+  String get collectionLocal => 'Collections are stored on this device.';
+
+  @override
+  String get collectionChooseSaved => 'Select saved exams';
+
+  @override
+  String get deleteExamCollection => 'Delete this collection?';
+
+  @override
+  String get schoolFilter => 'School';
+
+  @override
+  String get allSchools => 'All schools';
+
+  @override
+  String get studyHubUpdates => 'StudyHub updates';
+
+  @override
+  String get studyHubUpdatesBody =>
+      'Five English mini-games, recently viewed exams, and adjustable text size and appearance are available in this build.';
+
+  @override
+  String get studyHubPrivacyBody =>
+      'Your account, saved exams, and submissions are handled by the StudyHub backend in API mode. This device also stores settings and recent activity. Do not include passwords or other private information in shared content.';
+
+  @override
+  String get studyHubUsageRules => 'Usage rules';
+
+  @override
+  String get studyHubUsageBody =>
+      'Only share questions, files, and links you have permission to share. Do not post personal information or harmful content. Community submissions may be reviewed before becoming public.';
+
+  @override
+  String get editCollection => 'Edit collection';
+
+  @override
+  String get examLanguage => 'Exam language';
+
+  @override
+  String get examLanguageUnknown => 'Not specified';
+
+  @override
+  String get chinese => 'Chinese';
+
+  @override
+  String get otherExamLanguage => 'Other language';
+
+  @override
+  String get reportIssueEmail => 'Report an issue by email';
+
+  @override
+  String get unableToOpenPublicLink => 'Unable to open the link.';
+
+  @override
+  String get openOfficialPage => 'Open official page';
 }

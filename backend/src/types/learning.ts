@@ -17,6 +17,7 @@ export interface QuestionSet {
   id: string;
   subjectId: string;
   topicId?: string;
+  language?: string;
   title: string;
   description: string;
   questionCount: number;
@@ -33,6 +34,7 @@ export interface QuestionSetListItem extends QuestionSet {
 export interface ListQuestionSetsParams {
   subjectId?: string;
   topicId?: string;
+  language?: string;
   q?: string;
   limit: number;
   cursor?: string;

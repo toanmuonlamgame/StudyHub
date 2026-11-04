@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../auth/screens/change_password_dialog.dart';
 
 import '../../app/app_navigation.dart';
 import '../../core/app_design_tokens.dart';
@@ -187,7 +188,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _ActionTile(
                         icon: Icons.security_outlined,
                         title: context.l10n.securityAccount,
-                        onTap: _openSettings,
+                        onTap: () {
+                          final controller = AuthScope.maybeOf(context);
+                          if (controller?.canChangePassword != true) {
+                            _openSettings();
+                            return;
+                          }
+                          showDialog<void>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) =>
+                                ChangePasswordDialog(controller: controller!),
+                          );
+                        },
                       ),
                       const Divider(height: 1, indent: 64),
                       _ActionTile(

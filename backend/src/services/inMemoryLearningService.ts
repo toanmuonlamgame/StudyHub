@@ -130,6 +130,7 @@ export class InMemoryLearningService implements LearningService {
             questionSet.subjectId === params.subjectId) &&
           (params.topicId === undefined ||
             questionSet.topicId === params.topicId) &&
+          (params.language === undefined || questionSet.language === params.language) &&
           (search === undefined ||
             search.length === 0 ||
             questionSet.title.toLocaleLowerCase().includes(search)),
@@ -827,6 +828,7 @@ function cloneSubmissionInput(
   return {
     subjectId: input.subjectId,
     ...(input.topicId === undefined ? {} : { topicId: input.topicId }),
+    ...(input.language === undefined ? {} : { language: input.language }),
     title: input.title.trim(),
     description: input.description.trim(),
     questions: input.questions.map((question) => ({

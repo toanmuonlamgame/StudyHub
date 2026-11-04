@@ -477,6 +477,21 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Deploy an HTTPS backend API and build the final API-connected release APK.
 - [x] Add a provider-neutral, read-only smoke command for the deployed API.
 - [ ] Run staging smoke and verify authenticated flows on the physical device.
+- [x] Add persisted interface text size and an instance-local auth throttle.
+- [ ] Verify client-IP attribution behind the staging ingress and use a shared
+  or edge limiter before public rollout.
+- [x] Add authenticated password changes with session revocation.
+- [ ] Complete a real feedback/report channel and privacy/terms content before
+  public rollout.
+- [x] Add account-scoped recently viewed exams with bounded local storage.
+- [x] Add light/dark/system appearance and optional support email display.
+- [ ] Configure a monitored support inbox for staging and verify contact details.
+- [x] Add device-local personal collections, school filtering from subject
+  metadata, an in-app release note, and usage/privacy information.
+- [x] Add explicit Question Set language metadata and paginated language filtering.
+- [ ] Apply and smoke-test the question-set language migration on staging.
+- [ ] Publish reviewed policies and an external account deletion path.
+- [ ] Add a managed news feed only when there is a real editorial workflow.
 - [x] Add the local English Word Spaceship and Match the Cards mini-games.
 - [x] Add sentence ordering, missing-letter spelling, and listening practice.
 - [x] Add PostgreSQL readiness and a manual GitHub staging APK workflow.

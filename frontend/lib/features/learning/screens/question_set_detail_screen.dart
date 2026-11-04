@@ -4,7 +4,10 @@ import 'dart:async';
 import '../../../core/device_feedback.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../../saved/bookmark_scope.dart';
+import '../../auth/auth_scope.dart';
+import '../../my_exams/recent_exam_store.dart';
 import '../models/question_set.dart';
+import '../models/exam_language.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
 import '../repositories/learning_repository.dart';
@@ -33,11 +36,26 @@ class QuestionSetDetailScreen extends StatefulWidget {
 class _QuestionSetDetailScreenState extends State<QuestionSetDetailScreen> {
   bool _bookmarked = false;
   bool _bookmarkLoading = true;
+  Object? _recordedFor;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadBookmark();
+    final auth = AuthScope.maybeOf(context);
+    final account = auth?.user;
+    if (auth != null && account == null) return;
+    final navigator = Navigator.of(context);
+    final identity = account?.id ?? navigator;
+    if (_recordedFor != identity) {
+      _recordedFor = identity;
+      unawaited(
+        RecentExamStore(
+          account,
+          guestSession: navigator,
+        ).record(widget.questionSet.id).catchError((Object _) {}),
+      );
+    }
   }
 
   @override
@@ -98,6 +116,11 @@ class _QuestionSetDetailScreenState extends State<QuestionSetDetailScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
+                if (widget.questionSet.language != null)
+                  LearningStatChip(
+                    icon: Icons.translate,
+                    label: examLanguageLabel(l10n, widget.questionSet.language),
+                  ),
                 LearningStatChip(
                   icon: Icons.help_outline,
                   label: l10n.questionCount(widget.questionSet.questionCount),

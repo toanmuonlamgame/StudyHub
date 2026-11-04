@@ -56,8 +56,14 @@ POST  /auth/register
 POST  /auth/login
 GET   /auth/me
 PATCH /auth/me
+PUT   /auth/me/password
 POST  /auth/logout
 ```
+
+Password changes require an active bearer session and the current password.
+The new password is hashed and all sessions for that account are revoked.
+The client must sign in again. The change endpoint is rate-limited separately
+from registration and sign-in.
 
 Passwords are salted and hashed with Node's built-in `scrypt`. Clients receive
 an opaque 30-day session token; PostgreSQL stores only its SHA-256 hash. Protected
@@ -118,7 +124,7 @@ implementation remains the default and requires no PostgreSQL database:
 GET  /learning/subjects
 GET  /learning/subjects/:subjectId/topics
 GET  /learning/subjects/:subjectId/question-sets
-GET  /learning/question-sets?subjectId=...&topicId=...&q=...&limit=20&cursor=...
+GET  /learning/question-sets?subjectId=...&topicId=...&language=en&q=...&limit=20&cursor=...
 GET  /learning/question-sets/:questionSetId
 GET  /learning/question-sets/:questionSetId/questions
 POST /learning/questions/:questionId/check-answer
@@ -151,6 +157,10 @@ and returns `{ items, nextCursor, hasMore }`. Its opaque cursor uses stable
 `createdAt` and `id` ordering. List items contain metadata only, never questions
 or answers. Difficulty and estimated time are currently derived from question
 count until those fields become persisted product metadata.
+Optional language codes are `vi`, `en`, `zh`, and `other`. Filtering is
+applied before pagination. Existing unlabeled exams remain visible without
+the language filter. Deploy migration `20261104120000_question_set_language`
+before starting this backend against an existing staging database.
 
 Set `STUDYHUB_LEARNING_DATA_SOURCE=memory` or leave it unset for the current
 default. The prepared `prisma` option requires a valid local `DATABASE_URL` and

@@ -1,6 +1,9 @@
 import { createHash, randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 
 const keyLength = 64;
+// Only used to perform comparable work for an email that has no account.
+export const missingAccountHash =
+  `scrypt$${Buffer.alloc(16).toString('base64url')}$${Buffer.alloc(keyLength).toString('base64url')}`;
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16);

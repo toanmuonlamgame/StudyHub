@@ -236,9 +236,7 @@ class ApiContributionRepository implements ContributionRepository {
     StudyMaterialDraft draft, {
     String? submissionId,
   }) async {
-    final headers = {
-      ...await authenticatedJsonHeaders(accessTokenProvider),
-    };
+    final headers = {...await authenticatedJsonHeaders(accessTokenProvider)};
     if (submissionId != null) {
       headers['idempotency-key'] = submissionId;
     }
@@ -376,6 +374,7 @@ class ApiContributionRepository implements ContributionRepository {
       draft: QuestionSetDraft(
         subjectId: json['subjectId'] as String,
         topicId: json['topicId'] as String?,
+        language: json['language'] as String?,
         title: json['title'] as String,
         description: json['description'] as String,
         questions: questions,

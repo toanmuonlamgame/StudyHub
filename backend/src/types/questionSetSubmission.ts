@@ -24,6 +24,7 @@ export interface QuestionSubmissionInput {
 export interface QuestionSetSubmissionInput {
   subjectId: string;
   topicId?: string;
+  language?: string;
   title: string;
   description: string;
   questions: QuestionSubmissionInput[];

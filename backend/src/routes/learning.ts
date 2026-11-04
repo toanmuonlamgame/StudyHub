@@ -63,6 +63,7 @@ interface StudyMaterialListQuery extends QuestionSetListQuery {
 }
 
 interface QuestionSetListQuery {
+  language?: string;
   subjectId?: string;
   topicId?: string;
   q?: string;
@@ -147,6 +148,7 @@ const questionSetSubmissionBodySchema = {
   properties: {
     subjectId: { type: 'string' },
     topicId: { type: 'string' },
+    language: { type: 'string', enum: ['vi', 'en', 'zh', 'other'] },
     title: { type: 'string' },
     description: { type: 'string' },
     questions: {
@@ -557,6 +559,10 @@ export function createLearningRoutes(
     app.get<{ Querystring: QuestionSetListQuery }>(
       '/question-sets',
       async (request, reply) => {
+        const language = request.query.language;
+        if (language !== undefined && !['vi', 'en', 'zh', 'other'].includes(language)) {
+          return reply.code(400).send({ error: 'Unsupported question set language.' });
+        }
         const limit = parseListLimit(request.query.limit);
         if (limit === null) {
           return reply.code(400).send({
@@ -567,6 +573,7 @@ export function createLearningRoutes(
         try {
           return await service.listQuestionSets({
             limit,
+            ...(language === undefined ? {} : { language }),
             ...(request.query.subjectId === undefined
               ? {}
               : { subjectId: request.query.subjectId }),

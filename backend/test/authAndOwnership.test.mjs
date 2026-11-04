@@ -15,6 +15,29 @@ const accountB = {
   displayName: 'Learner B',
 };
 
+test('password change requires the current password and revokes all sessions', async (t) => {
+  const app = buildApp({ learningDataSource: 'memory' });
+  t.after(() => app.close());
+  const login = (password) => app.inject({
+    method: 'POST', url: '/auth/login', payload: { email: accountA.email, password },
+  });
+  const registration = await app.inject({ method: 'POST', url: '/auth/register', payload: accountA });
+  const second = await login(accountA.password);
+  const headers = (response) => ({ authorization: `Bearer ${response.json().accessToken}` });
+  const change = (currentPassword, requestHeaders) => app.inject({
+    method: 'PUT', url: '/auth/me/password', headers: requestHeaders,
+    payload: { currentPassword, newPassword: 'new-test-password-123' },
+  });
+  assert.equal((await change(accountA.password, {})).statusCode, 401);
+  assert.equal((await change('wrong-password', headers(registration))).statusCode, 401);
+  assert.equal((await change(accountA.password, headers(registration))).statusCode, 204);
+  for (const session of [registration, second]) {
+    assert.equal((await app.inject({ url: '/auth/me', headers: headers(session) })).statusCode, 401);
+  }
+  assert.equal((await login(accountA.password)).statusCode, 401);
+  assert.equal((await login('new-test-password-123')).statusCode, 200);
+});
+
 test('register, current user, profile update, logout, and invalid session', async (t) => {
   const app = buildApp({ learningDataSource: 'memory' });
   t.after(() => app.close());

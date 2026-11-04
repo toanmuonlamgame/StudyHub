@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations_x.dart';
 import '../models/question_set.dart';
+import '../models/exam_language.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
 import '../repositories/learning_repository.dart';
@@ -35,6 +36,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
   Timer? _searchTimer;
   String _query = '';
   String? _selectedTopicId;
+  String? _language;
   String? _nextCursor;
   bool _hasMore = false;
   bool _isInitialLoading = true;
@@ -119,6 +121,28 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
                   ),
                 ),
               ),
+            if (!keyboardOpen)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 2, 20, 8),
+                child: DropdownButtonFormField<String>(
+                  key: ValueKey(_language),
+                  isExpanded: true,
+                  initialValue: _language ?? '',
+                  decoration: InputDecoration(labelText: l10n.examLanguage),
+                  items: [
+                    DropdownMenuItem(value: '', child: Text(l10n.allLanguages)),
+                    for (final code in examLanguageCodes)
+                      DropdownMenuItem(
+                        value: code,
+                        child: Text(examLanguageLabel(l10n, code)),
+                      ),
+                  ],
+                  onChanged: (value) {
+                    _language = value == null || value.isEmpty ? null : value;
+                    unawaited(_loadFirstPage());
+                  },
+                ),
+              ),
             Expanded(child: _buildContent(context)),
           ],
         ),
@@ -155,8 +179,19 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
         message: searching
             ? l10n.noSearchResultsMessage
             : l10n.noQuestionSetsMessage(widget.subject.name),
-        actionLabel: searching ? l10n.clearSearch : null,
-        onAction: searching ? _clearSearch : null,
+        actionLabel: searching
+            ? l10n.clearSearch
+            : _language != null
+            ? l10n.allLanguages
+            : null,
+        onAction: searching
+            ? _clearSearch
+            : _language != null
+            ? () {
+                _language = null;
+                unawaited(_loadFirstPage());
+              }
+            : null,
       );
     }
 
@@ -263,6 +298,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
       final page = await widget.learningRepository.listQuestionSets(
         subjectId: widget.subject.id,
         topicId: _selectedTopicId,
+        language: _language,
         q: _query.isEmpty ? null : _query,
         limit: _pageSize,
       );
@@ -299,6 +335,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
       final page = await widget.learningRepository.listQuestionSets(
         subjectId: widget.subject.id,
         topicId: _selectedTopicId,
+        language: _language,
         q: _query.isEmpty ? null : _query,
         limit: _pageSize,
         cursor: cursor,

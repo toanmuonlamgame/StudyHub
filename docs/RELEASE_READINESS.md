@@ -173,6 +173,16 @@ testing, not a Play Store build. CI and locally generated debug keys may differ;
 Android may require uninstalling the previous build before installing the new
 one, which clears local app data.
 
+Set the optional GitHub repository variable `STUDYHUB_SUPPORT_EMAIL` to a
+monitored public inbox before building an APK for testers. This address is
+visible in Settings and is not a secret. An unset or invalid address hides
+the contact entry. Tapping it opens an email draft; users still send it
+themselves. This is an email contact, not an in-app report queue.
+Optional public HTTPS repository variables `STUDYHUB_PRIVACY_URL`,
+`STUDYHUB_TERMS_URL`, and `STUDYHUB_UPDATES_URL` add official links to
+the corresponding Settings pages. Publish and review these pages before
+setting the variables; the app does not create or publish them.
+
 ### Verified Local Build Baseline (2026-07-21)
 
 - Debug APK built successfully: `150,857,494` bytes (`143.87 MiB`).

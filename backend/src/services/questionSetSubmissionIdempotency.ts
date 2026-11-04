@@ -8,6 +8,7 @@ export function createQuestionSetSubmissionFingerprint(
   const canonicalInput = JSON.stringify({
     subjectId: input.subjectId.trim(),
     topicId: input.topicId?.trim() || null,
+    ...(input.language === undefined ? {} : { language: input.language }),
     title: input.title.trim(),
     description: input.description.trim(),
     questions: input.questions.map((question) => ({

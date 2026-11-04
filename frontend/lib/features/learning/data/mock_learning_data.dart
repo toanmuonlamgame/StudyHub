@@ -58,6 +58,7 @@ const List<Topic> mockTopics = [
 const List<QuestionSet> mockQuestionSets = [
   QuestionSet(
     id: 'question_set_js_basics',
+    language: 'en',
     subjectId: 'subject_javascript',
     topicId: 'topic_js_syntax',
     title: 'JavaScript Basics Check',
@@ -66,6 +67,7 @@ const List<QuestionSet> mockQuestionSets = [
   ),
   QuestionSet(
     id: 'question_set_js_functions',
+    language: 'en',
     subjectId: 'subject_javascript',
     topicId: 'topic_js_functions',
     title: 'JavaScript Functions',
@@ -74,6 +76,7 @@ const List<QuestionSet> mockQuestionSets = [
   ),
   QuestionSet(
     id: 'question_set_java_oop',
+    language: 'en',
     subjectId: 'subject_java',
     topicId: 'topic_java_classes',
     title: 'Java OOP Essentials',
@@ -82,6 +85,7 @@ const List<QuestionSet> mockQuestionSets = [
   ),
   QuestionSet(
     id: 'question_set_database',
+    language: 'en',
     subjectId: 'subject_database',
     topicId: 'topic_database_sql',
     title: 'Database Fundamentals',

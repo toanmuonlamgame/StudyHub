@@ -13,6 +13,9 @@ import '../learning/repositories/learning_repository.dart';
 import '../profile/widgets/user_avatar.dart';
 import '../saved/bookmark_scope.dart';
 import '../saved/screens/saved_question_sets_screen.dart';
+import 'recent_exam_store.dart';
+import 'recent_exams_screen.dart';
+import 'exam_collections_screen.dart';
 
 class MyExamsScreen extends StatefulWidget {
   const MyExamsScreen({
@@ -43,7 +46,49 @@ class _MyExamsScreenState extends State<MyExamsScreen> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: AppBar(title: Text(context.l10n.myExams)),
+        appBar: AppBar(
+          title: Text(context.l10n.myExams),
+          actions: [
+            IconButton(
+              tooltip: context.l10n.examCollections,
+              icon: const Icon(Icons.folder_outlined),
+              onPressed: () {
+                final navigator = Navigator.of(context);
+                final account = AuthScope.maybeOf(context)?.user;
+                final key = account == null
+                    ? null
+                    : '${account.id}.${account.createdAt.toUtc().millisecondsSinceEpoch}';
+                navigator.push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => ExamCollectionsScreen(
+                      repository: widget.learningRepository,
+                      store: ExamCollectionStore(
+                        accountKey: key,
+                        session: navigator,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              tooltip: context.l10n.recentExams,
+              icon: const Icon(Icons.history),
+              onPressed: () {
+                final navigator = Navigator.of(context);
+                final account = AuthScope.maybeOf(context)?.user;
+                navigator.push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => RecentExamsScreen(
+                      repository: widget.learningRepository,
+                      store: RecentExamStore(account, guestSession: navigator),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
         body: SafeArea(
           child: Column(
             children: [

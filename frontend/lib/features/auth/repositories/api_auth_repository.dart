@@ -7,7 +7,11 @@ import '../models/auth_session.dart';
 import '../models/auth_user.dart';
 import 'auth_repository.dart';
 
-class ApiAuthRepository implements AuthRepository, ProfileAvatarRepository {
+class ApiAuthRepository
+    implements
+        AuthRepository,
+        ProfileAvatarRepository,
+        PasswordChangeRepository {
   ApiAuthRepository({
     required String baseUrl,
     http.Client? client,
@@ -18,6 +22,26 @@ class ApiAuthRepository implements AuthRepository, ProfileAvatarRepository {
   final Uri _baseUri;
   final http.Client _client;
   final Duration requestTimeout;
+
+  @override
+  Future<void> changePassword(
+    String token,
+    String currentPassword,
+    String newPassword,
+  ) async {
+    final response = await withApiTimeout(
+      _client.put(
+        _baseUri.resolve('auth/me/password'),
+        headers: _authHeaders(token),
+        body: jsonEncode({
+          'currentPassword': currentPassword,
+          'newPassword': newPassword,
+        }),
+      ),
+      requestTimeout,
+    );
+    if (response.statusCode != 204) _throwResponseError(response);
+  }
 
   @override
   Future<AuthSession> register({

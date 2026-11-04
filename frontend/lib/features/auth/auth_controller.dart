@@ -130,6 +130,30 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  bool get canChangePassword => _repository is PasswordChangeRepository;
+
+  Future<bool> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    final session = _session;
+    final repository = _repository;
+    if (session == null || repository is! PasswordChangeRepository) {
+      return false;
+    }
+    try {
+      await (repository as PasswordChangeRepository).changePassword(
+        session.accessToken,
+        currentPassword,
+        newPassword,
+      );
+    } catch (_) {
+      return false;
+    }
+    if (identical(_session, session)) await logout();
+    return true;
+  }
+
   Future<void> logout() async {
     final token = _session?.accessToken;
     _session = null;

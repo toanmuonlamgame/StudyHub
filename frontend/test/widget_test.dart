@@ -24,6 +24,31 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
+  testWidgets('saved dark appearance applies across the app', (tester) async {
+    SharedPreferences.setMockInitialValues({'studyhub_theme_mode': 'dark'});
+    await tester.pumpWidget(const StudyHubApp());
+    await tester.pumpAndSettle();
+    final home = find.byKey(const ValueKey('home-hub-list'));
+    expect(Theme.of(tester.element(home)).brightness, Brightness.dark);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('stored text size applies without shrinking system text', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'studyhub_text_size': 'extraLarge',
+    });
+    await tester.pumpWidget(const StudyHubApp());
+    await tester.pumpAndSettle();
+    final home = find.byKey(const ValueKey('home-hub-list'));
+    expect(MediaQuery.textScalerOf(tester.element(home)).scale(20), 26);
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpAndSettle();
+    expect(MediaQuery.textScalerOf(tester.element(home)).scale(20), 30);
+  });
+
   test('supports English and Vietnamese interface locales', () {
     expect(
       AppLocalizations.supportedLocales,
@@ -210,7 +235,17 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('About StudyHub'),
+      180,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(find.text('About StudyHub'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Privacy and security'),
+      120,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(find.text('Privacy and security'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Study reminders'),
@@ -821,6 +856,7 @@ class _RetryQuestionSetRepository extends MockLearningRepository {
   Future<PaginatedResult<QuestionSet>> listQuestionSets({
     String? subjectId,
     String? topicId,
+    String? language,
     String? q,
     int limit = 20,
     String? cursor,

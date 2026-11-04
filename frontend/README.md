@@ -381,6 +381,14 @@ Scores are per-round only, with no game API, leaderboard, or in-game ads.
 
 ## Device storage and authoring
 
+My Exams has two device-local views: recently viewed exams and personal
+collections. Collections group already-saved exams and store only names and
+IDs per account (up to 12 collections and 50 exams each). Unbookmarking an
+exam removes it from the visible collection without deleting the exam.
+Explore offers a school filter when subject records contain school metadata.
+Settings shows release notes and usage/privacy information; it does not
+replace the reviewed public privacy policy and terms required for release.
+
 The contribution editor opens one question at a time, with a question picker
 and a lazy review list. Published data and API drafts remain server-side.
 The device stores up to 100 local progress summaries. Android cleans up

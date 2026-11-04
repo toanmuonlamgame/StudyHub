@@ -4,6 +4,36 @@ import test from 'node:test';
 import { buildApp } from '../dist/app.js';
 import { InMemoryLearningService } from '../dist/services/inMemoryLearningService.js';
 
+test('question-set listing filters by language before pagination', async (t) => {
+  const app = createTestApp(t);
+  const page = await app.inject('/learning/question-sets?subjectId=subject_javascript&language=en&limit=1');
+  assert.equal(page.statusCode, 200);
+  assert.equal(page.json().items[0].language, 'en');
+  assert.equal(page.json().hasMore, true);
+  const empty = await app.inject('/learning/question-sets?language=zh');
+  assert.deepEqual(empty.json().items, []);
+  assert.equal((await app.inject('/learning/question-sets?language=invalid')).statusCode, 400);
+});
+
+test('contribution preserves the explicit language and rejects invalid codes', async (t) => {
+  const app = createTestApp(t);
+  const draft = {
+    subjectId: 'subject_javascript',
+    title: 'Bộ đề thử',
+    description: '',
+    language: 'vi',
+    questions: [],
+  };
+  const created = await app.inject({ method: 'POST', url: '/learning/question-set-submissions', payload: draft });
+  assert.equal(created.statusCode, 201);
+  assert.equal(created.json().submission.language, 'vi');
+  const rejected = await app.inject({
+    method: 'POST', url: '/learning/question-set-submissions',
+    payload: { ...draft, language: 'not-supported' },
+  });
+  assert.equal(rejected.statusCode, 400);
+});
+
 function createTestApp(t) {
   const app = buildApp({
     learningDataSource: 'memory',

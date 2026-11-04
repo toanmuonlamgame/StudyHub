@@ -18,6 +18,14 @@ abstract interface class ProfileAvatarRepository {
   Future<AuthUser> removeAvatar(String accessToken);
 }
 
+abstract interface class PasswordChangeRepository {
+  Future<void> changePassword(
+    String token,
+    String currentPassword,
+    String newPassword,
+  );
+}
+
 class AuthRequestException implements Exception {
   const AuthRequestException(this.message, {this.code, this.field});
   final String message;

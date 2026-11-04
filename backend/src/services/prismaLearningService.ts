@@ -121,6 +121,7 @@ export class PrismaLearningService implements LearningService {
           ? {}
           : { subjectId: params.subjectId }),
         ...(params.topicId === undefined ? {} : { topicId: params.topicId }),
+        ...(params.language === undefined ? {} : { language: params.language }),
         ...(search === undefined || search.length === 0
           ? {}
           : { title: { contains: search, mode: 'insensitive' } }),
@@ -527,6 +528,7 @@ export class PrismaLearningService implements LearningService {
         data: {
           subjectId: input.subjectId,
           ...(input.topicId === undefined ? {} : { topicId: input.topicId }),
+          language: input.language ?? null,
           title: input.title.trim(),
           description: input.description.trim(),
           status: 'draft',
@@ -565,6 +567,7 @@ export class PrismaLearningService implements LearningService {
           data: {
             subjectId: input.subjectId,
             ...(input.topicId === undefined ? {} : { topicId: input.topicId }),
+            language: input.language ?? null,
             title: input.title.trim(),
             description: input.description.trim(),
             status: 'pendingReview',
@@ -645,6 +648,7 @@ export class PrismaLearningService implements LearningService {
         data: {
           subjectId: input.subjectId,
           topicId: input.topicId ?? null,
+          language: input.language ?? null,
           title: input.title.trim(),
           description: input.description.trim(),
         },
@@ -1144,6 +1148,7 @@ function mapQuestionSetSubmission(row: any): QuestionSetSubmission {
     id: row.id,
     subjectId: row.subjectId,
     ...(row.topicId === null ? {} : { topicId: row.topicId }),
+    ...(row.language == null ? {} : { language: row.language }),
     title: row.title,
     description: row.description,
     status: row.status,

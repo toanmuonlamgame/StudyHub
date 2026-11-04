@@ -55,6 +55,7 @@ class MockLearningRepository implements LearningRepository {
   Future<PaginatedResult<QuestionSet>> listQuestionSets({
     String? subjectId,
     String? topicId,
+    String? language,
     String? q,
     int limit = 20,
     String? cursor,
@@ -69,6 +70,7 @@ class MockLearningRepository implements LearningRepository {
           (questionSet) =>
               (subjectId == null || questionSet.subjectId == subjectId) &&
               (topicId == null || questionSet.topicId == topicId) &&
+              (language == null || questionSet.language == language) &&
               (search == null ||
                   search.isEmpty ||
                   questionSet.title.toLowerCase().contains(search)),

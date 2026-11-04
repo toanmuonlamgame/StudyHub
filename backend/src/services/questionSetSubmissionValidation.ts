@@ -18,6 +18,9 @@ export function validateQuestionSetSubmission(
 ): SubmissionValidationFieldError[] {
   const fields: SubmissionValidationFieldError[] = [];
   requiredText(fields, 'subjectId', input.subjectId, 120);
+  if (input.language !== undefined && !['vi', 'en', 'zh', 'other'].includes(input.language)) {
+    fields.push({ path: 'language', message: 'Unsupported question set language.' });
+  }
   requiredText(fields, 'title', input.title, TITLE_MAX);
   maximumText(fields, 'description', input.description, DESCRIPTION_MAX);
 

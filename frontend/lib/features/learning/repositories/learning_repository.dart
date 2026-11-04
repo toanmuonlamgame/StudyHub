@@ -17,6 +17,7 @@ abstract class LearningRepository {
   Future<PaginatedResult<QuestionSet>> listQuestionSets({
     String? subjectId,
     String? topicId,
+    String? language,
     String? q,
     int limit = 20,
     String? cursor,

@@ -9,6 +9,7 @@ import {
   validateAvatarUrl,
   validateLogin,
   validateRegistration,
+  validateNewPassword,
 } from './authService.js';
 import {
   createAccessToken,
@@ -59,7 +60,27 @@ export class InMemoryAuthService implements AuthService {
     if (user.status === 'disabled') {
       throw new AccountDisabledError('This account is disabled.');
     }
+    if (this.usersById.get(user.id)?.passwordHash !== user.passwordHash) {
+      throw new InvalidCredentialsError('Email or password is incorrect.');
+    }
     return this.createSession(user);
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    validateNewPassword(currentPassword, newPassword);
+    const user = this.usersById.get(userId);
+    if (!user || !(await verifyPassword(currentPassword, user.passwordHash))) {
+      throw new InvalidCredentialsError('Current password is incorrect.');
+    }
+    const passwordHash = await hashPassword(newPassword);
+    const latest = this.usersById.get(userId);
+    if (!latest || latest.status !== 'active' || latest.passwordHash !== user.passwordHash) {
+      throw new InvalidCredentialsError('Current password is incorrect.');
+    }
+    this.usersById.set(userId, { ...latest, passwordHash });
+    for (const [token, session] of this.sessions) {
+      if (session.userId === userId) this.sessions.delete(token);
+    }
   }
 
   async authenticate(accessToken: string): Promise<AuthUser | null> {

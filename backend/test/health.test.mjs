@@ -3,6 +3,24 @@ import test from 'node:test';
 
 import { buildApp } from '../dist/app.js';
 
+test('authentication rate limit cannot be bypassed with forwarded headers', async (t) => {
+  const app = buildApp({ learningDataSource: 'memory' });
+  t.after(() => app.close());
+  for (let i = 0; i < 10; i++) {
+    const result = await app.inject({ method: 'POST', url: '/auth/login', payload: {} });
+    assert.equal(result.statusCode, 400);
+  }
+  const limited = await app.inject({
+    method: 'POST', url: '/auth/login', payload: {},
+    headers: { 'x-forwarded-for': '203.0.113.9' },
+  });
+  assert.equal(limited.statusCode, 429);
+  assert.equal(limited.json().error.code, 'AUTH_RATE_LIMITED');
+  assert.ok(Number(limited.headers['retry-after']) > 0);
+  const other = await app.inject({ method: 'POST', url: '/auth/login', payload: {}, remoteAddress: '203.0.113.10' });
+  assert.equal(other.statusCode, 400);
+});
+
 test('GET /health returns the backend service status', async (t) => {
   const app = buildApp();
   t.after(() => app.close());

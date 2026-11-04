@@ -1708,4 +1708,133 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get contributionHideKeyboard => 'Ẩn bàn phím';
+
+  @override
+  String get textSize => 'Cỡ chữ';
+
+  @override
+  String get textSizeSystem => 'Theo hệ thống';
+
+  @override
+  String get textSizeLarge => 'Lớn';
+
+  @override
+  String get textSizeExtraLarge => 'Rất lớn';
+
+  @override
+  String get changePassword => 'Đổi mật khẩu';
+
+  @override
+  String get currentPassword => 'Mật khẩu hiện tại';
+
+  @override
+  String get newPassword => 'Mật khẩu mới';
+
+  @override
+  String get confirmNewPassword => 'Nhập lại mật khẩu mới';
+
+  @override
+  String get changePasswordValidation =>
+      'Dùng mật khẩu khác, dài 8–128 ký tự và nhập lại cho khớp.';
+
+  @override
+  String get changePasswordFailed =>
+      'Không thể đổi mật khẩu. Kiểm tra mật khẩu hiện tại hoặc thử lại sau.';
+
+  @override
+  String get changePasswordSignInAgain =>
+      'Bạn sẽ cần đăng nhập lại trên tất cả thiết bị.';
+
+  @override
+  String get recentExams => 'Đề xem gần đây';
+
+  @override
+  String get noRecentExams => 'Chưa có đề xem gần đây';
+
+  @override
+  String get clearRecentExams => 'Xóa danh sách đề xem gần đây?';
+
+  @override
+  String get lightAppearance => 'Sáng';
+
+  @override
+  String get darkAppearance => 'Tối';
+
+  @override
+  String get contactSupport => 'Liên hệ hỗ trợ';
+
+  @override
+  String get copySupportEmail => 'Sao chép email hỗ trợ';
+
+  @override
+  String get supportEmailCopied => 'Đã sao chép email hỗ trợ';
+
+  @override
+  String get examCollections => 'Bộ sưu tập đề';
+
+  @override
+  String get newExamCollection => 'Bộ sưu tập mới';
+
+  @override
+  String get collectionName => 'Tên bộ sưu tập';
+
+  @override
+  String get collectionEmpty => 'Chưa có bộ sưu tập';
+
+  @override
+  String get collectionLocal => 'Bộ sưu tập được lưu trên thiết bị này.';
+
+  @override
+  String get collectionChooseSaved => 'Chọn đề đã lưu';
+
+  @override
+  String get deleteExamCollection => 'Xóa bộ sưu tập này?';
+
+  @override
+  String get schoolFilter => 'Trường';
+
+  @override
+  String get allSchools => 'Tất cả trường';
+
+  @override
+  String get studyHubUpdates => 'Cập nhật StudyHub';
+
+  @override
+  String get studyHubUpdatesBody =>
+      'Bản này có năm trò chơi tiếng Anh, đề xem gần đây và tùy chọn cỡ chữ, giao diện.';
+
+  @override
+  String get studyHubPrivacyBody =>
+      'Ở chế độ API, backend StudyHub xử lý tài khoản, đề đã lưu và nội dung đóng góp. Thiết bị cũng lưu tùy chọn và hoạt động gần đây. Không đưa mật khẩu hoặc thông tin riêng tư vào nội dung chia sẻ.';
+
+  @override
+  String get studyHubUsageRules => 'Quy tắc sử dụng';
+
+  @override
+  String get studyHubUsageBody =>
+      'Chỉ chia sẻ câu hỏi, tệp và liên kết bạn có quyền chia sẻ. Không đăng thông tin cá nhân hoặc nội dung gây hại. Nội dung cộng đồng có thể được duyệt trước khi công khai.';
+
+  @override
+  String get editCollection => 'Sửa bộ sưu tập';
+
+  @override
+  String get examLanguage => 'Ngôn ngữ đề';
+
+  @override
+  String get examLanguageUnknown => 'Chưa xác định';
+
+  @override
+  String get chinese => 'Tiếng Trung';
+
+  @override
+  String get otherExamLanguage => 'Ngôn ngữ khác';
+
+  @override
+  String get reportIssueEmail => 'Báo lỗi qua email';
+
+  @override
+  String get unableToOpenPublicLink => 'Không thể mở liên kết.';
+
+  @override
+  String get openOfficialPage => 'Mở trang chính thức';
 }
