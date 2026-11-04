@@ -1525,4 +1525,63 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get learner => 'Người học';
+
+  @override
+  String get myStudyMaterials => 'Tài liệu của tôi';
+
+  @override
+  String get addMaterial => 'Thêm tài liệu';
+
+  @override
+  String get materialEditorTitle => 'Chia sẻ tài liệu học';
+
+  @override
+  String get materialEditorIntro =>
+      'Thêm liên kết học tập hữu ích và hợp pháp. Tài liệu chỉ hiện công khai sau khi được duyệt.';
+
+  @override
+  String get materialSubjectRequired => 'Hãy chọn môn học.';
+
+  @override
+  String get materialType => 'Loại tài liệu';
+
+  @override
+  String get materialSourceUrl => 'Liên kết nguồn';
+
+  @override
+  String get materialLanguageOptional => 'Mã ngôn ngữ (không bắt buộc)';
+
+  @override
+  String get materialUrlInvalid => 'Nhập liên kết HTTP hoặc HTTPS hợp lệ.';
+
+  @override
+  String get materialTaxonomyError =>
+      'Không thể tải chủ đề. Bạn vẫn có thể tiếp tục mà không chọn chủ đề.';
+
+  @override
+  String get materialSaveError =>
+      'Không thể lưu tài liệu. Hãy kiểm tra biểu mẫu và thử lại.';
+
+  @override
+  String get materialSubmissionLoadError => 'Không thể tải tài liệu của bạn';
+
+  @override
+  String get noMaterialSubmissions => 'Chưa có tài liệu chia sẻ';
+
+  @override
+  String get noMaterialSubmissionsBody =>
+      'Lưu một liên kết học tập hữu ích làm bản nháp hoặc gửi duyệt.';
+
+  @override
+  String get materialActionError => 'Không thể cập nhật tài liệu. Hãy thử lại.';
+
+  @override
+  String get deleteMaterialDraft => 'Xóa bản nháp tài liệu?';
+
+  @override
+  String get deleteMaterialDraftConfirm => 'Bản nháp này sẽ bị xóa vĩnh viễn.';
+
+  @override
+  String get studyMaterialsOwnershipNote =>
+      'Bản nháp là riêng tư. Chỉ tài liệu đã duyệt mới hiện trong thư viện công khai.';
 }

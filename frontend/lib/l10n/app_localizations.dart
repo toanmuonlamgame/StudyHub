@@ -2821,6 +2821,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Learner'**
   String get learner;
+
+  /// No description provided for @myStudyMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'My study materials'**
+  String get myStudyMaterials;
+
+  /// No description provided for @addMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Add material'**
+  String get addMaterial;
+
+  /// No description provided for @materialEditorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share study material'**
+  String get materialEditorTitle;
+
+  /// No description provided for @materialEditorIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a useful, legal learning link. It stays private until moderation approves it.'**
+  String get materialEditorIntro;
+
+  /// No description provided for @materialSubjectRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a subject.'**
+  String get materialSubjectRequired;
+
+  /// No description provided for @materialType.
+  ///
+  /// In en, this message translates to:
+  /// **'Material type'**
+  String get materialType;
+
+  /// No description provided for @materialSourceUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Source link'**
+  String get materialSourceUrl;
+
+  /// No description provided for @materialLanguageOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Language code (optional)'**
+  String get materialLanguageOptional;
+
+  /// No description provided for @materialUrlInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid HTTP or HTTPS link.'**
+  String get materialUrlInvalid;
+
+  /// No description provided for @materialTaxonomyError.
+  ///
+  /// In en, this message translates to:
+  /// **'Topics could not be loaded. You can continue without a topic.'**
+  String get materialTaxonomyError;
+
+  /// No description provided for @materialSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'The material could not be saved. Check the form and try again.'**
+  String get materialSaveError;
+
+  /// No description provided for @materialSubmissionLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your study materials could not be loaded'**
+  String get materialSubmissionLoadError;
+
+  /// No description provided for @noMaterialSubmissions.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared materials yet'**
+  String get noMaterialSubmissions;
+
+  /// No description provided for @noMaterialSubmissionsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a useful study link as a draft or submit it for review.'**
+  String get noMaterialSubmissionsBody;
+
+  /// No description provided for @materialActionError.
+  ///
+  /// In en, this message translates to:
+  /// **'The material could not be updated. Try again.'**
+  String get materialActionError;
+
+  /// No description provided for @deleteMaterialDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete material draft?'**
+  String get deleteMaterialDraft;
+
+  /// No description provided for @deleteMaterialDraftConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This draft will be permanently removed.'**
+  String get deleteMaterialDraftConfirm;
+
+  /// No description provided for @studyMaterialsOwnershipNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your drafts are private. Only approved materials appear in the public library.'**
+  String get studyMaterialsOwnershipNote;
 }
 
 class _AppLocalizationsDelegate

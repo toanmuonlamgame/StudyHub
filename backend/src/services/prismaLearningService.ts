@@ -25,6 +25,10 @@ import type {
   CreateQuestionSetSubmissionOutcome,
   QuestionSetSubmissionInput,
 } from '../types/questionSetSubmission.js';
+import type {
+  StudyMaterialSubmission,
+  StudyMaterialSubmissionInput,
+} from '../types/studyMaterialSubmission.js';
 import {
   mapQuestion,
   mapQuestionSet,
@@ -42,10 +46,15 @@ import {
   QuestionSetSubmissionStateError,
   QuestionSetSubmissionIdempotencyConflictError,
   QuestionSetSubmissionValidationError,
+  StudyMaterialSubmissionStateError,
+  StudyMaterialSubmissionIdempotencyConflictError,
+  StudyMaterialSubmissionValidationError,
   type LearningService,
 } from './learningService.js';
 import { validateQuestionSetSubmission } from './questionSetSubmissionValidation.js';
 import { createQuestionSetSubmissionFingerprint } from './questionSetSubmissionIdempotency.js';
+import { validateStudyMaterialSubmission } from './studyMaterialSubmissionValidation.js';
+import { createStudyMaterialSubmissionFingerprint } from './studyMaterialSubmissionIdempotency.js';
 import {
   createQuestionSetListItem,
   decodeQuestionSetCursor,
@@ -727,6 +736,135 @@ export class PrismaLearningService implements LearningService {
     return mapQuestionSetSubmission(row);
   }
 
+  async createStudyMaterialSubmission(
+    userId: string,
+    input: StudyMaterialSubmissionInput,
+    clientSubmissionId?: string,
+  ): Promise<StudyMaterialSubmission> {
+    this.assertValidMaterialSubmission(input);
+    await this.validateMaterialSubmissionReferences(input);
+    const normalized = normalizeMaterialSubmissionInput(input);
+    const fingerprint = createStudyMaterialSubmissionFingerprint(input);
+    if (clientSubmissionId !== undefined) {
+      const existing = await this.prisma.studyMaterial.findUnique({
+        where: { clientSubmissionId },
+      });
+      if (existing !== null) {
+        return this.resolveMaterialDraftRetry(existing, userId, fingerprint);
+      }
+    }
+    try {
+      const row = await this.prisma.studyMaterial.create({
+        data: {
+          ...normalized,
+          status: 'draft',
+          createdByUserId: userId,
+          clientSubmissionId,
+          submissionFingerprint: clientSubmissionId === undefined ? null : fingerprint,
+        },
+      });
+      return mapStudyMaterialSubmission(row);
+    } catch (error) {
+      if (!isUniqueConstraintError(error) || clientSubmissionId === undefined) {
+        throw error;
+      }
+      const existing = await this.prisma.studyMaterial.findUnique({
+        where: { clientSubmissionId },
+      });
+      if (existing === null) throw error;
+      return this.resolveMaterialDraftRetry(existing, userId, fingerprint);
+    }
+  }
+
+  private resolveMaterialDraftRetry(
+    row: any,
+    userId: string,
+    fingerprint: string,
+  ): StudyMaterialSubmission {
+    if (
+      row.createdByUserId !== userId ||
+      row.submissionFingerprint !== fingerprint
+    ) {
+      throw new StudyMaterialSubmissionIdempotencyConflictError(
+        'Material submission ID was already used with different data.',
+      );
+    }
+    return mapStudyMaterialSubmission(row);
+  }
+
+  async updateStudyMaterialSubmission(
+    userId: string,
+    submissionId: string,
+    input: StudyMaterialSubmissionInput,
+  ): Promise<StudyMaterialSubmission> {
+    this.assertValidMaterialSubmission(input);
+    await this.validateMaterialSubmissionReferences(input);
+    const normalized = normalizeMaterialSubmissionInput(input);
+    const updated = await this.prisma.studyMaterial.updateMany({
+      where: {
+        id: submissionId,
+        createdByUserId: userId,
+        status: 'draft',
+      },
+      data: normalized,
+    });
+    if (updated.count !== 1) {
+      await this.throwMaterialMutationError(userId, submissionId, 'edited');
+    }
+    const row = await this.prisma.studyMaterial.findUniqueOrThrow({
+      where: { id: submissionId },
+    });
+    return mapStudyMaterialSubmission(row);
+  }
+
+  async listStudyMaterialSubmissions(
+    userId: string,
+  ): Promise<StudyMaterialSubmission[]> {
+    const rows = await this.prisma.studyMaterial.findMany({
+      where: { createdByUserId: userId },
+      orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+    });
+    return rows.map(mapStudyMaterialSubmission);
+  }
+
+  async deleteStudyMaterialSubmission(
+    userId: string,
+    submissionId: string,
+  ): Promise<void> {
+    const deleted = await this.prisma.studyMaterial.deleteMany({
+      where: {
+        id: submissionId,
+        createdByUserId: userId,
+        status: 'draft',
+      },
+    });
+    if (deleted.count !== 1) {
+      await this.throwMaterialMutationError(userId, submissionId, 'deleted');
+    }
+  }
+
+  async submitStudyMaterialForReview(
+    userId: string,
+    submissionId: string,
+  ): Promise<StudyMaterialSubmission> {
+    const now = new Date();
+    const updated = await this.prisma.studyMaterial.updateMany({
+      where: {
+        id: submissionId,
+        createdByUserId: userId,
+        status: 'draft',
+      },
+      data: { status: 'pendingReview', submittedAt: now },
+    });
+    if (updated.count !== 1) {
+      await this.throwMaterialMutationError(userId, submissionId, 'submitted');
+    }
+    const row = await this.prisma.studyMaterial.findUniqueOrThrow({
+      where: { id: submissionId },
+    });
+    return mapStudyMaterialSubmission(row);
+  }
+
   async listBookmarkedQuestionSets(userId: string): Promise<QuestionSetListItem[]> {
     const rows = await this.prisma.bookmark.findMany({
       where: { userId, questionSet: { status: 'published', isArchived: false } },
@@ -789,6 +927,59 @@ export class PrismaLearningService implements LearningService {
         ]);
       }
     }
+  }
+
+  private assertValidMaterialSubmission(input: StudyMaterialSubmissionInput): void {
+    const fields = validateStudyMaterialSubmission(input);
+    if (fields.length > 0) {
+      throw new StudyMaterialSubmissionValidationError(fields);
+    }
+  }
+
+  private async validateMaterialSubmissionReferences(
+    input: StudyMaterialSubmissionInput,
+  ): Promise<void> {
+    const subject = await this.prisma.subject.findFirst({
+      where: { id: input.subjectId, isArchived: false },
+      select: { id: true },
+    });
+    if (subject === null) {
+      throw new StudyMaterialSubmissionValidationError([
+        { path: 'subjectId', message: 'Subject does not exist.' },
+      ]);
+    }
+    if (input.topicId !== undefined) {
+      const topic = await this.prisma.topic.findFirst({
+        where: {
+          id: input.topicId,
+          subjectId: input.subjectId,
+          isArchived: false,
+        },
+        select: { id: true },
+      });
+      if (topic === null) {
+        throw new StudyMaterialSubmissionValidationError([
+          { path: 'topicId', message: 'Topic must belong to the selected subject.' },
+        ]);
+      }
+    }
+  }
+
+  private async throwMaterialMutationError(
+    userId: string,
+    submissionId: string,
+    action: string,
+  ): Promise<never> {
+    const existing = await this.prisma.studyMaterial.findFirst({
+      where: { id: submissionId, createdByUserId: userId },
+      select: { id: true },
+    });
+    if (existing === null) {
+      throw new LearningResourceNotFoundError('Study material submission not found.');
+    }
+    throw new StudyMaterialSubmissionStateError(
+      `Only draft study materials can be ${action}.`,
+    );
   }
 
   private async requireSubmission(submissionId: string) {
@@ -978,6 +1169,43 @@ function mapQuestionSetSubmission(row: any): QuestionSetSubmission {
         isCorrect: option.isCorrect,
       })),
     })),
+  };
+}
+
+function normalizeMaterialSubmissionInput(input: StudyMaterialSubmissionInput) {
+  return {
+    subjectId: input.subjectId.trim(),
+    topicId: input.topicId?.trim() || null,
+    title: input.title.trim(),
+    description: input.description.trim(),
+    materialType: input.materialType,
+    sourceType: 'externalLink' as const,
+    sourceUrl: input.sourceUrl!.trim(),
+    fileName: null,
+    mimeType: null,
+    fileSizeBytes: null,
+    language: input.language?.trim().toLowerCase() || null,
+  };
+}
+
+function mapStudyMaterialSubmission(row: any): StudyMaterialSubmission {
+  return {
+    id: row.id,
+    subjectId: row.subjectId,
+    ...(row.topicId === null ? {} : { topicId: row.topicId }),
+    title: row.title,
+    description: row.description,
+    materialType: row.materialType,
+    sourceType: row.sourceType,
+    ...(row.sourceUrl === null ? {} : { sourceUrl: row.sourceUrl }),
+    ...(row.language === null ? {} : { language: row.language }),
+    status: row.status,
+    createdByUserId: row.createdByUserId,
+    ...(row.submittedAt === null ? {} : { submittedAt: row.submittedAt.toISOString() }),
+    ...(row.reviewedAt === null ? {} : { reviewedAt: row.reviewedAt.toISOString() }),
+    ...(row.rejectionReason === null ? {} : { rejectionReason: row.rejectionReason }),
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
   };
 }
 

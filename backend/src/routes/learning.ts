@@ -15,6 +15,9 @@ import {
   QuestionSetSubmissionStateError,
   QuestionSetSubmissionIdempotencyConflictError,
   QuestionSetSubmissionValidationError,
+  StudyMaterialSubmissionStateError,
+  StudyMaterialSubmissionIdempotencyConflictError,
+  StudyMaterialSubmissionValidationError,
   type LearningService,
 } from '../services/learningService.js';
 import type {
@@ -24,6 +27,7 @@ import type {
   SubmitQuizBody,
 } from '../types/learning.js';
 import type { QuestionSetSubmissionInput } from '../types/questionSetSubmission.js';
+import type { StudyMaterialSubmissionInput } from '../types/studyMaterialSubmission.js';
 
 interface SubjectParams {
   subjectId: string;
@@ -172,6 +176,32 @@ const atomicQuestionSetSubmissionBodySchema = {
   },
 } as const;
 
+const studyMaterialSubmissionBodySchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: [
+    'subjectId',
+    'title',
+    'description',
+    'materialType',
+    'sourceType',
+    'sourceUrl',
+  ],
+  properties: {
+    subjectId: { type: 'string' },
+    topicId: { type: 'string' },
+    title: { type: 'string' },
+    description: { type: 'string' },
+    materialType: {
+      type: 'string',
+      enum: ['pdf', 'slides', 'notes', 'document', 'link', 'other'],
+    },
+    sourceType: { type: 'string', enum: ['externalLink'] },
+    sourceUrl: { type: 'string' },
+    language: { type: 'string' },
+  },
+} as const;
+
 function sendLearningError(error: unknown, reply: FastifyReply): FastifyReply {
   if (error instanceof AuthenticationRequiredError) {
     return sendAuthError(error, reply);
@@ -214,6 +244,29 @@ function sendLearningError(error: unknown, reply: FastifyReply): FastifyReply {
   if (error instanceof QuestionSetSubmissionStateError) {
     return reply.code(409).send({
       error: { code: 'SUBMISSION_STATE_CONFLICT', message: error.message, fields: [] },
+    });
+  }
+  if (error instanceof StudyMaterialSubmissionValidationError) {
+    return reply.code(400).send({
+      error: {
+        code: 'MATERIAL_VALIDATION_FAILED',
+        message: error.message,
+        fields: error.fields,
+      },
+    });
+  }
+  if (error instanceof StudyMaterialSubmissionStateError) {
+    return reply.code(409).send({
+      error: { code: 'MATERIAL_STATE_CONFLICT', message: error.message, fields: [] },
+    });
+  }
+  if (error instanceof StudyMaterialSubmissionIdempotencyConflictError) {
+    return reply.code(409).send({
+      error: {
+        code: 'MATERIAL_IDEMPOTENCY_CONFLICT',
+        message: error.message,
+        fields: [],
+      },
     });
   }
   throw error;
@@ -340,6 +393,98 @@ export function createLearningRoutes(
           const user = await requireUser(request);
           return {
             submission: await service.submitQuestionSetForReview(
+              user.id,
+              request.params.submissionId,
+            ),
+          };
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+    app.post<{ Body: StudyMaterialSubmissionInput }>(
+      '/study-material-submissions',
+      { schema: { body: studyMaterialSubmissionBodySchema } },
+      async (request, reply) => {
+        try {
+          const user = await requireUser(request);
+          const clientSubmissionId = readIdempotencyKey(
+            request.headers['idempotency-key'],
+          );
+          if (clientSubmissionId === null) {
+            return reply.code(400).send({
+              error: {
+                code: 'MATERIAL_VALIDATION_FAILED',
+                message: 'Idempotency key must contain 1 to 128 characters.',
+                fields: [{ path: 'idempotencyKey', message: 'Idempotency key is invalid.' }],
+              },
+            });
+          }
+          const submission = await service.createStudyMaterialSubmission(
+            user.id,
+            request.body,
+            clientSubmissionId,
+          );
+          return reply.code(201).send({ submission });
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
+    app.get('/study-material-submissions', async (request, reply) => {
+      try {
+        const user = await requireUser(request);
+        return {
+          submissions: await service.listStudyMaterialSubmissions(user.id),
+        };
+      } catch (error) {
+        return sendLearningError(error, reply);
+      }
+    });
+
+    app.put<{ Params: SubmissionParams; Body: StudyMaterialSubmissionInput }>(
+      '/study-material-submissions/:submissionId',
+      { schema: { body: studyMaterialSubmissionBodySchema } },
+      async (request, reply) => {
+        try {
+          const user = await requireUser(request);
+          return {
+            submission: await service.updateStudyMaterialSubmission(
+              user.id,
+              request.params.submissionId,
+              request.body,
+            ),
+          };
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
+    app.delete<{ Params: SubmissionParams }>(
+      '/study-material-submissions/:submissionId',
+      async (request, reply) => {
+        try {
+          const user = await requireUser(request);
+          await service.deleteStudyMaterialSubmission(
+            user.id,
+            request.params.submissionId,
+          );
+          return reply.code(204).send();
+        } catch (error) {
+          return sendLearningError(error, reply);
+        }
+      },
+    );
+
+    app.post<{ Params: SubmissionParams }>(
+      '/study-material-submissions/:submissionId/submit',
+      async (request, reply) => {
+        try {
+          const user = await requireUser(request);
+          return {
+            submission: await service.submitStudyMaterialForReview(
               user.id,
               request.params.submissionId,
             ),
@@ -640,6 +785,13 @@ export function createLearningRoutes(
       },
     );
   };
+}
+
+function readIdempotencyKey(value: string | string[] | undefined): string | undefined | null {
+  if (value === undefined) return undefined;
+  if (Array.isArray(value)) return null;
+  const normalized = value.trim();
+  return normalized.length >= 1 && normalized.length <= 128 ? normalized : null;
 }
 
 function parseListLimit(value: string | undefined): number | null {

@@ -11,6 +11,7 @@ import '../auth/models/auth_user.dart';
 import '../contribution/repositories/contribution_repository.dart';
 import '../learning/repositories/learning_repository.dart';
 import '../media/media_repository_scope.dart';
+import '../materials/screens/my_study_materials_screen.dart';
 import '../saved/bookmark_scope.dart';
 import '../settings/settings_screen.dart';
 import 'services/avatar_service.dart';
@@ -148,6 +149,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icons.folder_copy_outlined,
                         title: context.l10n.myExams,
                         onTap: _openMyExams,
+                      ),
+                      const Divider(height: 1, indent: 64),
+                      _ActionTile(
+                        icon: Icons.library_books_outlined,
+                        title: context.l10n.myStudyMaterials,
+                        subtitle: context.l10n.studyMaterialsOwnershipNote,
+                        onTap: _openMyStudyMaterials,
                       ),
                       const Divider(height: 1, indent: 64),
                       _ActionTile(
@@ -329,6 +337,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _openMyExams() {
     AppNavigationScope.maybeOf(context)?.selectTab(2);
+  }
+
+  void _openMyStudyMaterials() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => MyStudyMaterialsScreen(
+          learningRepository: widget.learningRepository,
+          contributionRepository: widget.contributionRepository,
+        ),
+      ),
+    );
   }
 
   void _openSettings() {

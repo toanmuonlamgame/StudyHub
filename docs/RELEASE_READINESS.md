@@ -54,6 +54,57 @@ Review migration SQL and back up the target database before personally running
 
 ## Flutter Development Configuration
 
+### First cloud staging pass
+
+- Use a separate PostgreSQL database, a Node host that supports the toolchain
+  (local baseline: Node 24), an injected port, HTTPS, and server-side secrets.
+- Build with dev dependencies available: `npm ci --include=dev`, then
+  `npm run prisma:generate` and `npm run build`. Run the migration as a separate
+  step with the Prisma CLI available; start with `npm start`.
+- On an empty staging database, add approved demo content. Only seed a
+  disposable staging database if the development fixtures are intended there.
+- From `backend`, run
+  `npm run test:staging -- https://your-api.example`. This checks HTTPS, health,
+  a non-empty catalog, and answer safety without credentials or writes.
+- Verify registration, saved exams, quiz submission, and contributions using
+  a disposable account on a physical device. The read-only smoke does not
+  verify authentication, database writes, or the Android build.
+- If the host uses an ephemeral filesystem, do not rely on uploaded images
+  surviving restarts. Use a persistent volume or object storage before testing
+  media durability or onboarding real users. Do not expose staging as a public
+  release while abuse controls and production storage are outstanding.
+
+### Cloud Run + PostgreSQL staging
+
+1. Create a separate PostgreSQL database for staging. Store the connection
+   string as a Secret Manager secret, and grant the Cloud Run runtime service
+   account access to that secret only. Do not put the value in build arguments
+   or commit it.
+2. From `backend`, run `npm ci` and
+   `npm run prisma:migrate:deploy` against the reviewed staging database.
+   Supply `DATABASE_URL` securely in that terminal only. Do not run
+   development fixtures on a production database.
+3. Deploy from the backend directory with the Cloud Run source deploy
+   workflow. The Node buildpack runs `gcp-build` to generate Prisma Client
+   and compile TypeScript; the service starts with `npm start`.
+
+   ```powershell
+   gcloud run deploy studyhub-staging --source . --region REGION `
+     --allow-unauthenticated --min-instances 0 --max-instances 2 `
+     --set-build-env-vars GOOGLE_NODEJS_VERSION=24.x `
+     --set-env-vars NODE_ENV=production,STUDYHUB_LEARNING_DATA_SOURCE=prisma `
+     --set-secrets DATABASE_URL=studyhub-staging-database-url:1
+   ```
+
+   Replace `REGION` and the secret reference as needed. Public invocation
+   lets the mobile client reach the API; protected application endpoints
+   still require a StudyHub session. Instance limits are not spending caps.
+4. Load approved demo content, run `npm run test:staging -- https://...`,
+   and build the Android release candidate against that same HTTPS origin.
+   Verify login, Exam, Practice, bookmarks and contribution on a real device.
+
+### Local device configuration
+
 Debug builds default to mock mode. Android debug permits cleartext HTTP for a
 local backend; the main/release manifest does not enable cleartext traffic.
 

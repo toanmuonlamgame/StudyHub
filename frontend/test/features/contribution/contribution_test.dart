@@ -16,6 +16,7 @@ import 'package:frontend/features/contribution/models/contribution_submission.da
 import 'package:frontend/features/contribution/models/submission_confirmation.dart';
 import 'package:frontend/features/contribution/repositories/api_contribution_repository.dart';
 import 'package:frontend/features/contribution/repositories/contribution_repository.dart';
+import 'package:frontend/features/materials/models/study_material_submission.dart';
 import 'package:frontend/features/contribution/repositories/mock_contribution_repository.dart';
 import 'package:frontend/features/contribution/screens/contribution_editor_screen.dart';
 import 'package:frontend/features/contribution/screens/contribution_detail_screen.dart';
@@ -811,6 +812,21 @@ mixin _UnsupportedContributionManagement {
   Future<void> deleteDraft(String submissionId) => throw UnimplementedError();
   Future<SubmissionConfirmation> submitDraftForReview(String submissionId) =>
       throw UnimplementedError();
+  Future<List<StudyMaterialSubmission>> listMaterialSubmissions() =>
+      throw UnimplementedError();
+  Future<StudyMaterialSubmission> createMaterialDraft(
+    StudyMaterialDraft draft, {
+    String? submissionId,
+  }) => throw UnimplementedError();
+  Future<StudyMaterialSubmission> updateMaterialDraft(
+    String submissionId,
+    StudyMaterialDraft draft,
+  ) => throw UnimplementedError();
+  Future<void> deleteMaterialDraft(String submissionId) =>
+      throw UnimplementedError();
+  Future<StudyMaterialSubmission> submitMaterialDraftForReview(
+    String submissionId,
+  ) => throw UnimplementedError();
 }
 
 QuestionSetDraft _validDraft() => const QuestionSetDraft(

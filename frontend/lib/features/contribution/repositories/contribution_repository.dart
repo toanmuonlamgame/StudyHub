@@ -1,6 +1,7 @@
 import '../models/question_set_draft.dart';
 import '../models/contribution_submission.dart';
 import '../models/submission_confirmation.dart';
+import '../../materials/models/study_material_submission.dart';
 
 abstract interface class ContributionRepository {
   Future<List<ContributionSubmission>> listSubmissions();
@@ -15,6 +16,19 @@ abstract interface class ContributionRepository {
     QuestionSetDraft draft, {
     required String submissionId,
   });
+  Future<List<StudyMaterialSubmission>> listMaterialSubmissions();
+  Future<StudyMaterialSubmission> createMaterialDraft(
+    StudyMaterialDraft draft, {
+    String? submissionId,
+  });
+  Future<StudyMaterialSubmission> updateMaterialDraft(
+    String submissionId,
+    StudyMaterialDraft draft,
+  );
+  Future<void> deleteMaterialDraft(String submissionId);
+  Future<StudyMaterialSubmission> submitMaterialDraftForReview(
+    String submissionId,
+  );
 }
 
 class ContributionValidationException implements Exception {

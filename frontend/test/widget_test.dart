@@ -49,6 +49,34 @@ void main() {
     expect(find.textContaining('% off'), findsNothing);
   });
 
+  testWidgets('Home shows a usable materials banner when ads are disabled', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
+    final banner = find.byKey(const ValueKey('home-materials-promotion'));
+    await tester.scrollUntilVisible(banner, 240, scrollable: _homeScrollable());
+    await tester.pumpAndSettle();
+    expect(find.text('Advertisement'), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(
+      find.descendant(of: banner, matching: find.byType(ListTile)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Study Materials'), findsWidgets);
+    expect(find.byType(BackButton), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('authentication stays usable on a compact scaled viewport', (
     WidgetTester tester,
   ) async {

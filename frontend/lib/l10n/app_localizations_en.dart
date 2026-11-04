@@ -1526,4 +1526,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get learner => 'Learner';
+
+  @override
+  String get myStudyMaterials => 'My study materials';
+
+  @override
+  String get addMaterial => 'Add material';
+
+  @override
+  String get materialEditorTitle => 'Share study material';
+
+  @override
+  String get materialEditorIntro =>
+      'Add a useful, legal learning link. It stays private until moderation approves it.';
+
+  @override
+  String get materialSubjectRequired => 'Choose a subject.';
+
+  @override
+  String get materialType => 'Material type';
+
+  @override
+  String get materialSourceUrl => 'Source link';
+
+  @override
+  String get materialLanguageOptional => 'Language code (optional)';
+
+  @override
+  String get materialUrlInvalid => 'Enter a valid HTTP or HTTPS link.';
+
+  @override
+  String get materialTaxonomyError =>
+      'Topics could not be loaded. You can continue without a topic.';
+
+  @override
+  String get materialSaveError =>
+      'The material could not be saved. Check the form and try again.';
+
+  @override
+  String get materialSubmissionLoadError =>
+      'Your study materials could not be loaded';
+
+  @override
+  String get noMaterialSubmissions => 'No shared materials yet';
+
+  @override
+  String get noMaterialSubmissionsBody =>
+      'Save a useful study link as a draft or submit it for review.';
+
+  @override
+  String get materialActionError =>
+      'The material could not be updated. Try again.';
+
+  @override
+  String get deleteMaterialDraft => 'Delete material draft?';
+
+  @override
+  String get deleteMaterialDraftConfirm =>
+      'This draft will be permanently removed.';
+
+  @override
+  String get studyMaterialsOwnershipNote =>
+      'Your drafts are private. Only approved materials appear in the public library.';
 }

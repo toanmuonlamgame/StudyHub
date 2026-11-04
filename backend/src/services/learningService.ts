@@ -22,6 +22,10 @@ import type {
   QuestionSetSubmissionInput,
   SubmissionValidationFieldError,
 } from '../types/questionSetSubmission.js';
+import type {
+  StudyMaterialSubmission,
+  StudyMaterialSubmissionInput,
+} from '../types/studyMaterialSubmission.js';
 
 export interface LearningService {
   getSubjects(): Promise<Subject[]>;
@@ -78,6 +82,22 @@ export interface LearningService {
     userId: string,
     submissionId: string,
   ): Promise<QuestionSetSubmission>;
+  createStudyMaterialSubmission(
+    userId: string,
+    input: StudyMaterialSubmissionInput,
+    clientSubmissionId?: string,
+  ): Promise<StudyMaterialSubmission>;
+  updateStudyMaterialSubmission(
+    userId: string,
+    submissionId: string,
+    input: StudyMaterialSubmissionInput,
+  ): Promise<StudyMaterialSubmission>;
+  listStudyMaterialSubmissions(userId: string): Promise<StudyMaterialSubmission[]>;
+  deleteStudyMaterialSubmission(userId: string, submissionId: string): Promise<void>;
+  submitStudyMaterialForReview(
+    userId: string,
+    submissionId: string,
+  ): Promise<StudyMaterialSubmission>;
   listBookmarkedQuestionSets(userId: string): Promise<QuestionSetListItem[]>;
   bookmarkQuestionSet(userId: string, questionSetId: string): Promise<QuestionSetListItem>;
   removeQuestionSetBookmark(userId: string, questionSetId: string): Promise<void>;
@@ -102,3 +122,13 @@ export class QuestionSetSubmissionValidationError extends Error {
 }
 
 export class QuestionSetSubmissionStateError extends Error {}
+
+export class StudyMaterialSubmissionValidationError extends Error {
+  constructor(public readonly fields: SubmissionValidationFieldError[]) {
+    super('Study material submission validation failed.');
+  }
+}
+
+export class StudyMaterialSubmissionStateError extends Error {}
+
+export class StudyMaterialSubmissionIdempotencyConflictError extends Error {}

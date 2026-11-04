@@ -27,7 +27,12 @@ class HomeQuickActionGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         const spacing = 10.0;
-        final tileWidth = (constraints.maxWidth - spacing) / 2;
+        final singleColumn =
+            constraints.maxWidth < 300 ||
+            MediaQuery.textScalerOf(context).scale(14) > 24;
+        final tileWidth = singleColumn
+            ? constraints.maxWidth
+            : (constraints.maxWidth - spacing) / 2;
 
         return Wrap(
           key: const ValueKey('home-quick-action-grid'),
@@ -54,12 +59,25 @@ class _HomeQuickActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final (foreground, background) = switch (action.id) {
+      'materials' => (colors.onSecondaryContainer, colors.secondaryContainer),
+      'saved' => (colors.onTertiaryContainer, colors.tertiaryContainer),
+      _ => (colors.onPrimaryContainer, colors.primaryContainer),
+    };
 
     return Semantics(
       key: ValueKey('home-quick-${action.id}'),
       button: true,
       label: action.label,
+      onTap: action.onTap,
+      excludeSemantics: true,
       child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: colors.outlineVariant),
+        ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: action.onTap,
@@ -67,7 +85,12 @@ class _HomeQuickActionTile extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: Row(
               children: [
-                StudyHubIconSurface(icon: action.icon, size: 40),
+                StudyHubIconSurface(
+                  icon: action.icon,
+                  foregroundColor: foreground,
+                  backgroundColor: background,
+                  size: 36,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(action.label, style: theme.textTheme.titleSmall),
@@ -90,12 +113,14 @@ class PrimaryLearningCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    const panel = Color(0xFF153B3A);
+    const accent = Color(0xFFBAF0D8);
 
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(20),
+        color: panel,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,14 +129,16 @@ class PrimaryLearningCard extends StatelessWidget {
             children: [
               StudyHubIconSurface(
                 icon: Icons.play_arrow_rounded,
-                foregroundColor: theme.colorScheme.onPrimary,
-                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: panel,
+                backgroundColor: accent,
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   l10n.continueLearningSection,
-                  style: theme.textTheme.titleLarge,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
@@ -120,13 +147,17 @@ class PrimaryLearningCard extends StatelessWidget {
           Text(
             l10n.continueLearningBody,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onPrimaryContainer,
+              color: const Color(0xFFD9EAE5),
             ),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
             key: const ValueKey('home-primary-start-learning'),
             onPressed: onPressed,
+            style: FilledButton.styleFrom(
+              backgroundColor: accent,
+              foregroundColor: panel,
+            ),
             icon: const Icon(Icons.arrow_forward),
             label: Text(l10n.startLearning),
           ),

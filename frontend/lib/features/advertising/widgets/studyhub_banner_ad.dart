@@ -8,9 +8,10 @@ import '../advertising_scope.dart';
 import '../advertising_service.dart';
 
 class StudyHubBannerAd extends StatefulWidget {
-  const StudyHubBannerAd({super.key, required this.placement});
+  const StudyHubBannerAd({super.key, required this.placement, this.fallback});
 
   final BannerPlacement placement;
+  final Widget? fallback;
 
   @override
   State<StudyHubBannerAd> createState() => _StudyHubBannerAdState();
@@ -71,43 +72,40 @@ class _StudyHubBannerAdState extends State<StudyHubBannerAd> {
   @override
   Widget build(BuildContext context) {
     final service = AdvertisingScope.maybeOf(context);
-    if (service == null ||
-        !service.shouldShowAds ||
-        (!_loading && _handle == null)) {
-      return const SizedBox.shrink();
+    if (service?.shouldShowAds != true || _handle == null) {
+      return widget.fallback ?? const SizedBox.shrink();
     }
-    final handle = _handle;
-    return SafeArea(
-      top: false,
-      child: Semantics(
-        label: context.l10n.advertisement,
-        container: true,
-        child: SizedBox(
-          height: 72,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                context.l10n.advertisement,
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
-              const SizedBox(height: 4),
-              if (handle == null)
-                const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              else
+    final handle = _handle!;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (handle.size.width > constraints.maxWidth) {
+          return widget.fallback ?? const SizedBox.shrink();
+        }
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  context.l10n.advertisement,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                const SizedBox(height: 6),
                 SizedBox(
                   width: handle.size.width,
                   height: handle.size.height,
                   child: handle.buildView(),
                 ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

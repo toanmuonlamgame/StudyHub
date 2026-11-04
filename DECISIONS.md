@@ -75,6 +75,22 @@ Rule:
 - Real upload must be introduced later behind backend validation, authorization,
   storage safety, and moderation boundaries.
 
+## 2026-11-03 - Authenticated Study Material Contribution Boundary
+Decision:
+- Signed-in users may create external-link Study Material drafts and submit
+  them for moderation through `ContributionRepository` and `LearningService`.
+- The backend derives creator identity from the authenticated session. Only the
+  owner may list, edit, delete, or submit a draft, and only drafts are mutable.
+- Public material APIs continue to return published records only.
+- Draft creation uses a client idempotency key; matching retries return the
+  original draft and changed payloads are rejected.
+- Binary files are not accepted by this contract; production object storage and
+  admin material review are separate release tasks.
+
+Reason:
+- A complete, safe link contribution loop adds real product value now without
+  pretending local filesystem storage is production-ready.
+
 ## 2026-07-14 - Device-Local Learning Progress
 Decision:
 - StudyHub records completed Exam and Practice summaries locally through a

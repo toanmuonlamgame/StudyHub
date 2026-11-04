@@ -30,6 +30,10 @@ import type {
   CreateQuestionSetSubmissionOutcome,
   QuestionSetSubmissionInput,
 } from '../types/questionSetSubmission.js';
+import type {
+  StudyMaterialSubmission,
+  StudyMaterialSubmissionInput,
+} from '../types/studyMaterialSubmission.js';
 import {
   InvalidQuizSubmissionError,
   ExamAttemptIdempotencyConflictError,
@@ -38,10 +42,15 @@ import {
   QuestionSetSubmissionStateError,
   QuestionSetSubmissionIdempotencyConflictError,
   QuestionSetSubmissionValidationError,
+  StudyMaterialSubmissionStateError,
+  StudyMaterialSubmissionIdempotencyConflictError,
+  StudyMaterialSubmissionValidationError,
   type LearningService,
 } from './learningService.js';
 import { validateQuestionSetSubmission } from './questionSetSubmissionValidation.js';
 import { createQuestionSetSubmissionFingerprint } from './questionSetSubmissionIdempotency.js';
+import { validateStudyMaterialSubmission } from './studyMaterialSubmissionValidation.js';
+import { createStudyMaterialSubmissionFingerprint } from './studyMaterialSubmissionIdempotency.js';
 import {
   createQuestionSetListItem,
   decodeQuestionSetCursor,
@@ -68,6 +77,11 @@ const questionSetCreatedAtById = new Map(
 
 export class InMemoryLearningService implements LearningService {
   private readonly submissions = new Map<string, QuestionSetSubmission>();
+  private readonly materialSubmissions = new Map<string, StudyMaterialSubmission>();
+  private readonly materialDraftRequests = new Map<
+    string,
+    { userId: string; fingerprint: string; submissionId: string }
+  >();
   private readonly atomicSubmissions = new Map<
     string,
     { userId: string; fingerprint: string; submissionId: string }
@@ -75,6 +89,7 @@ export class InMemoryLearningService implements LearningService {
   private readonly examAttempts = new Map<string, StoredExamAttempt>();
   private readonly bookmarksByUserId = new Map<string, Set<string>>();
   private nextSubmissionNumber = 1;
+  private nextMaterialSubmissionNumber = 1;
   private nextAttemptNumber = 1;
 
   async getSubjects(): Promise<Subject[]> {
@@ -552,6 +567,110 @@ export class InMemoryLearningService implements LearningService {
     return cloneSubmission(submitted);
   }
 
+  async createStudyMaterialSubmission(
+    userId: string,
+    input: StudyMaterialSubmissionInput,
+    clientSubmissionId?: string,
+  ): Promise<StudyMaterialSubmission> {
+    this.assertValidMaterialSubmission(input);
+    this.validateMaterialSubmissionReferences(input);
+    const fingerprint = createStudyMaterialSubmissionFingerprint(input);
+    if (clientSubmissionId !== undefined) {
+      const existing = this.materialDraftRequests.get(clientSubmissionId);
+      if (existing !== undefined) {
+        if (existing.userId !== userId || existing.fingerprint !== fingerprint) {
+          throw new StudyMaterialSubmissionIdempotencyConflictError(
+            'Material submission ID was already used with different data.',
+          );
+        }
+        return { ...this.requireOwnedMaterialSubmission(userId, existing.submissionId) };
+      }
+    }
+    const now = new Date().toISOString();
+    const submission: StudyMaterialSubmission = {
+      ...normalizeMaterialSubmissionInput(input),
+      id: `material_submission_${this.nextMaterialSubmissionNumber++}`,
+      status: 'draft',
+      createdByUserId: userId,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.materialSubmissions.set(submission.id, submission);
+    if (clientSubmissionId !== undefined) {
+      this.materialDraftRequests.set(clientSubmissionId, {
+        userId,
+        fingerprint,
+        submissionId: submission.id,
+      });
+    }
+    return { ...submission };
+  }
+
+  async updateStudyMaterialSubmission(
+    userId: string,
+    submissionId: string,
+    input: StudyMaterialSubmissionInput,
+  ): Promise<StudyMaterialSubmission> {
+    const current = this.requireOwnedMaterialSubmission(userId, submissionId);
+    if (current.status !== 'draft') {
+      throw new StudyMaterialSubmissionStateError(
+        'Only draft study materials can be edited.',
+      );
+    }
+    this.assertValidMaterialSubmission(input);
+    this.validateMaterialSubmissionReferences(input);
+    const updated = {
+      ...current,
+      ...normalizeMaterialSubmissionInput(input),
+      updatedAt: new Date().toISOString(),
+    };
+    this.materialSubmissions.set(submissionId, updated);
+    return { ...updated };
+  }
+
+  async listStudyMaterialSubmissions(
+    userId: string,
+  ): Promise<StudyMaterialSubmission[]> {
+    return [...this.materialSubmissions.values()]
+      .filter(({ createdByUserId }) => createdByUserId === userId)
+      .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+      .map((submission) => ({ ...submission }));
+  }
+
+  async deleteStudyMaterialSubmission(
+    userId: string,
+    submissionId: string,
+  ): Promise<void> {
+    const current = this.requireOwnedMaterialSubmission(userId, submissionId);
+    if (current.status !== 'draft') {
+      throw new StudyMaterialSubmissionStateError(
+        'Only draft study materials can be deleted.',
+      );
+    }
+    this.materialSubmissions.delete(submissionId);
+  }
+
+  async submitStudyMaterialForReview(
+    userId: string,
+    submissionId: string,
+  ): Promise<StudyMaterialSubmission> {
+    const current = this.requireOwnedMaterialSubmission(userId, submissionId);
+    if (current.status !== 'draft') {
+      throw new StudyMaterialSubmissionStateError(
+        'Only draft study materials can be submitted for review.',
+      );
+    }
+    const now = new Date().toISOString();
+    const submitted: StudyMaterialSubmission = {
+      ...current,
+      status: 'pendingReview',
+      submittedAt: now,
+      updatedAt: now,
+    };
+    this.materialSubmissions.set(submissionId, submitted);
+    return { ...submitted };
+  }
+
   async listBookmarkedQuestionSets(userId: string): Promise<import('../types/learning.js').QuestionSetListItem[]> {
     const ids = this.bookmarksByUserId.get(userId) ?? new Set<string>();
     return questionSets
@@ -602,6 +721,43 @@ export class InMemoryLearningService implements LearningService {
         ]);
       }
     }
+  }
+
+  private assertValidMaterialSubmission(input: StudyMaterialSubmissionInput): void {
+    const fields = validateStudyMaterialSubmission(input);
+    if (fields.length > 0) {
+      throw new StudyMaterialSubmissionValidationError(fields);
+    }
+  }
+
+  private validateMaterialSubmissionReferences(
+    input: StudyMaterialSubmissionInput,
+  ): void {
+    const subject = subjects.find(({ id }) => id === input.subjectId);
+    if (subject === undefined) {
+      throw new StudyMaterialSubmissionValidationError([
+        { path: 'subjectId', message: 'Subject does not exist.' },
+      ]);
+    }
+    if (input.topicId !== undefined) {
+      const topic = topics.find(({ id }) => id === input.topicId);
+      if (topic === undefined || topic.subjectId !== input.subjectId) {
+        throw new StudyMaterialSubmissionValidationError([
+          { path: 'topicId', message: 'Topic must belong to the selected subject.' },
+        ]);
+      }
+    }
+  }
+
+  private requireOwnedMaterialSubmission(
+    userId: string,
+    submissionId: string,
+  ): StudyMaterialSubmission {
+    const submission = this.materialSubmissions.get(submissionId);
+    if (submission === undefined || submission.createdByUserId !== userId) {
+      throw new LearningResourceNotFoundError('Study material submission not found.');
+    }
+    return submission;
   }
 
   private requireSubmission(submissionId: string): QuestionSetSubmission {
@@ -694,4 +850,19 @@ function cloneSubmission(
   submission: QuestionSetSubmission,
 ): QuestionSetSubmission {
   return { ...submission, ...cloneSubmissionInput(submission) };
+}
+
+function normalizeMaterialSubmissionInput(
+  input: StudyMaterialSubmissionInput,
+): StudyMaterialSubmissionInput {
+  return {
+    subjectId: input.subjectId.trim(),
+    ...(input.topicId?.trim() ? { topicId: input.topicId.trim() } : {}),
+    title: input.title.trim(),
+    description: input.description.trim(),
+    materialType: input.materialType,
+    sourceType: 'externalLink',
+    sourceUrl: input.sourceUrl!.trim(),
+    ...(input.language?.trim() ? { language: input.language.trim().toLowerCase() } : {}),
+  };
 }

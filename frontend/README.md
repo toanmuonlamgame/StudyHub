@@ -211,10 +211,11 @@ The Home Study Materials tile opens a separate mobile-first browsing flow.
 both mock and API modes. Search is debounced, filters reset pagination, stale
 responses are ignored, and next-page failures preserve existing cards.
 
-Only published metadata is presented. External URLs are displayed as selectable
-resource text; uploaded-file entries show honest metadata and an unavailable
-prototype state. There is no binary upload, cloud storage, authentication,
-ownership, or moderation UI yet.
+Only published metadata is presented in the public library. Signed-in users can
+open Profile -> My study materials to create an external-link draft, edit or
+delete their own draft, submit it for review, and track moderation status. The
+backend remains the ownership source of truth. Binary upload, production object
+storage, and the admin material-review screen remain follow-up work.
 
 ## Contribute Questions
 

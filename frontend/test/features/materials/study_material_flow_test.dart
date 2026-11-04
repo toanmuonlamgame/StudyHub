@@ -139,7 +139,7 @@ Future<void> _openMaterials(
       )
       .first;
   await tester.scrollUntilVisible(tile, 300, scrollable: scrollable);
-  await tester.drag(scrollable, const Offset(0, -180));
+  await tester.ensureVisible(tile);
   await tester.pumpAndSettle();
   await tester.tap(tile);
   await tester.pumpAndSettle();

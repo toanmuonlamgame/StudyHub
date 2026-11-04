@@ -95,6 +95,114 @@ test('prisma data source requires DATABASE_URL', () => {
   }
 });
 
+test('study material submission requires authentication', async (t) => {
+  const app = buildApp({ learningDataSource: 'memory' });
+  t.after(() => app.close());
+  const response = await app.inject({
+    method: 'POST',
+    url: '/learning/study-material-submissions',
+    payload: validMaterialSubmission(),
+  });
+  assert.equal(response.statusCode, 401);
+});
+
+test('study material draft lifecycle enforces ownership and review state', async (t) => {
+  const service = new InMemoryLearningService();
+  const ownerApp = buildApp({
+    learningService: service,
+    requireUser: async () => ({ id: 'material-owner' }),
+  });
+  const otherApp = buildApp({
+    learningService: service,
+    requireUser: async () => ({ id: 'other-user' }),
+  });
+  t.after(() => Promise.all([ownerApp.close(), otherApp.close()]));
+
+  const created = await ownerApp.inject({
+    method: 'POST',
+    url: '/learning/study-material-submissions',
+    payload: validMaterialSubmission(),
+  });
+  assert.equal(created.statusCode, 201);
+  const submission = created.json().submission;
+  assert.equal(submission.status, 'draft');
+  assert.equal(submission.createdByUserId, 'material-owner');
+
+  const hidden = await otherApp.inject({
+    method: 'PUT',
+    url: `/learning/study-material-submissions/${submission.id}`,
+    payload: { ...validMaterialSubmission(), title: 'Changed by another user' },
+  });
+  assert.equal(hidden.statusCode, 404);
+
+  const submitted = await ownerApp.inject({
+    method: 'POST',
+    url: `/learning/study-material-submissions/${submission.id}/submit`,
+  });
+  assert.equal(submitted.statusCode, 200);
+  assert.equal(submitted.json().submission.status, 'pendingReview');
+
+  const editAfterSubmit = await ownerApp.inject({
+    method: 'PUT',
+    url: `/learning/study-material-submissions/${submission.id}`,
+    payload: validMaterialSubmission(),
+  });
+  assert.equal(editAfterSubmit.statusCode, 409);
+});
+
+test('study material submission rejects unsafe links and unknown fields', async (t) => {
+  const app = createTestApp(t);
+  const unsafe = await app.inject({
+    method: 'POST',
+    url: '/learning/study-material-submissions',
+    payload: { ...validMaterialSubmission(), sourceUrl: 'javascript:alert(1)' },
+  });
+  assert.equal(unsafe.statusCode, 400);
+  assert.equal(unsafe.json().error.code, 'MATERIAL_VALIDATION_FAILED');
+
+  const unknown = await app.inject({
+    method: 'POST',
+    url: '/learning/study-material-submissions',
+    payload: { ...validMaterialSubmission(), createdByUserId: 'attacker' },
+  });
+  assert.equal(unknown.statusCode, 400);
+});
+
+test('study material draft creation is retry-safe', async (t) => {
+  const app = createTestApp(t);
+  const request = {
+    method: 'POST',
+    url: '/learning/study-material-submissions',
+    headers: { 'idempotency-key': 'material-request-1' },
+    payload: validMaterialSubmission(),
+  };
+  const first = await app.inject(request);
+  const retry = await app.inject(request);
+  assert.equal(first.statusCode, 201);
+  assert.equal(retry.statusCode, 201);
+  assert.equal(retry.json().submission.id, first.json().submission.id);
+
+  const conflict = await app.inject({
+    ...request,
+    payload: { ...validMaterialSubmission(), title: 'Changed title' },
+  });
+  assert.equal(conflict.statusCode, 409);
+  assert.equal(conflict.json().error.code, 'MATERIAL_IDEMPOTENCY_CONFLICT');
+});
+
+function validMaterialSubmission() {
+  return {
+    subjectId: 'subject_javascript',
+    topicId: 'topic_js_syntax',
+    title: 'JavaScript reference',
+    description: 'A concise external learning reference.',
+    materialType: 'link',
+    sourceType: 'externalLink',
+    sourceUrl: 'https://developer.mozilla.org/docs/Web/JavaScript',
+    language: 'en',
+  };
+}
+
 test('GET /learning/subjects returns subjects', async (t) => {
   const app = createTestApp(t);
   const response = await app.inject({

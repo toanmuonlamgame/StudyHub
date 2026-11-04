@@ -321,12 +321,18 @@ Never commit `backend/.env` or its database credentials.
 
 ## Study Materials API
 
-Study Materials are currently a published metadata browsing feature. The API
-does not accept binary uploads and does not expose draft/review/moderation data.
+Study Materials support public published browsing plus authenticated,
+owner-scoped external-link drafts. Drafts can be created, edited, deleted, and
+submitted for review. Public endpoints never expose private moderation data.
 
 ```text
 GET /learning/materials
 GET /learning/materials/:materialId
+POST /learning/study-material-submissions
+GET /learning/study-material-submissions
+PUT /learning/study-material-submissions/:submissionId
+DELETE /learning/study-material-submissions/:submissionId
+POST /learning/study-material-submissions/:submissionId/submit
 ```
 
 The list accepts `subjectId`, `topicId`, `q`, `materialType`, `language`,
@@ -338,6 +344,16 @@ Migration `20260714135447_study_material_foundation` adds the PostgreSQL model,
 relations, publication/filter indexes, and seeded development fixtures. Run
 `npm run prisma:seed` after migration. `npm run test:prisma-smoke` verifies the
 material list/detail contract in Prisma mode as well as the existing quiz flow.
+
+Migration `20261103120000_study_material_ownership` adds creator ownership and
+moderation timestamps. Apply it manually before enabling this flow in Prisma
+mode. This release accepts validated HTTP/HTTPS links only; binary file storage
+and material moderation screens remain follow-up work.
+
+Flutter sends a stable `Idempotency-Key` while creating a draft. Memory and
+Prisma services return the original draft for matching retries and reject reuse
+with different content. Personal material lists are newest-first; cursor
+pagination remains required before broad scale.
 
 ## Community Question Set Submissions
 

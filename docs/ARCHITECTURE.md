@@ -364,11 +364,24 @@ GET /learning/materials?subjectId=...&topicId=...&q=...&materialType=...&languag
 GET /learning/materials/:materialId
 ```
 
+Authenticated creator APIs are owner-scoped:
+
+```text
+POST   /learning/study-material-submissions
+GET    /learning/study-material-submissions
+PUT    /learning/study-material-submissions/:submissionId
+DELETE /learning/study-material-submissions/:submissionId
+POST   /learning/study-material-submissions/:submissionId/submit
+```
+
 Lists use stable `createdAt + id` cursor ordering, default to 20, cap at 50,
 and return only published compact items. Detail is fetched only when opened.
 Draft, pending-review, rejected, moderation, and ownership data remain internal.
-The current uploaded-file source is metadata only; no binary upload or cloud
-delivery is implemented.
+The creator contract currently accepts validated HTTP/HTTPS external links.
+Binary upload and cloud delivery are not implemented. Flutter never supplies a
+trusted owner ID; Fastify derives it from `requireUser` and services enforce it.
+Draft creation carries an `Idempotency-Key` so network retries cannot create
+duplicate records with the same client operation.
 
 ## Community Question Bank Boundary
 

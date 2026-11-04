@@ -24,9 +24,10 @@ StudyHub is not a pre-seeded question database first. It should support a small 
 - StudyHub organizes content by school, program/system, major, subject, and topic.
 - The taxonomy must be flexible. Users should not be forced to pass through every taxonomy level when their content does not need it.
 - Study Material and Question Set are separate content types.
-- Study Materials now have a metadata-first browsing foundation in Flutter and
-  the backend. Only published materials are public; binary upload, ownership,
-  moderation workflows, and cloud storage remain future authenticated work.
+- Study Materials have public metadata browsing plus authenticated external-link
+  drafts with backend ownership and a draft -> pending-review lifecycle. Only
+  published materials are public; binary upload, cloud storage, and admin
+  material-review UI remain future work.
 - Users can study existing question sets.
 - Users can upload documents, exams, question sets, and other study content.
 - Users can contribute community content.

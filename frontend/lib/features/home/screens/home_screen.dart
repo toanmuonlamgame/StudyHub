@@ -31,10 +31,10 @@ class HomeScreen extends StatelessWidget {
     final displayName = user?.displayName.trim();
     final quickActions = [
       HomeQuickAction(
-        id: 'browse-subjects',
-        icon: Icons.menu_book_outlined,
-        label: l10n.browseSubjects,
-        onTap: onStartLearning,
+        id: 'materials',
+        icon: Icons.description_outlined,
+        label: l10n.studyMaterials,
+        onTap: onOpenStudyMaterials,
       ),
       HomeQuickAction(
         id: 'progress',
@@ -63,60 +63,39 @@ class HomeScreen extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 560),
             child: ListView(
               key: const ValueKey('home-hub-list'),
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 32),
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
               children: [
                 _HomeHeader(
                   title: l10n.appTitle,
                   greeting: displayName == null || displayName.isEmpty
                       ? l10n.homeGreeting
                       : l10n.homeGreetingName(displayName),
-                  supportingLine: l10n.homeSupportingLine,
-                ),
-                const SizedBox(height: 24),
-                PrimaryLearningCard(onPressed: onStartLearning),
-                const SizedBox(height: 28),
-                StudyHubSectionHeader(
-                  title: l10n.quickActionsSection,
-                  subtitle: l10n.homeSupportingLine,
-                ),
-                const SizedBox(height: 12),
-                HomeQuickActionGrid(actions: quickActions),
-                const SizedBox(height: 28),
-                StudyHubSectionHeader(title: l10n.exploreSection),
-                const SizedBox(height: 12),
-                FeaturePreviewTile(
-                  icon: Icons.description_outlined,
-                  title: l10n.studyMaterials,
-                  onTap: onOpenStudyMaterials,
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.shield_outlined,
-                        color: theme.colorScheme.secondary,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          l10n.answersHiddenNote,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSecondaryContainer,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
                 const SizedBox(height: 20),
-                const StudyHubBannerAd(placement: BannerPlacement.home),
+                PrimaryLearningCard(onPressed: onStartLearning),
+                const SizedBox(height: 28),
+                StudyHubSectionHeader(title: l10n.quickActionsSection),
+                const SizedBox(height: 12),
+                HomeQuickActionGrid(actions: quickActions),
+                const SizedBox(height: 24),
+                StudyHubBannerAd(
+                  placement: BannerPlacement.home,
+                  fallback: Card(
+                    key: const ValueKey('home-materials-promotion'),
+                    color: theme.colorScheme.tertiaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: ListTile(
+                      leading: const Icon(Icons.collections_bookmark_outlined),
+                      title: Text(l10n.exploreSection),
+                      subtitle: Text(l10n.studyMaterialsSubtitle),
+                      trailing: const Icon(Icons.arrow_forward_rounded),
+                      onTap: onOpenStudyMaterials,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -127,15 +106,10 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader({
-    required this.title,
-    required this.greeting,
-    required this.supportingLine,
-  });
+  const _HomeHeader({required this.title, required this.greeting});
 
   final String title;
   final String greeting;
-  final String supportingLine;
 
   @override
   Widget build(BuildContext context) {
@@ -155,16 +129,9 @@ class _HomeHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: theme.textTheme.titleLarge),
+              Text(title, style: theme.textTheme.titleMedium),
               const SizedBox(height: 2),
-              Text(greeting, style: theme.textTheme.titleMedium),
-              const SizedBox(height: 3),
-              Text(
-                supportingLine,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
+              Text(greeting, style: theme.textTheme.headlineSmall),
             ],
           ),
         ),

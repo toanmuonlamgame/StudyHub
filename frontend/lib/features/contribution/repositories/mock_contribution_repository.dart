@@ -2,11 +2,13 @@ import '../models/question_set_draft.dart';
 import '../models/contribution_submission.dart';
 import '../models/submission_confirmation.dart';
 import 'contribution_repository.dart';
+import '../../materials/models/study_material_submission.dart';
 
 class MockContributionRepository implements ContributionRepository {
   MockContributionRepository();
 
   final Map<String, ContributionSubmission> _submissions = {};
+  final Map<String, StudyMaterialSubmission> _materialSubmissions = {};
   int _nextId = 1;
 
   @override
@@ -100,5 +102,84 @@ class MockContributionRepository implements ContributionRepository {
       updatedAt: DateTime.now(),
     );
     return confirmation;
+  }
+
+  @override
+  Future<List<StudyMaterialSubmission>> listMaterialSubmissions() async {
+    final values = _materialSubmissions.values.toList()
+      ..sort((left, right) => right.updatedAt.compareTo(left.updatedAt));
+    return values;
+  }
+
+  @override
+  Future<StudyMaterialSubmission> createMaterialDraft(
+    StudyMaterialDraft draft, {
+    String? submissionId,
+  }) async {
+    final now = DateTime.now();
+    final submission = StudyMaterialSubmission(
+      id: 'mock-material-${_nextId++}',
+      draft: draft,
+      status: StudyMaterialSubmissionStatus.draft,
+      createdAt: now,
+      updatedAt: now,
+    );
+    _materialSubmissions[submission.id] = submission;
+    return submission;
+  }
+
+  @override
+  Future<StudyMaterialSubmission> updateMaterialDraft(
+    String submissionId,
+    StudyMaterialDraft draft,
+  ) async {
+    final current = _materialSubmissions[submissionId];
+    if (current == null || !current.canEdit) {
+      throw const ContributionSubmissionException(
+        'Material draft cannot be edited.',
+      );
+    }
+    final updated = StudyMaterialSubmission(
+      id: current.id,
+      draft: draft,
+      status: current.status,
+      createdAt: current.createdAt,
+      updatedAt: DateTime.now(),
+    );
+    _materialSubmissions[submissionId] = updated;
+    return updated;
+  }
+
+  @override
+  Future<void> deleteMaterialDraft(String submissionId) async {
+    final current = _materialSubmissions[submissionId];
+    if (current == null || !current.canEdit) {
+      throw const ContributionSubmissionException(
+        'Material draft cannot be deleted.',
+      );
+    }
+    _materialSubmissions.remove(submissionId);
+  }
+
+  @override
+  Future<StudyMaterialSubmission> submitMaterialDraftForReview(
+    String submissionId,
+  ) async {
+    final current = _materialSubmissions[submissionId];
+    if (current == null || !current.canEdit) {
+      throw const ContributionSubmissionException(
+        'Material draft cannot be submitted.',
+      );
+    }
+    final submitted = StudyMaterialSubmission(
+      id: current.id,
+      draft: current.draft,
+      status: StudyMaterialSubmissionStatus.pendingReview,
+      createdAt: current.createdAt,
+      updatedAt: DateTime.now(),
+      submittedAt: DateTime.now(),
+    );
+    _materialSubmissions[submissionId] = submitted;
+    return submitted;
   }
 }

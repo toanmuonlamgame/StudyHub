@@ -119,7 +119,14 @@ Question Sets are ready for migration and dedicated stabilization testing.
 - [x] Populate Progress metrics from persisted trusted completed sessions.
 - [ ] Add authenticated backend progress sync and conflict handling after real auth exists.
 - [x] Activate safe, published Study Materials metadata browsing from Home.
-- [ ] Add authenticated material upload, ownership, storage, validation, and moderation.
+- [x] Add authenticated external-link Study Material drafts, ownership,
+  validation, and submit-for-review lifecycle.
+- [ ] Add binary Study Material upload through production object storage.
+- [ ] Add admin Study Material approve/reject UI and audit history.
+- [ ] Add shared-store rate limiting and cursor pagination to authenticated
+  material contribution endpoints before wider public launch.
+- [ ] Apply `20261103120000_study_material_ownership` locally and smoke-test
+  authenticated material contribution in Prisma/API mode.
 - [ ] Manually verify Study Materials in mock/API mode on a real Android device.
 - [x] Define and enable account-owned Saved Question Sets.
 - [ ] Define a Learning Plans contract before enabling that post-MVP destination.
@@ -319,7 +326,8 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 
 ## Research-Informed Roadmap
 - [x] Define and implement a Practice Mode `checkAnswer` backend contract while preserving Exam Mode behavior.
-- [ ] Implement secure user-upload Study Materials with metadata, validation, and ownership.
+- [x] Implement secure external-link Study Materials with metadata, validation,
+  ownership, and private draft states.
 - [ ] Add moderation/reporting before uploaded materials become broadly discoverable.
 - [ ] Add AI-assisted question extraction from user sources in V3 with citations, provenance, and human review.
 - [ ] Build a React Admin Dashboard later for real moderation and content operations, not as the learner app.
@@ -467,6 +475,12 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Replace the Flutter template launcher icon with final StudyHub branding.
 - [ ] Configure a private production upload keystore outside Git.
 - [ ] Deploy an HTTPS backend API and build the final API-connected release APK.
+- [x] Add a provider-neutral, read-only smoke command for the deployed API.
+- [ ] Run staging smoke and verify authenticated flows on the physical device.
+- [x] Refine Home shortcuts and add a labelled banner slot with an internal
+  Study Materials fallback when no ad is available.
+- [ ] Verify the Android test banner on-device; keep live ads disabled until
+  provider configuration and production consent are ready.
 - [ ] Review/apply pending migrations and run Prisma smoke tests personally.
 - [ ] Complete the iQOO Z9 Turbo checklist in `docs/RELEASE_READINESS.md`.
 

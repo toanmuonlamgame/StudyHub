@@ -10,6 +10,8 @@ import '../models/question_draft.dart';
 import '../models/answer_option_draft.dart';
 import '../models/submission_confirmation.dart';
 import '../../learning/repositories/media_asset_json_mapper.dart';
+import '../../materials/models/study_material_submission.dart';
+import '../../materials/models/study_material.dart';
 import 'contribution_repository.dart';
 
 class ApiContributionRepository implements ContributionRepository {
@@ -152,6 +154,115 @@ class ApiContributionRepository implements ContributionRepository {
     return SubmissionConfirmation(id: id, status: status, title: title);
   }
 
+  @override
+  Future<List<StudyMaterialSubmission>> listMaterialSubmissions() async {
+    final response = await withApiTimeout(
+      _client.get(
+        _baseUri.resolve('learning/study-material-submissions'),
+        headers: await authenticatedJsonHeaders(accessTokenProvider),
+      ),
+      requestTimeout,
+    );
+    final values = _decodeResponse(response)['submissions'];
+    if (values is! List) {
+      throw const ContributionSubmissionException('Malformed material list.');
+    }
+    final submissions = <StudyMaterialSubmission>[];
+    for (final value in values) {
+      if (value is! Map<String, dynamic>) {
+        throw const ContributionSubmissionException(
+          'Malformed material list item.',
+        );
+      }
+      submissions.add(_materialSubmissionFromJson(value));
+    }
+    return List.unmodifiable(submissions);
+  }
+
+  @override
+  Future<StudyMaterialSubmission> createMaterialDraft(
+    StudyMaterialDraft draft, {
+    String? submissionId,
+  }) => _writeMaterialDraft(
+    'POST',
+    'learning/study-material-submissions',
+    draft,
+    submissionId: submissionId,
+  );
+
+  @override
+  Future<StudyMaterialSubmission> updateMaterialDraft(
+    String submissionId,
+    StudyMaterialDraft draft,
+  ) => _writeMaterialDraft(
+    'PUT',
+    'learning/study-material-submissions/${Uri.encodeComponent(submissionId)}',
+    draft,
+  );
+
+  @override
+  Future<void> deleteMaterialDraft(String submissionId) async {
+    final response = await withApiTimeout(
+      _client.delete(
+        _baseUri.resolve(
+          'learning/study-material-submissions/${Uri.encodeComponent(submissionId)}',
+        ),
+        headers: await authenticatedJsonHeaders(accessTokenProvider),
+      ),
+      requestTimeout,
+    );
+    if (response.statusCode != 204) _decodeResponse(response);
+  }
+
+  @override
+  Future<StudyMaterialSubmission> submitMaterialDraftForReview(
+    String submissionId,
+  ) async {
+    final response = await withApiTimeout(
+      _client.post(
+        _baseUri.resolve(
+          'learning/study-material-submissions/${Uri.encodeComponent(submissionId)}/submit',
+        ),
+        headers: await authenticatedJsonHeaders(accessTokenProvider),
+      ),
+      requestTimeout,
+    );
+    return _readMaterialSubmission(_decodeResponse(response));
+  }
+
+  Future<StudyMaterialSubmission> _writeMaterialDraft(
+    String method,
+    String path,
+    StudyMaterialDraft draft, {
+    String? submissionId,
+  }) async {
+    final headers = {
+      ...await authenticatedJsonHeaders(accessTokenProvider),
+    };
+    if (submissionId != null) {
+      headers['idempotency-key'] = submissionId;
+    }
+    final uri = _baseUri.resolve(path);
+    final body = jsonEncode(draft.toJson());
+    final response = await withApiTimeout(
+      method == 'POST'
+          ? _client.post(uri, headers: headers, body: body)
+          : _client.put(uri, headers: headers, body: body),
+      requestTimeout,
+    );
+    return _readMaterialSubmission(_decodeResponse(response));
+  }
+
+  StudyMaterialSubmission _readMaterialSubmission(Map<String, dynamic> body) {
+    final value = body['submission'];
+    if (value is! Map<String, dynamic>) {
+      throw const ContributionSubmissionException(
+        'Malformed material submission response.',
+      );
+    }
+    return _materialSubmissionFromJson(value);
+  }
+
   Future<ContributionSubmission> _writeDraft(
     String method,
     String path,
@@ -284,6 +395,43 @@ class ApiContributionRepository implements ContributionRepository {
     }
     throw const ContributionSubmissionException('Malformed server response.');
   }
+
+  static StudyMaterialSubmission _materialSubmissionFromJson(
+    Map<String, dynamic> json,
+  ) {
+    final status = switch (json['status']) {
+      'draft' => StudyMaterialSubmissionStatus.draft,
+      'pendingReview' => StudyMaterialSubmissionStatus.pendingReview,
+      'published' => StudyMaterialSubmissionStatus.published,
+      'rejected' => StudyMaterialSubmissionStatus.rejected,
+      _ => throw const ContributionSubmissionException(
+        'Unknown material submission status.',
+      ),
+    };
+    return StudyMaterialSubmission(
+      id: json['id'] as String,
+      draft: StudyMaterialDraft(
+        subjectId: json['subjectId'] as String,
+        topicId: json['topicId'] as String?,
+        title: json['title'] as String,
+        description: json['description'] as String,
+        materialType: StudyMaterialType.values.byName(
+          json['materialType'] as String,
+        ),
+        sourceUrl: json['sourceUrl'] as String,
+        language: json['language'] as String?,
+      ),
+      status: status,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      submittedAt: _optionalDate(json['submittedAt']),
+      reviewedAt: _optionalDate(json['reviewedAt']),
+      rejectionReason: json['rejectionReason'] as String?,
+    );
+  }
+
+  static DateTime? _optionalDate(Object? value) =>
+      value is String ? DateTime.tryParse(value) : null;
 
   static Uri _parseBaseUrl(String baseUrl) {
     final value = baseUrl.trim();

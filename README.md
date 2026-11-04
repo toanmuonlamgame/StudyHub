@@ -57,6 +57,8 @@ safety guarantees, limitations, and Phase 2 entry criteria.
 - Register, sign in, restore a session, edit a display name, and log out.
 - Save and remove Question Sets, then reopen them from Home or Settings.
 - Create, edit, delete, and submit owned contribution drafts.
+- Create, edit, delete, and submit owned external-link Study Material drafts;
+  only approved materials can enter the public library.
 - Track `draft`, `pendingReview`, `approved`, and `rejected` states, including
   rejection notes returned by a future controlled review process.
 
@@ -93,7 +95,7 @@ the backend calculates the score and answer review.
 ## Planned Features
 
 - Auth-backed cross-device progress sync and measured feedback polish.
-- User-uploaded Study Materials with binary storage, validation, ownership, and moderation.
+- Binary Study Material upload with production object storage and admin moderation UI.
 - AI-assisted question extraction with source provenance, citations, and human
   review before publication.
 - More advanced ranked search and measured caching for growing public content.
