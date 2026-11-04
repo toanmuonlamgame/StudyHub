@@ -474,5 +474,68 @@
   "materialActionError": "The material could not be updated. Try again.",
   "deleteMaterialDraft": "Delete material draft?",
   "deleteMaterialDraftConfirm": "This draft will be permanently removed.",
-  "studyMaterialsOwnershipNote": "Your drafts are private. Only approved materials appear in the public library."
+  "studyMaterialsOwnershipNote": "Your drafts are private. Only approved materials appear in the public library.",
+  "playAndLearn": "Play and learn",
+  "englishGames": "English mini-games",
+  "wordMatch": "Match the cards",
+  "wordMatchSubtitle": "Match each English word to its meaning.",
+  "wordShip": "Word Spaceship",
+  "wordShipSubtitle": "Type the English word to hit the target.",
+  "gameWordInput": "English word",
+  "gameFire": "Fire",
+  "gameTryAgain": "Not quite. Try again.",
+  "gameHit": "Direct hit!",
+  "gameNext": "Next word",
+  "gameSkip": "Skip word",
+  "gameContinue": "Continue",
+  "gameNotAPair": "Not a match. Try a different pair.",
+  "gamePair": "You found a pair!",
+  "gameDone": "Round complete",
+  "gameScore": "Score: {score} / {total}",
+  "gameRetryMissed": "Review missed words",
+  "gameReplay": "Play again",
+  "gameFlipped": "Face-down card {number}",
+  "gameMissed": "Words to review",
+  "gameAnswer": "Answer: {word}",
+  "@gameScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@gameFlipped": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "@gameAnswer": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "gameSentence": "Build a sentence",
+  "gameSentenceSubtitle": "Put the words in the right order.",
+  "gameSpelling": "Decode the word",
+  "gameSpellingSubtitle": "Choose the letter that completes the word.",
+  "gameListening": "Listen and choose",
+  "gameListeningSubtitle": "Listen to the English word and choose its meaning.",
+  "gameHear": "Play word",
+  "gameAudioUnavailable": "No English voice is available. Try again or skip this word.",
+  "gameCheck": "Check",
+  "gameClear": "Clear",
+  "gameCorrect": "That's right!",
+  "gameTryDifferent": "Try another answer.",
+  "gamePickWords": "Tap words to build your sentence.",
+  "gameSkipQuestion": "Skip question",
+  "gameReviewMissed": "Review missed questions",
+"gameNextQuestion": "Next question",
+  "contributionHideKeyboard": "Hide keyboard"
 }

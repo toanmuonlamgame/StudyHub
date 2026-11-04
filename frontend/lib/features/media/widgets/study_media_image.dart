@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations_x.dart';
@@ -43,15 +44,29 @@ class StudyMediaImage extends StatelessWidget {
     return (width / height).clamp(0.75, 2.0);
   }
 
-  Widget _image(BuildContext context, {required BoxFit fit}) {
+  Widget _image(
+    BuildContext context, {
+    required BoxFit fit,
+    bool full = false,
+  }) {
     final preview = media.previewBytes;
-    if (preview != null) {
-      return Image.memory(preview, fit: fit, gaplessPlayback: true);
-    }
-    return Image.network(
-      media.thumbnailUrl ?? media.mediaUrl,
+    final ImageProvider provider = preview != null
+        ? MemoryImage(preview)
+        : NetworkImage(
+            full ? media.mediaUrl : media.thumbnailUrl ?? media.mediaUrl,
+          );
+    final maxDimension = full ? 1600 : 960;
+    return Image(
+      image: kIsWeb
+          ? provider
+          : ResizeImage(
+              provider,
+              width: maxDimension,
+              height: maxDimension,
+              policy: ResizeImagePolicy.fit,
+            ),
       fit: fit,
-      cacheWidth: 1280,
+      gaplessPlayback: preview != null,
       frameBuilder: (context, child, frame, synchronous) =>
           frame != null || synchronous
           ? child
@@ -92,7 +107,9 @@ class StudyMediaImage extends StatelessWidget {
           child: InteractiveViewer(
             minScale: 0.8,
             maxScale: 4,
-            child: Center(child: _image(context, fit: BoxFit.contain)),
+            child: Center(
+              child: _image(context, fit: BoxFit.contain, full: true),
+            ),
           ),
         ),
       ),

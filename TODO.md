@@ -477,6 +477,21 @@ Build this frontend-only mock flow in small, reviewable commits. Keep data local
 - [ ] Deploy an HTTPS backend API and build the final API-connected release APK.
 - [x] Add a provider-neutral, read-only smoke command for the deployed API.
 - [ ] Run staging smoke and verify authenticated flows on the physical device.
+- [x] Add the local English Word Spaceship and Match the Cards mini-games.
+- [x] Add sentence ordering, missing-letter spelling, and listening practice.
+- [x] Add PostgreSQL readiness and a manual GitHub staging APK workflow.
+- [x] Keep mini-game feedback and next actions visible on compact screens,
+  and cover the rapid-edit Question Set search regression.
+- [x] Simplify question authoring and bound device-side image work.
+- [ ] Measure split Android APK size and installed data/cache after repeated
+  uploads on a physical device; verify cutout and keyboard behavior there.
+- [ ] Verify mini-games on a physical Android device with the keyboard
+  open before promoting the staging build.
+- [x] Add a GitHub Actions verification workflow, a local Maestro Exam smoke
+  flow, and an isolated Widgetbook catalog.
+- [ ] Run the first GitHub Actions workflow and the Maestro flow on a disposable
+  Android emulator.
+- [ ] Decide how to redact crash reports before enabling external telemetry.
 - [x] Refine Home shortcuts and add a labelled banner slot with an internal
   Study Materials fallback when no ad is available.
 - [ ] Verify the Android test banner on-device; keep live ads disabled until

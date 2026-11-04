@@ -1584,4 +1584,128 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get studyMaterialsOwnershipNote =>
       'Bản nháp là riêng tư. Chỉ tài liệu đã duyệt mới hiện trong thư viện công khai.';
+
+  @override
+  String get playAndLearn => 'Vừa học vừa chơi';
+
+  @override
+  String get englishGames => 'Trò chơi tiếng Anh';
+
+  @override
+  String get wordMatch => 'Lật thẻ ghép đôi';
+
+  @override
+  String get wordMatchSubtitle => 'Ghép mỗi từ tiếng Anh với nghĩa của nó.';
+
+  @override
+  String get wordShip => 'Phi thuyền từ vựng';
+
+  @override
+  String get wordShipSubtitle => 'Gõ từ tiếng Anh để bắn trúng mục tiêu.';
+
+  @override
+  String get gameWordInput => 'Từ tiếng Anh';
+
+  @override
+  String get gameFire => 'Bắn';
+
+  @override
+  String get gameTryAgain => 'Chưa đúng. Thử lại nhé!';
+
+  @override
+  String get gameHit => 'Bắn trúng rồi!';
+
+  @override
+  String get gameNext => 'Từ tiếp theo';
+
+  @override
+  String get gameSkip => 'Bỏ qua từ này';
+
+  @override
+  String get gameContinue => 'Tiếp tục';
+
+  @override
+  String get gameNotAPair => 'Hai thẻ chưa khớp. Thử cặp khác nhé!';
+
+  @override
+  String get gamePair => 'Bạn ghép đúng rồi!';
+
+  @override
+  String get gameDone => 'Hoàn thành lượt chơi';
+
+  @override
+  String gameScore(int score, int total) {
+    return 'Điểm: $score / $total';
+  }
+
+  @override
+  String get gameRetryMissed => 'Ôn lại từ đã sai';
+
+  @override
+  String get gameReplay => 'Chơi lại';
+
+  @override
+  String gameFlipped(int number) {
+    return 'Thẻ úp số $number';
+  }
+
+  @override
+  String get gameMissed => 'Từ cần ôn';
+
+  @override
+  String gameAnswer(String word) {
+    return 'Đáp án: $word';
+  }
+
+  @override
+  String get gameSentence => 'Xếp từ thành câu';
+
+  @override
+  String get gameSentenceSubtitle => 'Xếp các từ theo đúng thứ tự.';
+
+  @override
+  String get gameSpelling => 'Giải mã từ';
+
+  @override
+  String get gameSpellingSubtitle => 'Chọn chữ cái còn thiếu để hoàn thành từ.';
+
+  @override
+  String get gameListening => 'Nghe rồi chọn';
+
+  @override
+  String get gameListeningSubtitle => 'Nghe từ tiếng Anh rồi chọn nghĩa đúng.';
+
+  @override
+  String get gameHear => 'Nghe từ';
+
+  @override
+  String get gameAudioUnavailable =>
+      'Không có giọng tiếng Anh. Hãy thử lại hoặc bỏ qua từ này.';
+
+  @override
+  String get gameCheck => 'Kiểm tra';
+
+  @override
+  String get gameClear => 'Xóa lựa chọn';
+
+  @override
+  String get gameCorrect => 'Chính xác!';
+
+  @override
+  String get gameTryDifferent => 'Thử đáp án khác nhé!';
+
+  @override
+  String get gamePickWords => 'Chạm các từ để xếp thành câu.';
+
+  @override
+  String get gameSkipQuestion => 'Bỏ qua câu này';
+
+  @override
+  String get gameReviewMissed => 'Ôn lại câu đã sai';
+
+  @override
+  String get gameNextQuestion => 'Câu tiếp theo';
+
+  @override
+  String get contributionHideKeyboard => 'Ẩn bàn phím';
 }

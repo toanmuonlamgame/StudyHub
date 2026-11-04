@@ -467,8 +467,69 @@ void main() {
       await tester.pump();
 
       expect(find.text('2 questions'), findsOneWidget);
+      expect(find.text('Question 2 of 2'), findsOneWidget);
+      expect(find.byType(TextFormField).hitTestable(), findsWidgets);
     },
   );
+
+  testWidgets('editor keeps one question in view and avoids display cutouts', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(720, 420);
+    const cutout = FakeViewPadding(left: 52, right: 16, top: 24, bottom: 20);
+    tester.view.padding = cutout;
+    tester.view.viewPadding = cutout;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetPadding);
+    addTearDown(tester.view.resetViewPadding);
+    addTearDown(tester.view.resetViewInsets);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    final draft = _validDraft();
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: ContributionEditorScreen(
+          learningRepository: const MockLearningRepository(),
+          contributionRepository: MockContributionRepository(),
+          initialDraft: draft.copyWith(
+            questions: [...draft.questions, QuestionSetDraft.newQuestion(2)],
+          ),
+          startWithQuestions: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Question 1 of 2'), findsOneWidget);
+    expect(find.byKey(const ValueKey('question-draft-2-text')), findsNothing);
+    await tester.tap(find.byTooltip('Next Question'));
+    await tester.pumpAndSettle();
+    expect(find.text('Question 2 of 2'), findsOneWidget);
+    final question = find.byKey(const ValueKey('question-draft-2-text'));
+    final bounds = tester.getRect(question);
+    expect(bounds.left, greaterThan(52));
+    expect(bounds.right, lessThan(704));
+
+    await tester.enterText(question, 'My second question');
+    tester.view.viewInsets = const FakeViewPadding(bottom: 170);
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Hide keyboard').hitTestable(), findsOneWidget);
+    expect(find.text('Review and finish'), findsNothing);
+    expect(tester.takeException(), isNull);
+    tester.view.resetViewInsets();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Previous'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Next Question'));
+    await tester.pumpAndSettle();
+    expect(find.text('My second question'), findsOneWidget);
+  });
 
   testWidgets('paste exam previews valid questions before importing', (
     tester,

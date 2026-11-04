@@ -332,3 +332,59 @@ the persisted session, resets protected navigation and local user-specific
 progress, and attempts backend invalidation without blocking local logout.
 Production avatar delivery still requires object storage configuration outside
 Git.
+## Android smoke test with Maestro
+
+Use a **disposable English-language Android emulator** and a debug build with
+`STUDYHUB_LEARNING_SOURCE=mock`. The smoke flow resets StudyHub app data on
+that emulator, creates a mock-only account, then completes an Exam and verifies
+the score and answer review. Do not run it against a personal installation.
+
+With Java 17+, Android platform-tools and Maestro on your terminal path:
+
+```powershell
+flutter build apk --debug --dart-define=STUDYHUB_LEARNING_SOURCE=mock
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
+maestro test maestro/exam-smoke.yaml
+```
+
+On the current Windows workstation, Maestro is portable:
+`F:\Tools\Maestro\maestro\bin\maestro.bat`. Set
+`JAVA_HOME=F:\androistudio\jbr` for the terminal session if Java is not
+configured. Check `adb devices` first and keep only the disposable emulator
+connected before running the flow.
+
+The GitHub Actions verification workflow runs Flutter analyze/tests and
+backend checks independently; it does not deploy or use a real database.
+
+## Widgetbook
+
+The isolated catalog in `tools/widgetbook` previews real StudyHub components
+without changing the learner app's dependencies. From the repository root:
+
+```powershell
+cd tools/widgetbook
+flutter pub get
+flutter run -d chrome
+```
+
+The first use cases compare the Home learning card in English and Vietnamese
+at 1.5x text size. Set `PUB_CACHE` to a folder on the desired drive before
+running the commands if the system drive is low on space.
+
+## English mini-games
+
+Home links to five English mini-games: Match the Cards, Word Spaceship, Build a
+Sentence, Decode the Word, and Listen and Choose. The games use local learning
+content and let learners replay missed items. Listening uses the device or
+browser English speech engine; voice availability can vary by platform.
+Scores are per-round only, with no game API, leaderboard, or in-game ads.
+
+## Device storage and authoring
+
+The contribution editor opens one question at a time, with a question picker
+and a lazy review list. Published data and API drafts remain server-side.
+The device stores up to 100 local progress summaries. Android cleans up
+consumed picker files and old picker-shaped files inside the app's temporary
+cache; gallery originals and account data are not removed. Image decode
+limits and the 48 MiB Flutter image-cache budget apply to RAM, not the total
+installed Android app size.

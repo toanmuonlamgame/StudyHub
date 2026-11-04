@@ -41,34 +41,6 @@ class ContributionIntroScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 10),
-                Text(l10n.contributionIntroBody),
-                const SizedBox(height: 24),
-                _Guideline(
-                  icon: Icons.fact_check_outlined,
-                  text: l10n.contributionReviewGuideline,
-                ),
-                _Guideline(
-                  icon: Icons.shield_outlined,
-                  text: l10n.contributionSafetyGuideline,
-                ),
-                _Guideline(
-                  icon: Icons.person_off_outlined,
-                  text: l10n.contributionLocalGuideline,
-                ),
-                const SizedBox(height: 28),
-                OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => ContributionManagementScreen(
-                        learningRepository: learningRepository,
-                        contributionRepository: contributionRepository,
-                      ),
-                    ),
-                  ),
-                  icon: const Icon(Icons.folder_copy_outlined),
-                  label: Text(l10n.myContributions),
-                ),
-                const SizedBox(height: 12),
                 FilledButton.icon(
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
@@ -86,6 +58,34 @@ class ContributionIntroScreen extends StatelessWidget {
                   onPressed: () => _openPasteFlow(context),
                   icon: const Icon(Icons.content_paste_go_rounded),
                   label: Text(l10n.contributionPasteFullExam),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ContributionManagementScreen(
+                        learningRepository: learningRepository,
+                        contributionRepository: contributionRepository,
+                      ),
+                    ),
+                  ),
+                  icon: const Icon(Icons.folder_copy_outlined),
+                  label: Text(l10n.myContributions),
+                ),
+                const SizedBox(height: 24),
+                Text(l10n.contributionIntroBody),
+                const SizedBox(height: 12),
+                _Guideline(
+                  icon: Icons.fact_check_outlined,
+                  text: l10n.contributionReviewGuideline,
+                ),
+                _Guideline(
+                  icon: Icons.shield_outlined,
+                  text: l10n.contributionSafetyGuideline,
+                ),
+                _Guideline(
+                  icon: Icons.person_off_outlined,
+                  text: l10n.contributionLocalGuideline,
                 ),
               ],
             ),

@@ -244,8 +244,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
     final displayName = authController.user!.displayName;
+    SelectedAvatar? pendingAvatar;
+    setState(() => _updatingAvatar = true);
     try {
       final selected = await service.chooseFromGallery();
+      pendingAvatar = selected;
       if (selected == null || !mounted) return;
       final confirmed = await showDialog<bool>(
         context: context,
@@ -268,7 +271,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       );
       if (confirmed != true || !mounted) return;
-      setState(() => _updatingAvatar = true);
       final asset = await service.upload(selected, altText: displayName);
       final saved = await authController.updateAvatar(asset.mediaUrl);
       if (!saved) throw StateError('Avatar profile update failed.');
@@ -283,6 +285,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (_) {
       if (mounted) _showMessage(context.l10n.avatarUpdateFailed);
     } finally {
+      if (pendingAvatar != null) await service.discard(pendingAvatar);
       if (mounted) setState(() => _updatingAvatar = false);
     }
   }

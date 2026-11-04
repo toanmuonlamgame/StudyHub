@@ -95,6 +95,25 @@ void main() {
     expect(find.text('JavaScript Basics Check'), findsNothing);
   });
 
+  testWidgets('typing and reverting does not leave the search loading', (
+    tester,
+  ) async {
+    final repository = _StaleSearchRepository();
+    await _pumpQuestionSets(tester, repository);
+    final field = find.byKey(const ValueKey('question-set-search-field'));
+
+    await tester.enterText(field, 'slow');
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.enterText(field, 'slow edit');
+    repository.completeSlowSearch();
+    await tester.pump();
+    await tester.enterText(field, 'slow');
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+
+    expect(find.text('First page set'), findsOneWidget);
+  });
+
   testWidgets('topic choice keeps filtering in the repository', (
     WidgetTester tester,
   ) async {

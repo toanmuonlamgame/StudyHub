@@ -10,8 +10,8 @@ to Google Play.
 - Android application ID: `com.toanmuonlamgame.studyhub`
 - Version name/code: `1.0.0` / `1`
 - Minimum, target, and compile SDK versions follow the installed Flutter SDK.
-- The current launcher icon is the Flutter template icon. Replacing it with
-  final StudyHub branding is post-MVP polish.
+- Android uses the StudyHub launcher icon. The source artwork is
+  `frontend/branding/studyhub-icon.png`.
 
 ## Required Tools
 
@@ -65,7 +65,8 @@ Review migration SQL and back up the target database before personally running
   disposable staging database if the development fixtures are intended there.
 - From `backend`, run
   `npm run test:staging -- https://your-api.example`. This checks HTTPS, health,
-  a non-empty catalog, and answer safety without credentials or writes.
+  data-source readiness, a non-empty catalog, and answer safety without
+  credentials or writes.
 - Verify registration, saved exams, quiz submission, and contributions using
   a disposable account on a physical device. The read-only smoke does not
   verify authentication, database writes, or the Android build.
@@ -103,6 +104,18 @@ Review migration SQL and back up the target database before personally running
    and build the Android release candidate against that same HTTPS origin.
    Verify login, Exam, Practice, bookmarks and contribution on a real device.
 
+For a Chrome smoke test against staging, run from `frontend`:
+
+```powershell
+flutter run -d chrome --web-port=8080 `
+  --dart-define=STUDYHUB_LEARNING_SOURCE=api `
+  --dart-define=STUDYHUB_API_BASE_URL=https://your-api.example
+```
+
+Add the exact origin shown in Chrome (typically `http://localhost:8080`) to
+the staging service's `STUDYHUB_CORS_ORIGINS` for this test, then remove it
+when no longer needed. Android does not need this CORS entry.
+
 ### Local device configuration
 
 Debug builds default to mock mode. Android debug permits cleartext HTTP for a
@@ -130,6 +143,10 @@ port, and both devices must share the network.
 Release mode accepts only API mode and an explicit HTTPS origin. It never falls
 back to mock data, localhost, the emulator address, or cleartext HTTP.
 
+Run `flutter doctor -v` before building. If the Android SDK has moved, point
+`ANDROID_HOME` at the installed SDK and make sure the ignored
+`frontend/android/local.properties` does not still point to the old path.
+
 ```powershell
 cd frontend
 flutter pub get
@@ -145,6 +162,16 @@ debug key. That is suitable only for local installation. Before external
 distribution, create a private upload keystore outside Git, configure local
 `key.properties`, protect backups/passwords, and replace the debug signing
 configuration. Never commit a keystore or signing credentials.
+
+Without a local Android SDK, use GitHub Actions > **Build Android staging APK**
+after this workflow is pushed. Enter the public staging HTTPS origin and
+download the artifact for your device ABI: `studyhub-staging-arm64` for most
+current Android phones, `studyhub-staging-arm32` for 32-bit ARM devices, or
+`studyhub-staging-x64` for x86_64. Each APK includes only the native code for
+that ABI. It is debug-signed for
+testing, not a Play Store build. CI and locally generated debug keys may differ;
+Android may require uninstalling the previous build before installing the new
+one, which clears local app data.
 
 ### Verified Local Build Baseline (2026-07-21)
 
@@ -192,11 +219,15 @@ flutter build apk --debug
 - [ ] Complete an Exam: navigate answers, submit, review, save, and return Home.
 - [ ] Open Attempt History and detail, then return Home without stale routes.
 - [ ] Complete Practice Mode and verify immediate feedback and final review.
+- [ ] Open Play and Learn, complete both word games, and verify missed-word
+  replay and keyboard usability on the device.
 - [ ] Create and submit a manual contribution; verify one pending submission.
 - [ ] Paste a long Vietnamese exam, preview, edit, submit, and return Home.
 - [ ] Stop the backend, verify safe errors, restart it, retry, and check no duplicates.
 - [ ] Rapidly tap submit/retry/Home and confirm only one action/result occurs.
 - [ ] Test keyboard-open forms, long Vietnamese text, and 1.5x display text.
+- [ ] Check portrait and landscape on a device with a display cutout and
+  compare app/data/cache size before and after repeated image uploads.
 - [ ] Test Android Back during browsing and during an active Exam.
 - [ ] Background/resume the app during browsing and an unfinished form.
 - [ ] Cold-start on a slow network and check loading/error/retry states.

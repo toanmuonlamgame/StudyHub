@@ -2929,6 +2929,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your drafts are private. Only approved materials appear in the public library.'**
   String get studyMaterialsOwnershipNote;
+
+  /// No description provided for @playAndLearn.
+  ///
+  /// In en, this message translates to:
+  /// **'Play and learn'**
+  String get playAndLearn;
+
+  /// No description provided for @englishGames.
+  ///
+  /// In en, this message translates to:
+  /// **'English mini-games'**
+  String get englishGames;
+
+  /// No description provided for @wordMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the cards'**
+  String get wordMatch;
+
+  /// No description provided for @wordMatchSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Match each English word to its meaning.'**
+  String get wordMatchSubtitle;
+
+  /// No description provided for @wordShip.
+  ///
+  /// In en, this message translates to:
+  /// **'Word Spaceship'**
+  String get wordShip;
+
+  /// No description provided for @wordShipSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the English word to hit the target.'**
+  String get wordShipSubtitle;
+
+  /// No description provided for @gameWordInput.
+  ///
+  /// In en, this message translates to:
+  /// **'English word'**
+  String get gameWordInput;
+
+  /// No description provided for @gameFire.
+  ///
+  /// In en, this message translates to:
+  /// **'Fire'**
+  String get gameFire;
+
+  /// No description provided for @gameTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Not quite. Try again.'**
+  String get gameTryAgain;
+
+  /// No description provided for @gameHit.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct hit!'**
+  String get gameHit;
+
+  /// No description provided for @gameNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next word'**
+  String get gameNext;
+
+  /// No description provided for @gameSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip word'**
+  String get gameSkip;
+
+  /// No description provided for @gameContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get gameContinue;
+
+  /// No description provided for @gameNotAPair.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a match. Try a different pair.'**
+  String get gameNotAPair;
+
+  /// No description provided for @gamePair.
+  ///
+  /// In en, this message translates to:
+  /// **'You found a pair!'**
+  String get gamePair;
+
+  /// No description provided for @gameDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Round complete'**
+  String get gameDone;
+
+  /// No description provided for @gameScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Score: {score} / {total}'**
+  String gameScore(int score, int total);
+
+  /// No description provided for @gameRetryMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Review missed words'**
+  String get gameRetryMissed;
+
+  /// No description provided for @gameReplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play again'**
+  String get gameReplay;
+
+  /// No description provided for @gameFlipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Face-down card {number}'**
+  String gameFlipped(int number);
+
+  /// No description provided for @gameMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Words to review'**
+  String get gameMissed;
+
+  /// No description provided for @gameAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer: {word}'**
+  String gameAnswer(String word);
+
+  /// No description provided for @gameSentence.
+  ///
+  /// In en, this message translates to:
+  /// **'Build a sentence'**
+  String get gameSentence;
+
+  /// No description provided for @gameSentenceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Put the words in the right order.'**
+  String get gameSentenceSubtitle;
+
+  /// No description provided for @gameSpelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Decode the word'**
+  String get gameSpelling;
+
+  /// No description provided for @gameSpellingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the letter that completes the word.'**
+  String get gameSpellingSubtitle;
+
+  /// No description provided for @gameListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen and choose'**
+  String get gameListening;
+
+  /// No description provided for @gameListeningSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen to the English word and choose its meaning.'**
+  String get gameListeningSubtitle;
+
+  /// No description provided for @gameHear.
+  ///
+  /// In en, this message translates to:
+  /// **'Play word'**
+  String get gameHear;
+
+  /// No description provided for @gameAudioUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No English voice is available. Try again or skip this word.'**
+  String get gameAudioUnavailable;
+
+  /// No description provided for @gameCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get gameCheck;
+
+  /// No description provided for @gameClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get gameClear;
+
+  /// No description provided for @gameCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s right!'**
+  String get gameCorrect;
+
+  /// No description provided for @gameTryDifferent.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another answer.'**
+  String get gameTryDifferent;
+
+  /// No description provided for @gamePickWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap words to build your sentence.'**
+  String get gamePickWords;
+
+  /// No description provided for @gameSkipQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip question'**
+  String get gameSkipQuestion;
+
+  /// No description provided for @gameReviewMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Review missed questions'**
+  String get gameReviewMissed;
+
+  /// No description provided for @gameNextQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Next question'**
+  String get gameNextQuestion;
+
+  /// No description provided for @contributionHideKeyboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide keyboard'**
+  String get contributionHideKeyboard;
 }
 
 class _AppLocalizationsDelegate

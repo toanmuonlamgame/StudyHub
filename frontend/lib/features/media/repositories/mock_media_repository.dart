@@ -7,6 +7,9 @@ class MockMediaRepository implements MediaRepository {
   const MockMediaRepository();
   @override
   Future<MediaAsset> uploadImage(XFile file, {String? altText}) async {
+    if (await file.length() > imageUploadMaxBytes) {
+      throw const MediaUploadException('Image must be 5 MiB or smaller.');
+    }
     final bytes = await file.readAsBytes();
     if (bytes.length > imageUploadMaxBytes) {
       throw const MediaUploadException('Image must be 5 MiB or smaller.');

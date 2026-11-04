@@ -26,6 +26,10 @@ async function main() {
   assert.ok(health.status === 'ok' && health.service === 'studyhub-backend', 'Unexpected health response.');
   console.log('PASS: HTTPS and backend health');
 
+  const readiness = await get('/ready');
+  assert.equal(readiness.status, 'ready', 'The backend data source is not ready.');
+  console.log('PASS: backend data source readiness');
+
   const { subjects } = await get('/learning/subjects');
   assert.ok(Array.isArray(subjects), 'Expected subjects array.');
   const { items } = await get('/learning/question-sets?limit=1');

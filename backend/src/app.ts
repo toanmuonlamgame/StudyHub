@@ -15,6 +15,7 @@ import { createPrismaAuthService } from './services/prismaAuthService.js';
 import { createPrismaAdminService } from './services/prismaAdminService.js';
 import { createPrismaLearningService } from './services/prismaLearningService.js';
 import { LocalMediaStorage, type MediaStorage } from './services/mediaStorage.js';
+import { getPrismaClient } from './db/prisma.js';
 
 export interface BuildAppOptions {
   learningService?: LearningService;
@@ -25,6 +26,7 @@ export interface BuildAppOptions {
   corsOrigins?: string[];
   requireUser?: RequireUser;
   mediaStorage?: MediaStorage;
+  readinessProbe?: () => Promise<unknown>;
 }
 
 const requestBodyLimitBytes = 1024 * 1024;
@@ -133,6 +135,35 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     status: 'ok',
     service: 'studyhub-backend',
   }));
+
+  const readinessProbe = options.readinessProbe ??
+    (dataSource === 'prisma'
+      ? () => getPrismaClient().$queryRaw`SELECT 1`
+      : undefined);
+  let pendingProbe: Promise<boolean> | undefined;
+  app.get('/ready', async (_request, reply) => {
+    reply.header('cache-control', 'no-store');
+    if (!readinessProbe) return { status: 'ready' };
+
+    pendingProbe ??= Promise.resolve()
+      .then(readinessProbe)
+      .then(() => true, () => false)
+      .finally(() => { pendingProbe = undefined; });
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const ready = await Promise.race([
+        pendingProbe,
+        new Promise<false>((resolve) => {
+          timer = setTimeout(() => resolve(false), 3_000);
+        }),
+      ]);
+      return ready
+        ? { status: 'ready' }
+        : reply.code(503).send({ status: 'unavailable' });
+    } finally {
+      clearTimeout(timer);
+    }
+  });
 
   app.register(createAuthRoutes(authService), { prefix: '/auth' });
   app.register(createAdminRoutes(adminService, requireUser), { prefix: '/admin' });

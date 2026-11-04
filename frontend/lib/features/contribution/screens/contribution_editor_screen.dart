@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/app_localizations_x.dart';
@@ -18,6 +19,7 @@ import 'paste_exam_screen.dart';
 import 'submission_confirmation_screen.dart';
 import '../../media/media_repository_scope.dart';
 import '../../media/services/image_selection_service.dart';
+import '../../media/services/picker_cache.dart';
 import '../../media/widgets/study_media_image.dart';
 import '../../../core/device_feedback.dart';
 
@@ -49,8 +51,8 @@ class ContributionEditorScreen extends StatefulWidget {
 class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _questionsScrollController = ScrollController();
   _EditorStep _step = _EditorStep.details;
+  int _activeQuestion = 0;
   late QuestionSetDraft _draft;
   late final String _submissionId;
   List<Subject> _subjects = const [];
@@ -82,13 +84,17 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _questionsScrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final size = MediaQuery.sizeOf(context);
+    final padding = MediaQuery.paddingOf(context);
+    final compactToolbar = size.width - padding.horizontal < 360;
+    final tallTablet = size.width >= 720 && size.height >= 900;
     return PopScope(
       canPop: _draft.isEmpty && !_submitting,
       onPopInvokedWithResult: (didPop, _) {
@@ -99,66 +105,114 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
           leading: BackButton(
             onPressed: _submitting ? null : _handleAppBarBack,
           ),
-          title: Text(_stepTitle(l10n)),
-          actions: [
-            IconButton(
-              tooltip: l10n.contributionSaveDraft,
-              onPressed: _submitting ? null : _saveDraft,
-              icon: const Icon(Icons.save_outlined),
-            ),
-            IconButton(
-              tooltip: l10n.contributionPasteFullExam,
-              onPressed: _submitting ? null : _openPasteExam,
-              icon: const Icon(Icons.content_paste_go_outlined),
-            ),
-            PopupMenuButton<_EditorAction>(
-              enabled: !_submitting,
-              onSelected: (action) {
-                if (action == _EditorAction.reset) _confirmResetDraft();
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: _EditorAction.reset,
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.restart_alt_rounded),
-                    title: Text(l10n.contributionResetDraft),
+          title: Text(
+            _stepTitle(l10n),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          actions: keyboardOpen
+              ? [
+                  IconButton(
+                    tooltip: l10n.contributionHideKeyboard,
+                    onPressed: () => FocusScope.of(context).unfocus(),
+                    icon: const Icon(Icons.keyboard_hide_outlined),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ]
+              : [
+                  IconButton(
+                    tooltip: l10n.contributionSaveDraft,
+                    onPressed: _submitting || _uploadingMedia.isNotEmpty
+                        ? null
+                        : _saveDraft,
+                    icon: const Icon(Icons.save_outlined),
+                  ),
+                  if (!compactToolbar)
+                    IconButton(
+                      tooltip: l10n.contributionPasteFullExam,
+                      onPressed: _submitting ? null : _openPasteExam,
+                      icon: const Icon(Icons.content_paste_go_outlined),
+                    ),
+                  PopupMenuButton<_EditorAction>(
+                    enabled: !_submitting,
+                    onSelected: (action) {
+                      switch (action) {
+                        case _EditorAction.paste:
+                          _openPasteExam();
+                        case _EditorAction.reset:
+                          _confirmResetDraft();
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      if (compactToolbar)
+                        PopupMenuItem(
+                          value: _EditorAction.paste,
+                          child: ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(
+                              Icons.content_paste_go_outlined,
+                            ),
+                            title: Text(l10n.contributionPasteFullExam),
+                          ),
+                        ),
+                      PopupMenuItem(
+                        value: _EditorAction.reset,
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.restart_alt_rounded),
+                          title: Text(l10n.contributionResetDraft),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
         ),
         body: SafeArea(
-          child: Center(
+          top: false,
+          child: Align(
+            alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 640),
+              constraints: BoxConstraints(
+                maxWidth: 640,
+                maxHeight: tallTablet
+                    ? (_step == _EditorStep.details ? 640 : 800)
+                    : double.infinity,
+              ),
               child: Column(
                 children: [
                   LinearProgressIndicator(value: (_step.index + 1) / 3),
+                  if (_step == _EditorStep.questions &&
+                      _draft.questions.isNotEmpty &&
+                      !keyboardOpen)
+                    _buildQuestionNavigation(),
                   Expanded(child: _buildStep()),
-                  _BottomActions(
-                    showBack: _step != _EditorStep.details,
-                    busy: _submitting,
-                    primaryLabel: switch (_step) {
-                      _EditorStep.details => l10n.contributionContinue,
-                      _EditorStep.questions => l10n.contributionReviewAndFinish,
-                      _EditorStep.review => l10n.contributionSubmitForReview,
-                    },
-                    secondaryLabel: _step == _EditorStep.questions
-                        ? l10n.contributionAddNextQuestion
-                        : null,
-                    onSecondary: _step == _EditorStep.questions
-                        ? (_draft.questions.length >=
-                                  contributionQuestionCountMax
-                              ? null
-                              : _addQuestion)
-                        : null,
-                    onBack: _goBack,
-                    onPrimary: _step == _EditorStep.review
-                        ? _confirmSubmit
-                        : _goNext,
-                  ),
+                  if (!keyboardOpen)
+                    _BottomActions(
+                      showBack: _step != _EditorStep.details,
+                      busy: _submitting,
+                      primaryLabel: switch (_step) {
+                        _EditorStep.details => l10n.contributionContinue,
+                        _EditorStep.questions =>
+                          l10n.contributionReviewAndFinish,
+                        _EditorStep.review => l10n.contributionSubmitForReview,
+                      },
+                      secondaryLabel:
+                          _step == _EditorStep.questions &&
+                              _draft.questions.isNotEmpty
+                          ? l10n.contributionAddNextQuestion
+                          : null,
+                      onSecondary: _step == _EditorStep.questions
+                          ? (_draft.questions.length >=
+                                    contributionQuestionCountMax
+                                ? null
+                                : _addQuestion)
+                          : null,
+                      onBack: _goBack,
+                      onPrimary: _uploadingMedia.isNotEmpty
+                          ? null
+                          : _step == _EditorStep.review
+                          ? _confirmSubmit
+                          : _goNext,
+                    ),
                 ],
               ),
             ),
@@ -208,7 +262,10 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
         const SizedBox(height: 20),
         DropdownButtonFormField<String>(
           isExpanded: true,
-          initialValue: _draft.subjectId.isEmpty ? null : _draft.subjectId,
+          initialValue:
+              _subjects.any((subject) => subject.id == _draft.subjectId)
+              ? _draft.subjectId
+              : null,
           decoration: InputDecoration(
             labelText: l10n.contributionSubject,
             errorText: _issueFor('subjectId'),
@@ -229,8 +286,11 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String?>(
+          key: ValueKey((_draft.subjectId, _topics.isNotEmpty)),
           isExpanded: true,
-          initialValue: _draft.topicId,
+          initialValue: _topics.any((topic) => topic.id == _draft.topicId)
+              ? _draft.topicId
+              : null,
           decoration: InputDecoration(
             labelText: l10n.contributionTopicOptional,
             errorText: _issueFor('topicId'),
@@ -289,8 +349,11 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
 
   Widget _buildQuestions() {
     final l10n = context.l10n;
+    final questions = _draft.questions;
+    final index = _activeQuestion;
+    final question = questions.isEmpty ? null : questions[index];
     return ListView(
-      controller: _questionsScrollController,
+      key: ValueKey(question?.id ?? 'no-questions'),
       padding: const EdgeInsets.all(16),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       children: [
@@ -307,11 +370,11 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
           ),
         ],
         const SizedBox(height: 16),
-        ...List.generate(
-          _draft.questions.length,
-          (index) => QuestionEditorCard(
+        if (question != null) ...[
+          QuestionEditorCard(
+            key: ValueKey(question.id),
             index: index,
-            question: _draft.questions[index],
+            question: question,
             errorFor: _issueFor,
             onChanged: (question) => _replaceQuestion(index, question),
             onDuplicate: _draft.questions.length >= contributionQuestionCountMax
@@ -337,15 +400,58 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
               _draft.questions[index].copyWith(explanationMedia: null),
             ),
           ),
-        ),
-        OutlinedButton.icon(
-          onPressed: _draft.questions.length >= contributionQuestionCountMax
-              ? null
-              : _addQuestion,
-          icon: const Icon(Icons.add),
-          label: Text(l10n.contributionAddQuestion),
-        ),
+        ] else
+          OutlinedButton.icon(
+            onPressed: _addQuestion,
+            icon: const Icon(Icons.add),
+            label: Text(l10n.contributionAddQuestion),
+          ),
       ],
+    );
+  }
+
+  Widget _buildQuestionNavigation() {
+    final l10n = context.l10n;
+    final count = _draft.questions.length;
+    final index = _activeQuestion;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          IconButton(
+            tooltip: l10n.previous,
+            onPressed: index == 0 ? null : () => _showQuestion(index - 1),
+            icon: const Icon(Icons.chevron_left),
+          ),
+          Expanded(
+            child: DropdownButton<int>(
+              isExpanded: true,
+              value: index,
+              items: [
+                for (var i = 0; i < count; i++)
+                  DropdownMenuItem(
+                    value: i,
+                    child: Text(
+                      l10n.questionProgress(i + 1, count),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (value) {
+                if (value != null) _showQuestion(value);
+              },
+            ),
+          ),
+          IconButton(
+            tooltip: l10n.nextQuestion,
+            onPressed: index == count - 1
+                ? null
+                : () => _showQuestion(index + 1),
+            icon: const Icon(Icons.chevron_right),
+          ),
+        ],
+      ),
     );
   }
 
@@ -361,72 +467,88 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
         .where((topic) => topic.id == _draft.topicId)
         .firstOrNull
         ?.name;
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        if (_issues.isNotEmpty) ...[
-          _ValidationSummary(
-            messages: _issues
-                .map(_localizedIssueMessage)
-                .toList(growable: false),
-          ),
-          const SizedBox(height: 16),
-        ],
-        Text(_draft.title, style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 8),
-        Text(subjectName),
-        if (topicName != null) Text(topicName),
-        if (_draft.description.trim().isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Text(_draft.description),
-        ],
-        const SizedBox(height: 20),
-        Text(
-          l10n.contributionQuestionCount(_draft.questions.length),
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 12),
-        ...List.generate(_draft.questions.length, (index) {
-          final question = _draft.questions[index];
-          return Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(20),
+          sliver: SliverMainAxisGroup(
+            slivers: [
+              SliverList.list(
                 children: [
-                  Text(
-                    '${index + 1}. ${question.text}',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  if (question.media != null) ...[
-                    const SizedBox(height: 10),
-                    StudyMediaImage(media: question.media!),
-                  ],
-                  const SizedBox(height: 8),
-                  ...question.answerOptions.map(
-                    (option) => ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        option.isCorrect
-                            ? Icons.check_circle
-                            : Icons.circle_outlined,
-                      ),
-                      title: Text(option.text),
-                      subtitle: option.isCorrect
-                          ? Text(l10n.contributionCorrectAnswer)
-                          : null,
+                  if (_issues.isNotEmpty) ...[
+                    _ValidationSummary(
+                      messages: _issues
+                          .map(_localizedIssueMessage)
+                          .toList(growable: false),
                     ),
-                  ),
-                  if (question.explanationMedia != null) ...[
-                    const SizedBox(height: 10),
-                    StudyMediaImage(media: question.explanationMedia!),
+                    const SizedBox(height: 16),
                   ],
+                  Text(
+                    _draft.title,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(subjectName),
+                  if (topicName != null) Text(topicName),
+                  if (_draft.description.trim().isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(_draft.description),
+                  ],
+                  const SizedBox(height: 20),
+                  Text(
+                    l10n.contributionQuestionCount(_draft.questions.length),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 12),
                 ],
               ),
-            ),
-          );
-        }),
+              SliverList.builder(
+                itemCount: _draft.questions.length,
+                itemBuilder: (context, index) {
+                  final question = _draft.questions[index];
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${index + 1}. ${question.text}',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          if (question.media != null) ...[
+                            const SizedBox(height: 10),
+                            StudyMediaImage(media: question.media!),
+                          ],
+                          const SizedBox(height: 8),
+                          ...question.answerOptions.map(
+                            (option) => ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              leading: Icon(
+                                option.isCorrect
+                                    ? Icons.check_circle
+                                    : Icons.circle_outlined,
+                              ),
+                              title: Text(option.text),
+                              subtitle: option.isCorrect
+                                  ? Text(l10n.contributionCorrectAnswer)
+                                  : null,
+                            ),
+                          ),
+                          if (question.explanationMedia != null) ...[
+                            const SizedBox(height: 10),
+                            StudyMediaImage(media: question.explanationMedia!),
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -444,6 +566,19 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
         _subjects = subjects;
         _loadingTaxonomy = false;
       });
+      final subjectId = _draft.subjectId;
+      if (subjectId.isNotEmpty) {
+        try {
+          final topics = await widget.learningRepository.getTopicsBySubjectId(
+            subjectId,
+          );
+          if (mounted && _draft.subjectId == subjectId) {
+            setState(() => _topics = topics);
+          }
+        } catch (_) {
+          // Topic suggestions are optional when restoring a draft.
+        }
+      }
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -454,7 +589,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   }
 
   Future<void> _selectSubject(String? subjectId) async {
-    if (subjectId == null) return;
+    if (subjectId == null || subjectId == _draft.subjectId) return;
     setState(() {
       _draft = _draft.copyWith(subjectId: subjectId, topicId: null);
       _topics = const [];
@@ -496,7 +631,16 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
     }
     final issues = _draft.validateForSubmission();
     if (issues.isNotEmpty) {
-      setState(() => _issues = issues);
+      setState(() {
+        _issues = issues;
+        final question = RegExp(
+          r'^questions\[(\d+)\]',
+        ).firstMatch(issues.first.path);
+        final questionIndex = int.tryParse(question?.group(1) ?? '');
+        if (questionIndex != null && questionIndex < _draft.questions.length) {
+          _activeQuestion = questionIndex;
+        }
+      });
       return;
     }
     setState(() {
@@ -507,24 +651,22 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
 
   void _goBack() => setState(() => _step = _EditorStep.values[_step.index - 1]);
 
+  void _showQuestion(int index) {
+    FocusScope.of(context).unfocus();
+    setState(() => _activeQuestion = index);
+  }
+
   void _addQuestion() {
     if (_draft.questions.length >= contributionQuestionCountMax) return;
-    setState(
-      () => _draft = _draft.copyWith(
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _activeQuestion = _draft.questions.length;
+      _draft = _draft.copyWith(
         questions: [
           ..._draft.questions,
           QuestionSetDraft.newQuestion(DateTime.now().microsecondsSinceEpoch),
         ],
-      ),
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _questionsScrollController.hasClients) {
-        _questionsScrollController.animateTo(
-          _questionsScrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-        );
-      }
+      );
     });
   }
 
@@ -550,6 +692,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
     setState(() {
       final questions = [..._draft.questions]..insert(index + 1, duplicate);
       _draft = _draft.copyWith(questions: questions);
+      _activeQuestion = index + 1;
     });
   }
 
@@ -560,12 +703,14 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   });
 
   Future<void> _chooseImage(int index, {required bool explanation}) async {
-    final file = await _imageSelectionService.chooseFromGallery();
-    if (file == null || !mounted) return;
+    if (_uploadingMedia.isNotEmpty) return;
     final questionId = _draft.questions[index].id;
     final slot = '$questionId-${explanation ? 'explanation' : 'question'}';
     setState(() => _uploadingMedia.add(slot));
+    XFile? file;
     try {
+      file = await _imageSelectionService.chooseFromGallery();
+      if (file == null || !mounted) return;
       final media = await MediaRepositoryScope.of(context).uploadImage(file);
       if (!mounted) return;
       final currentIndex = _draft.questions.indexWhere(
@@ -586,6 +731,10 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
         ).showSnackBar(SnackBar(content: Text(context.l10n.imageUploadFailed)));
       }
     } finally {
+      if (file != null &&
+          _imageSelectionService is DeviceImageSelectionService) {
+        await discardPickedImage(file.path);
+      }
       if (mounted) setState(() => _uploadingMedia.remove(slot));
     }
   }
@@ -612,6 +761,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
       setState(() {
         final questions = [..._draft.questions]..removeAt(index);
         _draft = _draft.copyWith(questions: questions);
+        _activeQuestion = max(0, min(index, questions.length - 1));
       });
     }
   }
@@ -787,6 +937,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
       _descriptionController.clear();
       _issues = const [];
       _step = _EditorStep.details;
+      _activeQuestion = 0;
     });
   }
 
@@ -822,6 +973,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
     setState(() {
       _draft = imported;
       _issues = const [];
+      _activeQuestion = 0;
       _step = imported.subjectId.isEmpty || imported.title.trim().isEmpty
           ? _EditorStep.details
           : _EditorStep.questions;
@@ -891,7 +1043,7 @@ class _ContributionEditorScreenState extends State<ContributionEditorScreen> {
   };
 }
 
-enum _EditorAction { reset }
+enum _EditorAction { paste, reset }
 
 class _ValidationSummary extends StatelessWidget {
   const _ValidationSummary({required this.messages});
@@ -926,7 +1078,7 @@ class _BottomActions extends StatelessWidget {
   final bool busy;
   final String primaryLabel;
   final VoidCallback onBack;
-  final VoidCallback onPrimary;
+  final VoidCallback? onPrimary;
   final String? secondaryLabel;
   final VoidCallback? onSecondary;
   @override
@@ -960,6 +1112,7 @@ class _BottomActions extends StatelessWidget {
                 const SizedBox(width: 12),
               ],
               Expanded(
+                flex: showBack ? 2 : 1,
                 child: FilledButton(
                   onPressed: busy ? null : onPrimary,
                   child: busy
@@ -967,7 +1120,7 @@ class _BottomActions extends StatelessWidget {
                           dimension: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text(primaryLabel),
+                      : Text(primaryLabel, textAlign: TextAlign.center),
                 ),
               ),
             ],

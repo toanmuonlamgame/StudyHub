@@ -37,6 +37,25 @@ test('CORS allows Flutter Web localhost development origins', async (t) => {
   assert.match(response.headers.vary, /Origin/);
 });
 
+test('readiness is safe in memory mode and independent from liveness', async (t) => {
+  const memory = buildApp({ learningDataSource: 'memory' });
+  const unavailable = buildApp({
+    learningDataSource: 'memory',
+    readinessProbe: async () => { throw new Error('Private database details'); },
+  });
+  t.after(() => Promise.all([memory.close(), unavailable.close()]));
+
+  const ready = await memory.inject('/ready');
+  assert.equal(ready.statusCode, 200);
+  assert.deepEqual(ready.json(), { status: 'ready' });
+  assert.equal(ready.headers['cache-control'], 'no-store');
+
+  const failed = await unavailable.inject('/ready');
+  assert.equal(failed.statusCode, 503);
+  assert.deepEqual(failed.json(), { status: 'unavailable' });
+  assert.equal((await unavailable.inject('/health')).statusCode, 200);
+});
+
 test('CORS allows 127.0.0.1 but not non-local browser origins', async (t) => {
   const app = buildApp();
   t.after(() => app.close());

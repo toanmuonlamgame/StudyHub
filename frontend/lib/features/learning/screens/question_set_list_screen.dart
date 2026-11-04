@@ -61,15 +61,19 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.questionSetsTitle)),
       body: SafeArea(
         child: Column(
           children: [
-            _QuestionSetListHeader(subjectName: widget.subject.name),
+            _QuestionSetListHeader(
+              subjectName: widget.subject.name,
+              compact: keyboardOpen,
+            ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+              padding: EdgeInsets.fromLTRB(20, keyboardOpen ? 8 : 14, 20, 8),
               child: TextField(
                 key: const ValueKey('question-set-search-field'),
                 controller: _searchController,
@@ -262,11 +266,8 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
         q: _query.isEmpty ? null : _query,
         limit: _pageSize,
       );
-      if (!mounted ||
-          generation != _requestGeneration ||
-          _searchController.text.trim() != _query) {
-        return;
-      }
+      // A newer committed query invalidates the response; typing alone does not.
+      if (!mounted || generation != _requestGeneration) return;
       setState(() {
         _questionSets.addAll(_deduplicate(page.items));
         _nextCursor = page.nextCursor;
@@ -274,11 +275,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
         _isInitialLoading = false;
       });
     } catch (_) {
-      if (!mounted ||
-          generation != _requestGeneration ||
-          _searchController.text.trim() != _query) {
-        return;
-      }
+      if (!mounted || generation != _requestGeneration) return;
       setState(() {
         _isInitialLoading = false;
         _initialLoadFailed = true;
@@ -306,11 +303,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
         limit: _pageSize,
         cursor: cursor,
       );
-      if (!mounted ||
-          generation != _requestGeneration ||
-          _searchController.text.trim() != _query) {
-        return;
-      }
+      if (!mounted || generation != _requestGeneration) return;
       setState(() {
         final existingIds = _questionSets.map((item) => item.id).toSet();
         _questionSets.addAll(
@@ -321,11 +314,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
         _isLoadingMore = false;
       });
     } catch (_) {
-      if (!mounted ||
-          generation != _requestGeneration ||
-          _searchController.text.trim() != _query) {
-        return;
-      }
+      if (!mounted || generation != _requestGeneration) return;
       setState(() {
         _isLoadingMore = false;
         _loadMoreFailed = true;
@@ -340,6 +329,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
   }
 
   void _submitSearch(String value) {
+    FocusScope.of(context).unfocus();
     _searchTimer?.cancel();
     _applySearch(value);
   }
@@ -408,9 +398,13 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
 }
 
 class _QuestionSetListHeader extends StatelessWidget {
-  const _QuestionSetListHeader({required this.subjectName});
+  const _QuestionSetListHeader({
+    required this.subjectName,
+    required this.compact,
+  });
 
   final String subjectName;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -421,14 +415,23 @@ class _QuestionSetListHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(subjectName, style: theme.textTheme.headlineSmall),
-          const SizedBox(height: 6),
           Text(
-            context.l10n.chooseQuestionSetSubtitle,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            subjectName,
+            style: compact
+                ? theme.textTheme.titleMedium
+                : theme.textTheme.headlineSmall,
+            maxLines: compact ? 1 : null,
+            overflow: compact ? TextOverflow.ellipsis : null,
           ),
+          if (!compact) ...[
+            const SizedBox(height: 6),
+            Text(
+              context.l10n.chooseQuestionSetSubtitle,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ],
       ),
     );

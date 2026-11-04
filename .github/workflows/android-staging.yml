@@ -1,0 +1,70 @@
+name: Build Android staging APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_origin:
+        description: HTTPS origin of the staging API (not a secret)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      STUDYHUB_STAGING_ORIGIN: ${{ inputs.api_origin }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Validate API origin
+        run: |
+          node --input-type=module <<'NODE'
+          const input = process.env.STUDYHUB_STAGING_ORIGIN;
+          const url = new URL(input);
+          if (url.protocol !== 'https:' ||
+              (input !== url.origin && input !== url.origin + '/')) {
+            throw new Error('Enter an HTTPS origin without credentials or a path.');
+          }
+          NODE
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.4'
+          cache: true
+      - run: flutter pub get
+      - name: Build test-only APK
+        run: |
+          flutter build apk --release --no-pub --split-per-abi \
+            --dart-define=STUDYHUB_LEARNING_SOURCE=api \
+            "--dart-define=STUDYHUB_API_BASE_URL=$STUDYHUB_STAGING_ORIGIN"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: studyhub-staging-arm64
+          path: frontend/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: studyhub-staging-arm32
+          path: frontend/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: studyhub-staging-x64
+          path: frontend/build/app/outputs/flutter-apk/app-x86_64-release.apk
+          if-no-files-found: error
+          retention-days: 7

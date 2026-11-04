@@ -45,6 +45,10 @@ Health check:
 GET http://localhost:3000/health
 ```
 
+`GET /ready` additionally checks connectivity in Prisma mode. It returns
+`503` with a generic body when the database is unavailable. The read-only
+staging smoke checks both endpoints and then verifies the public catalog.
+
 ## Authentication API
 
 ```text

@@ -5,7 +5,7 @@
     <application
         android:label="StudyHub"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_studyhub">
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="${studyHubAdMobAppId}" />
@@ -56,6 +56,9 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE"/>
+        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

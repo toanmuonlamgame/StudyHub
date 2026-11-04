@@ -77,6 +77,80 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Home opens word games and Back preserves the Home tab', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.vietnamese),
+    );
+    final shortcut = find.text('Vừa học vừa chơi');
+    await tester.scrollUntilVisible(
+      shortcut,
+      150,
+      scrollable: _homeScrollable(),
+    );
+    await tester.tap(shortcut);
+    await tester.pumpAndSettle();
+    expect(find.text('Lật thẻ ghép đôi'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('home-hub-list')), findsOneWidget);
+    expect(
+      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      0,
+    );
+  });
+
+  for (final (name, size, insets) in [
+    ('small phone', const Size(320, 568), const FakeViewPadding()),
+    (
+      'top cutout phone',
+      const Size(430, 932),
+      const FakeViewPadding(top: 59, bottom: 34),
+    ),
+    (
+      'landscape cutout',
+      const Size(844, 390),
+      const FakeViewPadding(left: 59, right: 24, bottom: 21),
+    ),
+    ('tablet', const Size(820, 1180), const FakeViewPadding(top: 24)),
+  ]) {
+    testWidgets('Home respects usable bounds on $name', (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = size;
+      tester.view.padding = insets;
+      tester.view.viewPadding = insets;
+      tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetPadding);
+      addTearDown(tester.view.resetViewPadding);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+      await tester.pumpWidget(
+        const StudyHubApp(
+          initialLocaleSelection: AppLocaleSelection.vietnamese,
+        ),
+      );
+      final start = find.byKey(const ValueKey('home-primary-start-learning'));
+      await tester.scrollUntilVisible(
+        start,
+        100,
+        scrollable: _homeScrollable(),
+      );
+      await tester.pumpAndSettle();
+
+      final bounds = tester.getRect(start);
+      expect(bounds.left, greaterThanOrEqualTo(insets.left));
+      expect(bounds.right, lessThanOrEqualTo(size.width - insets.right));
+      expect(bounds.width, lessThanOrEqualTo(560));
+      expect(start.hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('authentication stays usable on a compact scaled viewport', (
     WidgetTester tester,
   ) async {

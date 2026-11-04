@@ -18,6 +18,9 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final decodeWidth = (radius * 2 * MediaQuery.devicePixelRatioOf(context))
+        .ceil()
+        .clamp(48, 384);
     final fallback = Center(
       child: Text(
         _initials(user.displayName),
@@ -40,8 +43,11 @@ class UserAvatar extends StatelessWidget {
             dimension: radius * 2,
             child: previewBytes != null
                 ? Image.memory(
-                    Uint8List.fromList(previewBytes!),
+                    previewBytes is Uint8List
+                        ? previewBytes! as Uint8List
+                        : Uint8List.fromList(previewBytes!),
                     fit: BoxFit.cover,
+                    cacheWidth: decodeWidth,
                     errorBuilder: (_, _, _) => fallback,
                   )
                 : url == null
@@ -49,6 +55,7 @@ class UserAvatar extends StatelessWidget {
                 : Image.network(
                     url,
                     fit: BoxFit.cover,
+                    cacheWidth: decodeWidth,
                     errorBuilder: (_, _, _) => fallback,
                   ),
           ),

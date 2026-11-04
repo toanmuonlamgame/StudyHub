@@ -1,0 +1,42 @@
+appId: com.toanmuonlamgame.studyhub
+name: Mock Exam smoke test
+---
+# Use only on a disposable emulator with a debug mock build.
+- launchApp:
+    clearState: true
+- assertVisible: "Continue your learning journey"
+- tapOn: ".*Create account.*"
+- tapOn: "Display name"
+- inputText: "StudyHub Tester"
+- tapOn: "Email"
+- inputText: "maestro@example.test"
+- tapOn: "Password"
+- inputText: "MockOnly123!"
+- hideKeyboard
+- tapOn: "Create account"
+- tapOn: "Start Learning"
+- tapOn: "JavaScript Basics"
+- tapOn: "JavaScript Basics Check"
+- scrollUntilVisible:
+    element: "Choose learning mode"
+    direction: DOWN
+- tapOn: "Choose learning mode"
+- scrollUntilVisible:
+    element: "Start Exam Mode"
+    direction: DOWN
+- tapOn: "Start Exam Mode"
+- assertNotVisible: "Correct answer: let"
+- tapOn: "const"
+- tapOn: "Next Question"
+- tapOn: "==="
+- tapOn: "Next Question"
+- tapOn: "push"
+- scrollUntilVisible:
+    element: "Submit Quiz"
+    direction: DOWN
+- tapOn: "Submit Quiz"
+- assertVisible: "67%"
+- scrollUntilVisible:
+    element: "Answer review"
+    direction: DOWN
+- assertVisible: "Answer review"

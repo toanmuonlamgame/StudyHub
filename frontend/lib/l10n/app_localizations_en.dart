@@ -1588,4 +1588,130 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get studyMaterialsOwnershipNote =>
       'Your drafts are private. Only approved materials appear in the public library.';
+
+  @override
+  String get playAndLearn => 'Play and learn';
+
+  @override
+  String get englishGames => 'English mini-games';
+
+  @override
+  String get wordMatch => 'Match the cards';
+
+  @override
+  String get wordMatchSubtitle => 'Match each English word to its meaning.';
+
+  @override
+  String get wordShip => 'Word Spaceship';
+
+  @override
+  String get wordShipSubtitle => 'Type the English word to hit the target.';
+
+  @override
+  String get gameWordInput => 'English word';
+
+  @override
+  String get gameFire => 'Fire';
+
+  @override
+  String get gameTryAgain => 'Not quite. Try again.';
+
+  @override
+  String get gameHit => 'Direct hit!';
+
+  @override
+  String get gameNext => 'Next word';
+
+  @override
+  String get gameSkip => 'Skip word';
+
+  @override
+  String get gameContinue => 'Continue';
+
+  @override
+  String get gameNotAPair => 'Not a match. Try a different pair.';
+
+  @override
+  String get gamePair => 'You found a pair!';
+
+  @override
+  String get gameDone => 'Round complete';
+
+  @override
+  String gameScore(int score, int total) {
+    return 'Score: $score / $total';
+  }
+
+  @override
+  String get gameRetryMissed => 'Review missed words';
+
+  @override
+  String get gameReplay => 'Play again';
+
+  @override
+  String gameFlipped(int number) {
+    return 'Face-down card $number';
+  }
+
+  @override
+  String get gameMissed => 'Words to review';
+
+  @override
+  String gameAnswer(String word) {
+    return 'Answer: $word';
+  }
+
+  @override
+  String get gameSentence => 'Build a sentence';
+
+  @override
+  String get gameSentenceSubtitle => 'Put the words in the right order.';
+
+  @override
+  String get gameSpelling => 'Decode the word';
+
+  @override
+  String get gameSpellingSubtitle =>
+      'Choose the letter that completes the word.';
+
+  @override
+  String get gameListening => 'Listen and choose';
+
+  @override
+  String get gameListeningSubtitle =>
+      'Listen to the English word and choose its meaning.';
+
+  @override
+  String get gameHear => 'Play word';
+
+  @override
+  String get gameAudioUnavailable =>
+      'No English voice is available. Try again or skip this word.';
+
+  @override
+  String get gameCheck => 'Check';
+
+  @override
+  String get gameClear => 'Clear';
+
+  @override
+  String get gameCorrect => 'That\'s right!';
+
+  @override
+  String get gameTryDifferent => 'Try another answer.';
+
+  @override
+  String get gamePickWords => 'Tap words to build your sentence.';
+
+  @override
+  String get gameSkipQuestion => 'Skip question';
+
+  @override
+  String get gameReviewMissed => 'Review missed questions';
+
+  @override
+  String get gameNextQuestion => 'Next question';
+
+  @override
+  String get contributionHideKeyboard => 'Hide keyboard';
 }

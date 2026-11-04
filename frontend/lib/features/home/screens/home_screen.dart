@@ -6,6 +6,7 @@ import '../../../l10n/app_localizations_x.dart';
 import '../widgets/home_hub_widgets.dart';
 import '../../advertising/advertising_service.dart';
 import '../../advertising/widgets/studyhub_banner_ad.dart';
+import '../../word_games/word_games_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
@@ -73,6 +74,25 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 PrimaryLearningCard(onPressed: onStartLearning),
+                const SizedBox(height: 12),
+                Card(
+                  color: theme.colorScheme.secondaryContainer,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: ListTile(
+                    leading: const Icon(Icons.sports_esports_outlined),
+                    title: Text(l10n.playAndLearn),
+                    subtitle: Text(l10n.englishGames),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const WordGamesScreen(),
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 28),
                 StudyHubSectionHeader(title: l10n.quickActionsSection),
                 const SizedBox(height: 12),

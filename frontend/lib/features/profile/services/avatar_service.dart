@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../learning/models/media_asset.dart';
 import '../../media/repositories/media_repository.dart';
+import '../../media/services/picker_cache.dart';
 
 class SelectedAvatar {
   const SelectedAvatar({required this.file, required this.bytes});
@@ -20,25 +21,46 @@ class AvatarService {
   final ImagePicker _imagePicker;
 
   Future<SelectedAvatar?> chooseFromGallery() async {
-    final file = await _imagePicker.pickImage(source: ImageSource.gallery);
+    final file = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 640,
+      maxHeight: 640,
+      imageQuality: 85,
+      requestFullMetadata: false,
+    );
     if (file == null) return null;
-    if (!RegExp(
-      r'\.(?:jpe?g|png|webp)$',
-      caseSensitive: false,
-    ).hasMatch(file.name)) {
-      throw const AvatarValidationException(
-        AvatarValidationIssue.unsupportedType,
-      );
+    try {
+      if (!RegExp(
+        r'\.(?:jpe?g|png|webp)$',
+        caseSensitive: false,
+      ).hasMatch(file.name)) {
+        throw const AvatarValidationException(
+          AvatarValidationIssue.unsupportedType,
+        );
+      }
+      if (await file.length() > imageUploadMaxBytes) {
+        throw const AvatarValidationException(
+          AvatarValidationIssue.fileTooLarge,
+        );
+      }
+      final bytes = await file.readAsBytes();
+      if (bytes.length > imageUploadMaxBytes) {
+        throw const AvatarValidationException(
+          AvatarValidationIssue.fileTooLarge,
+        );
+      }
+      return SelectedAvatar(file: file, bytes: bytes);
+    } catch (_) {
+      await discardPickedImage(file.path);
+      rethrow;
     }
-    final bytes = await file.readAsBytes();
-    if (bytes.length > imageUploadMaxBytes) {
-      throw const AvatarValidationException(AvatarValidationIssue.fileTooLarge);
-    }
-    return SelectedAvatar(file: file, bytes: bytes);
   }
 
   Future<MediaAsset> upload(SelectedAvatar avatar, {String? altText}) =>
       mediaRepository.uploadImage(avatar.file, altText: altText);
+
+  Future<void> discard(SelectedAvatar avatar) =>
+      discardPickedImage(avatar.file.path);
 }
 
 enum AvatarValidationIssue { unsupportedType, fileTooLarge }

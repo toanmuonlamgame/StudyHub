@@ -25,15 +25,20 @@ class ApiMediaRepository implements MediaRepository {
 
   @override
   Future<MediaAsset> uploadImage(XFile file, {String? altText}) async {
-    final bytes = await file.readAsBytes();
-    if (bytes.length > imageUploadMaxBytes) {
+    final length = await file.length();
+    if (length > imageUploadMaxBytes) {
       throw const MediaUploadException('Image must be 5 MiB or smaller.');
     }
     final token = await accessTokenProvider?.call();
     final request =
         http.MultipartRequest('POST', _baseUri.resolve('media/images'))
           ..files.add(
-            http.MultipartFile.fromBytes('file', bytes, filename: file.name),
+            http.MultipartFile(
+              'file',
+              file.openRead(0, length),
+              length,
+              filename: file.name,
+            ),
           );
     if (token?.trim().isNotEmpty == true) {
       request.headers['authorization'] = 'Bearer ${token!.trim()}';
@@ -42,7 +47,10 @@ class ApiMediaRepository implements MediaRepository {
       _client.send(request),
       requestTimeout,
     );
-    final response = await http.Response.fromStream(streamed);
+    final response = await withApiTimeout(
+      http.Response.fromStream(streamed),
+      requestTimeout,
+    );
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw MediaUploadException(
         'Image upload failed with status ${response.statusCode}.',

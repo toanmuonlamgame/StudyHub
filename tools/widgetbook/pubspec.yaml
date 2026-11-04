@@ -1,0 +1,13 @@
+name: studyhub_widgetbook
+description: Isolated visual catalog for StudyHub components.
+publish_to: none
+environment:
+  sdk: ^3.12.2
+dependencies:
+  flutter:
+    sdk: flutter
+  frontend:
+    path: ../../frontend
+  widgetbook: 3.25.0
+flutter:
+  uses-material-design: true
