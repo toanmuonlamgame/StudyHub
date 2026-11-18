@@ -12,7 +12,7 @@ void main() {
       const repository = MockLearningRepository();
 
       final subjects = await repository.getSubjects();
-      expect(subjects, hasLength(3));
+      expect(subjects, hasLength(4));
       expect(subjects.first.name, 'JavaScript Basics');
 
       final subjectId = subjects.first.id;
@@ -37,6 +37,36 @@ void main() {
       expect(await repository.getQuestionSetById('missing'), isNull);
     },
   );
+
+  test('school review sets can be completed and reviewed', () async {
+    const repository = MockLearningRepository();
+    final sets = await repository.listQuestionSets(
+      subjectId: 'subject_school_review',
+      language: 'vi',
+    );
+    expect(sets.items, hasLength(3));
+
+    for (final set in sets.items) {
+      final questions = await repository.getQuestionsByQuestionSetId(set.id);
+      expect(questions, hasLength(5));
+      expect(questions.length, set.questionCount);
+      final answers = <String, String>{};
+      for (final question in questions) {
+        final check = await repository.checkAnswer(
+          questionId: question.id,
+          selectedAnswerOptionId: question.answerOptions.first.id,
+        );
+        expect(check.explanation, isNotEmpty);
+        answers[question.id] = check.correctAnswerOptionId;
+      }
+      final result = await repository.submitQuiz(
+        questionSetId: set.id,
+        selectedAnswerOptionIdsByQuestionId: answers,
+      );
+      expect(result.percentageScore, 100);
+      expect(result.answerReviews, hasLength(5));
+    }
+  });
 
   test('returns quiz-safe answer options before submission', () async {
     const repository = MockLearningRepository();

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../core/widgets/study_illustration.dart';
 import 'package:intl/intl.dart';
 
 import '../../../app/app_navigation.dart';
@@ -204,37 +205,46 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    Container(
-                      width: 104,
-                      height: 104,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        shape: BoxShape.circle,
-                      ),
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween(end: result.percentageScore),
-                        duration: AppMotion.duration(
-                          context,
-                          const Duration(milliseconds: 280),
-                        ),
-                        curve: Curves.easeOutCubic,
-                        builder: (context, value, child) => Text(
-                          NumberFormat.percentPattern(
-                            Localizations.localeOf(context).toLanguageTag(),
-                          ).format(value / 100),
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            color: theme.colorScheme.primary,
+                    IllustratedStudyPanel(
+                      artwork: StudyArtwork.trophy,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 104,
+                            height: 104,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(26),
+                            ),
+                            child: TweenAnimationBuilder<double>(
+                              tween: Tween(end: result.percentageScore),
+                              duration: AppMotion.duration(
+                                context,
+                                const Duration(milliseconds: 280),
+                              ),
+                              curve: Curves.easeOutCubic,
+                              builder: (context, value, child) => Text(
+                                NumberFormat.percentPattern(
+                                  Localizations.localeOf(
+                                    context,
+                                  ).toLanguageTag(),
+                                ).format(value / 100),
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                          const SizedBox(height: 14),
+                          Text(
+                            message,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 20),

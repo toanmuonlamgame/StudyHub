@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/study_illustration.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../models/question_set.dart';
 import '../models/exam_language.dart';
@@ -495,6 +496,12 @@ class _QuestionSetCard extends StatelessWidget {
         questionSet.estimatedMinutes ??
         (questionSet.questionCount * 1.5).ceil();
     final difficulty = questionSet.difficulty ?? 'easy';
+    final artwork = switch (questionSet.topicId) {
+      'review_math' => StudyArtwork.trophy,
+      'review_english' => StudyArtwork.books,
+      'review_science' => StudyArtwork.compass,
+      _ => null,
+    };
 
     return Semantics(
       button: true,
@@ -508,13 +515,35 @@ class _QuestionSetCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(questionSet.title, style: theme.textTheme.titleMedium),
-                const SizedBox(height: 6),
-                Text(
-                  questionSet.description,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            questionSet.title,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            questionSet.description,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (artwork != null &&
+                        MediaQuery.textScalerOf(context).scale(14) <= 21) ...[
+                      const SizedBox(width: 12),
+                      SizedBox.square(
+                        dimension: 68,
+                        child: StudyIllustration(artwork),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 14),
                 Wrap(

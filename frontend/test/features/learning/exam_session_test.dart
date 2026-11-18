@@ -87,6 +87,11 @@ void main() {
     expect(find.text('33%'), findsOneWidget);
     expect(find.text('Unanswered'), findsWidgets);
     expect(find.text('2'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Answer review'),
+      180,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(find.text('Your answer: Not answered'), findsNWidgets(2));
     expect(find.text('Explanation'), findsNWidgets(2));
     expect(

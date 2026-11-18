@@ -3,6 +3,7 @@ import '../models/question.dart';
 import '../models/question_set.dart';
 import '../models/subject.dart';
 import '../models/topic.dart';
+import 'school_review_data.dart';
 
 const List<Subject> mockSubjects = [
   Subject(
@@ -20,9 +21,15 @@ const List<Subject> mockSubjects = [
     name: 'Database Fundamentals',
     description: 'Relational databases and basic SQL.',
   ),
+  Subject(
+    id: schoolReviewSubjectId,
+    name: 'Ôn tập phổ thông',
+    description: 'Luyện nhanh Toán, Tiếng Anh và Khoa học với các đề mẫu.',
+  ),
 ];
 
 const List<Topic> mockTopics = [
+  ...schoolReviewTopics,
   Topic(
     id: 'topic_js_syntax',
     subjectId: 'subject_javascript',
@@ -55,7 +62,7 @@ const List<Topic> mockTopics = [
   ),
 ];
 
-const List<QuestionSet> mockQuestionSets = [
+final List<QuestionSet> mockQuestionSets = List.unmodifiable([
   QuestionSet(
     id: 'question_set_js_basics',
     language: 'en',
@@ -92,9 +99,10 @@ const List<QuestionSet> mockQuestionSets = [
     description: 'Review SQL and relational database concepts.',
     questionCount: 3,
   ),
-];
+  ...schoolReviewSets,
+]);
 
-const List<Question> mockQuestions = [
+final List<Question> mockQuestions = List.unmodifiable([
   Question(
     id: 'question_js_basics_1',
     questionSetId: 'question_set_js_basics',
@@ -227,7 +235,8 @@ const List<Question> mockQuestions = [
       AnswerOption(id: 'db_3_d', text: 'Column alias'),
     ],
   ),
-];
+  ...schoolReviewQuestions,
+]);
 
 List<Topic> getTopicsBySubjectId(String subjectId) {
   return mockTopics

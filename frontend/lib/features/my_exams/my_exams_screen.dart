@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/app_navigation.dart';
 import '../../core/app_design_tokens.dart';
+import '../../core/widgets/studyhub_ui.dart';
 import '../../l10n/app_localizations_x.dart';
 import '../attempts/attempt_repository_scope.dart';
 import '../attempts/screens/exam_attempt_history_screen.dart';
@@ -138,17 +139,28 @@ class _MyExamsScreenState extends State<MyExamsScreen> {
                     ),
                     child: Row(
                       children: [
-                        _SummaryMetric(
-                          label: context.l10n.uploaded,
-                          value: values?.uploaded,
+                        Expanded(
+                          child: StudyHubMetric(
+                            icon: Icons.upload_file_rounded,
+                            label: context.l10n.uploaded,
+                            value: values?.uploaded,
+                          ),
                         ),
-                        _SummaryMetric(
-                          label: context.l10n.completed,
-                          value: values?.completed,
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: StudyHubMetric(
+                            icon: Icons.task_alt_rounded,
+                            label: context.l10n.completed,
+                            value: values?.completed,
+                          ),
                         ),
-                        _SummaryMetric(
-                          label: context.l10n.saved,
-                          value: values?.saved,
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: StudyHubMetric(
+                            icon: Icons.bookmark_border_rounded,
+                            label: context.l10n.saved,
+                            value: values?.saved,
+                          ),
                         ),
                       ],
                     ),
@@ -211,37 +223,3 @@ final _demoUser = AuthUser(
   displayName: 'StudyHub Learner',
   createdAt: DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
 );
-
-class _SummaryMetric extends StatelessWidget {
-  const _SummaryMetric({required this.label, required this.value});
-
-  final String label;
-  final int? value;
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-    child: Semantics(
-      label: '$label ${value ?? 0}',
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        child: Column(
-          children: [
-            Text(
-              value?.toString() ?? '-',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}

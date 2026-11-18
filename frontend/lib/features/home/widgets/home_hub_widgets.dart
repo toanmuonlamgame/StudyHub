@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/app_design_tokens.dart';
+import '../../../core/widgets/study_illustration.dart';
 import '../../../core/widgets/studyhub_ui.dart';
 import '../../../l10n/app_localizations_x.dart';
 
@@ -63,6 +65,8 @@ class _HomeQuickActionTile extends StatelessWidget {
     final (foreground, background) = switch (action.id) {
       'materials' => (colors.onSecondaryContainer, colors.secondaryContainer),
       'saved' => (colors.onTertiaryContainer, colors.tertiaryContainer),
+      'progress' => (colors.onSecondaryContainer, colors.secondaryContainer),
+      'contribution' => (colors.onPrimaryContainer, colors.primaryContainer),
       _ => (colors.onPrimaryContainer, colors.primaryContainer),
     };
 
@@ -75,7 +79,7 @@ class _HomeQuickActionTile extends StatelessWidget {
       child: Card(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppRadii.card),
           side: BorderSide(color: colors.outlineVariant),
         ),
         clipBehavior: Clip.antiAlias,
@@ -83,18 +87,27 @@ class _HomeQuickActionTile extends StatelessWidget {
           onTap: action.onTap,
           child: Padding(
             padding: const EdgeInsets.all(14),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                StudyHubIconSurface(
-                  icon: action.icon,
-                  foregroundColor: foreground,
-                  backgroundColor: background,
-                  size: 36,
+                Row(
+                  children: [
+                    StudyHubIconSurface(
+                      icon: action.icon,
+                      foregroundColor: foreground,
+                      backgroundColor: background,
+                      size: 38,
+                    ),
+                    const Spacer(),
+                    Icon(
+                      Icons.arrow_outward_rounded,
+                      size: 17,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(action.label, style: theme.textTheme.titleSmall),
-                ),
+                const SizedBox(height: 10),
+                Text(action.label, style: theme.textTheme.titleSmall),
               ],
             ),
           ),
@@ -113,41 +126,21 @@ class PrimaryLearningCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    const panel = Color(0xFF153B3A);
-    const accent = Color(0xFFBAF0D8);
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: panel,
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return IllustratedStudyPanel(
+      artwork: StudyArtwork.books,
+      featured: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              StudyHubIconSurface(
-                icon: Icons.play_arrow_rounded,
-                foregroundColor: panel,
-                backgroundColor: accent,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  l10n.continueLearningSection,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            l10n.continueLearningSection,
+            style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 12),
           Text(
             l10n.continueLearningBody,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFFD9EAE5),
+              color: const Color(0xFFEDE5FF),
             ),
           ),
           const SizedBox(height: 16),
@@ -155,10 +148,11 @@ class PrimaryLearningCard extends StatelessWidget {
             key: const ValueKey('home-primary-start-learning'),
             onPressed: onPressed,
             style: FilledButton.styleFrom(
-              backgroundColor: accent,
-              foregroundColor: panel,
+              backgroundColor: const Color(0xFFFFEBC1),
+              foregroundColor: const Color(0xFF312178),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
-            icon: const Icon(Icons.arrow_forward),
+            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
             label: Text(l10n.startLearning),
           ),
         ],

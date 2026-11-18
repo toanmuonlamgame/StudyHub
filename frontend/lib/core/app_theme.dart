@@ -14,6 +14,19 @@ class AppTheme {
     );
     final base = ThemeData(colorScheme: colors, useMaterial3: true);
     return base.copyWith(
+      textTheme: light.textTheme.apply(
+        bodyColor: colors.onSurface,
+        displayColor: colors.onSurface,
+      ),
+      scaffoldBackgroundColor: colors.surface,
+      appBarTheme: AppBarTheme(
+        backgroundColor: colors.surface,
+        foregroundColor: colors.onSurface,
+        scrolledUnderElevation: 0,
+        titleTextStyle: light.appBarTheme.titleTextStyle?.copyWith(
+          color: colors.onSurface,
+        ),
+      ),
       navigationBarTheme: NavigationBarThemeData(
         height: 76,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
@@ -29,8 +42,13 @@ class AppTheme {
         border: const OutlineInputBorder(),
       ),
       cardTheme: CardThemeData(
+        elevation: 0,
+        color: colors.surfaceContainerLow,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.card),
+          side: BorderSide(color: colors.outlineVariant),
+        ),
       ),
     );
   }
@@ -61,7 +79,7 @@ class AppTheme {
       onSurface: AppColors.ink,
       onSurfaceVariant: AppColors.mutedInk,
       outline: outline,
-      outlineVariant: Color(0xFFE9EBF1),
+      outlineVariant: Color(0xFFEEE6F5),
     );
     final textTheme = ThemeData.light().textTheme.copyWith(
       headlineMedium: const TextStyle(
@@ -72,7 +90,8 @@ class AppTheme {
       headlineSmall: const TextStyle(
         fontSize: 24,
         height: 1.25,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -.45,
       ),
       titleLarge: const TextStyle(
         fontSize: 20,
@@ -196,7 +215,7 @@ class AppTheme {
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: primary,
-        linearTrackColor: Color(0xFFE7E7FF),
+        linearTrackColor: AppColors.brandContainer,
         linearMinHeight: 8,
       ),
       snackBarTheme: SnackBarThemeData(

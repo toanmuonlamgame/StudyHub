@@ -130,32 +130,16 @@ class _QuizScreenState extends State<QuizScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                l10n.questionProgress(_examQuestionIndex + 1, questions.length),
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
-            Flexible(
-              child: Text(
-                l10n.examAnswerStatus(
-                  _examSelectedAnswerIds.length,
-                  questions.length - _examSelectedAnswerIds.length,
-                ),
-                textAlign: TextAlign.end,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        _AnimatedQuizProgress(
+        _QuizProgressPanel(
+          icon: Icons.assignment_outlined,
+          title: l10n.questionProgress(
+            _examQuestionIndex + 1,
+            questions.length,
+          ),
+          detail: l10n.examAnswerStatus(
+            _examSelectedAnswerIds.length,
+            questions.length - _examSelectedAnswerIds.length,
+          ),
           value: (_examQuestionIndex + 1) / questions.length,
         ),
         const SizedBox(height: 24),
@@ -220,7 +204,6 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Widget _buildPracticeContent(BuildContext context, List<Question> questions) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
     final question = questions[_practiceQuestionIndex];
     final isLastQuestion = _practiceQuestionIndex == questions.length - 1;
@@ -228,29 +211,13 @@ class _QuizScreenState extends State<QuizScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                l10n.questionProgress(
-                  _practiceQuestionIndex + 1,
-                  questions.length,
-                ),
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
-            Text(
-              l10n.instantFeedback,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.secondary,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        _AnimatedQuizProgress(
+        _QuizProgressPanel(
+          icon: Icons.bolt_rounded,
+          title: l10n.questionProgress(
+            _practiceQuestionIndex + 1,
+            questions.length,
+          ),
+          detail: l10n.instantFeedback,
           value: (_practiceQuestionIndex + 1) / questions.length,
         ),
         const SizedBox(height: 24),
@@ -646,6 +613,63 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 }
 
+class _QuizProgressPanel extends StatelessWidget {
+  const _QuizProgressPanel({
+    required this.icon,
+    required this.title,
+    required this.detail,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String title;
+  final String detail;
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.primaryContainer,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: colors.onPrimaryContainer, size: 22),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: colors.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              detail,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colors.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(height: 10),
+            _AnimatedQuizProgress(value: value),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _AnimatedQuizProgress extends StatelessWidget {
   const _AnimatedQuizProgress({required this.value});
 
@@ -659,6 +683,7 @@ class _AnimatedQuizProgress extends StatelessWidget {
       curve: Curves.easeOutCubic,
       builder: (context, animatedValue, child) => LinearProgressIndicator(
         value: animatedValue,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(4),
       ),
     );

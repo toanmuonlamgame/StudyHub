@@ -1,5 +1,11 @@
 # StudyHub TODO
 
+## Learner interface refresh
+
+- [x] Refresh the learner colors, home shortcuts, subject discovery, and quiz flow.
+- [x] Add three bundled illustrations and three Vietnamese school review sets in demo mode.
+- [ ] Verify the refreshed screens on a physical Android device.
+
 ## Admin Dashboard Milestone (2026-07-22)
 
 - [x] Add React + TypeScript + Vite admin application foundation.

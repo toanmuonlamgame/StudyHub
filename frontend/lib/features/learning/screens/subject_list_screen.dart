@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_design_tokens.dart';
-import '../../../core/widgets/studyhub_ui.dart';
+import '../../../core/widgets/study_illustration.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../models/subject.dart';
 import '../repositories/learning_repository.dart';
@@ -117,6 +117,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                           ),
                         ),
                       ],
+                      const SizedBox(height: AppSpacing.sm),
                     ],
                   );
                 }
@@ -157,10 +158,25 @@ class _SubjectListHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StudyHubPageHeader(
-      icon: Icons.menu_book_outlined,
-      title: context.l10n.chooseSubjectTitle,
-      body: context.l10n.chooseSubjectSubtitle,
+    final theme = Theme.of(context);
+    return IllustratedStudyPanel(
+      artwork: StudyArtwork.compass,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.chooseSubjectTitle,
+            style: theme.textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n.chooseSubjectSubtitle,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -176,6 +192,19 @@ class _SubjectCard extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final metadata = _buildMetadata(context, subject);
+    final colors = theme.colorScheme;
+    final icon = _subjectIcon(subject);
+    final (background, foreground) = switch (icon) {
+      Icons.storage_outlined => (
+        colors.secondaryContainer,
+        colors.onSecondaryContainer,
+      ),
+      Icons.account_tree_outlined => (
+        colors.tertiaryContainer,
+        colors.onTertiaryContainer,
+      ),
+      _ => (colors.primaryContainer, colors.onPrimaryContainer),
+    };
 
     return Semantics(
       button: true,
@@ -193,12 +222,12 @@ class _SubjectCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
+                    color: background,
                     borderRadius: BorderRadius.circular(AppRadii.control),
                   ),
                   child: Icon(
-                    _subjectIcon(subject),
-                    color: theme.colorScheme.primary,
+                    icon,
+                    color: foreground,
                     size: AppIconSizes.feature,
                   ),
                 ),

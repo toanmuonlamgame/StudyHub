@@ -103,17 +103,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     final value = snapshot.data;
                     return Row(
                       children: [
-                        _ProfileMetric(
-                          label: context.l10n.uploaded,
-                          value: value?.submissions,
+                        Expanded(
+                          child: StudyHubMetric(
+                            icon: Icons.upload_file_rounded,
+                            label: context.l10n.uploaded,
+                            value: value?.submissions,
+                          ),
                         ),
-                        _ProfileMetric(
-                          label: context.l10n.completed,
-                          value: value?.attempts,
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: StudyHubMetric(
+                            icon: Icons.task_alt_rounded,
+                            label: context.l10n.completed,
+                            value: value?.attempts,
+                          ),
                         ),
-                        _ProfileMetric(
-                          label: context.l10n.saved,
-                          value: value?.saved,
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: StudyHubMetric(
+                            icon: Icons.bookmark_border_rounded,
+                            label: context.l10n.saved,
+                            value: value?.saved,
+                          ),
                         ),
                       ],
                     );
@@ -424,7 +435,21 @@ class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = AuthScope.maybeOf(context)?.user ?? _demoUser;
-    return Card(
+    final colors = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadii.feature),
+        border: Border.all(color: colors.outlineVariant),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colors.primaryContainer,
+            colors.surface,
+            colors.secondaryContainer,
+          ],
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
@@ -489,38 +514,6 @@ final _demoUser = AuthUser(
   displayName: 'StudyHub Learner',
   createdAt: DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
 );
-
-class _ProfileMetric extends StatelessWidget {
-  const _ProfileMetric({required this.label, required this.value});
-
-  final String label;
-  final int? value;
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Column(
-        children: [
-          Text(
-            value?.toString() ?? '-',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelMedium,
-          ),
-        ],
-      ),
-    ),
-  );
-}
 
 class _ActionTile extends StatelessWidget {
   const _ActionTile({

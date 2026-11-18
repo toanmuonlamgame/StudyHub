@@ -1,4 +1,5 @@
 import '../data/mock_learning_data.dart' as mock_data;
+import '../data/school_review_data.dart';
 import '../models/answer_check_result.dart';
 import '../models/answer_review.dart';
 import '../models/question.dart';
@@ -14,7 +15,9 @@ import '../../materials/models/study_material.dart';
 class MockLearningRepository implements LearningRepository {
   const MockLearningRepository();
 
-  static const Map<String, String> _correctAnswerOptionIdsByQuestionId = {
+  static final Map<String, String> _correctAnswerOptionIdsByQuestionId = {
+    for (final entry in schoolReviewAnswers.entries)
+      entry.key: entry.value.optionId,
     'question_js_basics_1': 'js_b1_c',
     'question_js_basics_2': 'js_b2_b',
     'question_js_basics_3': 'js_b3_c',
@@ -29,7 +32,9 @@ class MockLearningRepository implements LearningRepository {
     'question_database_3': 'db_3_c',
   };
 
-  static const Map<String, String> _explanationsByQuestionId = {
+  static final Map<String, String> _explanationsByQuestionId = {
+    for (final entry in schoolReviewAnswers.entries)
+      entry.key: entry.value.explanation,
     'question_js_basics_1':
         '`let` declares a block-scoped variable whose value may be reassigned.',
     'question_js_basics_2':

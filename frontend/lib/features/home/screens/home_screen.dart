@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/app_design_tokens.dart';
 import '../../../core/widgets/studyhub_ui.dart';
 import '../../auth/auth_scope.dart';
 import '../../../l10n/app_localizations_x.dart';
@@ -33,25 +34,25 @@ class HomeScreen extends StatelessWidget {
     final quickActions = [
       HomeQuickAction(
         id: 'materials',
-        icon: Icons.description_outlined,
+        icon: Icons.auto_stories_rounded,
         label: l10n.studyMaterials,
         onTap: onOpenStudyMaterials,
       ),
       HomeQuickAction(
         id: 'progress',
-        icon: Icons.insights_outlined,
+        icon: Icons.insights_rounded,
         label: l10n.progressTab,
         onTap: onOpenProgress,
       ),
       HomeQuickAction(
         id: 'contribution',
-        icon: Icons.post_add_outlined,
+        icon: Icons.post_add_rounded,
         label: l10n.contributionTitle,
         onTap: onOpenContribution,
       ),
       HomeQuickAction(
         id: 'saved',
-        icon: Icons.bookmarks_outlined,
+        icon: Icons.bookmarks_rounded,
         label: l10n.savedQuestionSets,
         onTap: onOpenSaved,
       ),
@@ -64,7 +65,7 @@ class HomeScreen extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 560),
             child: ListView(
               key: const ValueKey('home-hub-list'),
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
               children: [
                 _HomeHeader(
                   title: l10n.appTitle,
@@ -78,12 +79,19 @@ class HomeScreen extends StatelessWidget {
                 Card(
                   color: theme.colorScheme.secondaryContainer,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppRadii.card),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: ListTile(
-                    leading: const Icon(Icons.sports_esports_outlined),
-                    title: Text(l10n.playAndLearn),
+                    leading: StudyHubIconSurface(
+                      icon: Icons.sports_esports_rounded,
+                      backgroundColor: theme.colorScheme.surface,
+                      foregroundColor: theme.colorScheme.secondary,
+                    ),
+                    title: Text(
+                      l10n.playAndLearn,
+                      style: theme.textTheme.titleMedium,
+                    ),
                     subtitle: Text(l10n.englishGames),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.of(context).push(
@@ -104,7 +112,7 @@ class HomeScreen extends StatelessWidget {
                     key: const ValueKey('home-materials-promotion'),
                     color: theme.colorScheme.tertiaryContainer,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppRadii.card),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: ListTile(
@@ -149,7 +157,13 @@ class _HomeHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: theme.textTheme.titleMedium),
+              Text(
+                title,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  letterSpacing: .6,
+                ),
+              ),
               const SizedBox(height: 2),
               Text(greeting, style: theme.textTheme.headlineSmall),
             ],

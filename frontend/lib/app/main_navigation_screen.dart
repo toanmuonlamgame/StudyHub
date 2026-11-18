@@ -91,8 +91,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               label: l10n.homeTab,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.menu_book_outlined),
-              selectedIcon: const Icon(Icons.menu_book_rounded),
+              icon: const Icon(Icons.explore_outlined),
+              selectedIcon: const Icon(Icons.explore_rounded),
               label: l10n.exploreTab,
             ),
             NavigationDestination(

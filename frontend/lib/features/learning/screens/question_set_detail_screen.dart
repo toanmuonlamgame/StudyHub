@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/study_illustration.dart';
 import 'dart:async';
 
 import '../../../core/device_feedback.dart';
@@ -86,32 +87,40 @@ class _QuestionSetDetailScreenState extends State<QuestionSetDetailScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           children: [
-            Text(
-              widget.questionSet.title,
-              style: theme.textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Icon(
-                  Icons.menu_book_outlined,
-                  size: 18,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: Text(
-                    widget.topic == null
-                        ? widget.subject.name
-                        : '${widget.subject.name} / ${widget.topic!.name}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+            IllustratedStudyPanel(
+              artwork: StudyArtwork.books,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.questionSet.title,
+                    style: theme.textTheme.headlineSmall,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.menu_book_outlined,
+                        size: 18,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 7),
+                      Expanded(
+                        child: Text(
+                          widget.topic == null
+                              ? widget.subject.name
+                              : '${widget.subject.name} / ${widget.topic!.name}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 18),
             Wrap(
               spacing: 8,
               runSpacing: 8,

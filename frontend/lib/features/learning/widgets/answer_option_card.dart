@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/app_design_tokens.dart';
 import '../models/answer_option.dart';
 
 class AnswerOptionCard extends StatelessWidget {
@@ -26,10 +27,10 @@ class AnswerOptionCard extends StatelessWidget {
         enabled: enabled,
         child: Material(
           color: selected
-              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.55)
-              : theme.colorScheme.surface,
+              ? theme.colorScheme.primaryContainer
+              : theme.colorScheme.surfaceContainerLowest,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadii.control),
             side: BorderSide(
               color: selected
                   ? theme.colorScheme.primary
@@ -43,7 +44,7 @@ class AnswerOptionCard extends StatelessWidget {
             enabled: enabled,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
-              vertical: 4,
+              vertical: 6,
             ),
             title: Text(
               answerOption.text,

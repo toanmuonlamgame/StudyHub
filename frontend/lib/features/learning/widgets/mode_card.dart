@@ -29,22 +29,25 @@ class ModeCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: highlighted
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.secondaryContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                color: highlighted
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.onSecondaryContainer,
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: highlighted
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.secondaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: highlighted
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.onSecondaryContainer,
+                ),
               ),
             ),
             const SizedBox(height: 16),

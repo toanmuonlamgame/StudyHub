@@ -2,6 +2,46 @@ import 'package:flutter/material.dart';
 
 import '../app_design_tokens.dart';
 
+class StudyHubMetric extends StatelessWidget {
+  const StudyHubMetric({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final int? value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return Card(
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+        child: Column(
+          children: [
+            ExcludeSemantics(
+              child: Icon(icon, size: 20, color: colors.primary),
+            ),
+            const SizedBox(height: 6),
+            Text(value?.toString() ?? '—', style: theme.textTheme.titleLarge),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class StudyHubSectionHeader extends StatelessWidget {
   const StudyHubSectionHeader({
     super.key,

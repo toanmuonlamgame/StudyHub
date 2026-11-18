@@ -310,6 +310,11 @@ void main() {
 
     await tester.tap(_navigationLabel('Profile'));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Personal information'),
+      150,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(find.text('Personal information'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
