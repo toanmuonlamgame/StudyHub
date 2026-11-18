@@ -779,6 +779,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get externalResource => 'Tài nguyên bên ngoài';
 
   @override
+  String get openStudyMaterialLink => 'Mở tài liệu';
+
+  @override
+  String get studyMaterialLinkOpenFailed =>
+      'Không mở được tài liệu. Bạn có thể sao chép liên kết bên trên.';
+
+  @override
   String get uploadedFile => 'Tệp đã tải lên';
 
   @override

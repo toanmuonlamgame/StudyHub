@@ -784,6 +784,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get externalResource => 'External resource';
 
   @override
+  String get openStudyMaterialLink => 'Open resource';
+
+  @override
+  String get studyMaterialLinkOpenFailed =>
+      'Could not open the resource. You can copy the link above.';
+
+  @override
   String get uploadedFile => 'Uploaded file';
 
   @override

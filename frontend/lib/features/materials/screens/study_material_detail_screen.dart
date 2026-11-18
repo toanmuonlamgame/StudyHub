@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/widgets/study_illustration.dart';
 import '../../../l10n/app_localizations_x.dart';
@@ -134,6 +135,13 @@ class _ExternalSource extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final url = material.sourceUrl;
+    final uri = url == null ? null : Uri.tryParse(url.trim());
+    final safeLink =
+        uri != null &&
+        (uri.scheme == 'https' || uri.scheme == 'http') &&
+        uri.host.isNotEmpty &&
+        uri.userInfo.isEmpty;
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -149,8 +157,31 @@ class _ExternalSource extends StatelessWidget {
             ),
           ],
         ),
-        if (url != null) ...[const SizedBox(height: 12), SelectableText(url)],
+        if (url != null && url.trim().isNotEmpty) ...[
+          const SizedBox(height: 12),
+          SelectableText(url),
+        ],
+        if (safeLink) ...[
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: () => _open(context, uri),
+            icon: const Icon(Icons.open_in_new_rounded),
+            label: Text(l10n.openStudyMaterialLink),
+          ),
+        ],
       ],
+    );
+  }
+
+  Future<void> _open(BuildContext context, Uri uri) async {
+    try {
+      if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+    } catch (_) {
+      // The link stays selectable if an external browser cannot open it.
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.studyMaterialLinkOpenFailed)),
     );
   }
 }

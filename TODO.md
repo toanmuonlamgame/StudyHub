@@ -2,6 +2,7 @@
 
 ## Learner interface refresh
 
+- [x] Open published web study materials directly from their detail page.
 - [x] Unify light/dark learner surfaces and extend the illustrated experience to auth, library, quiz results, games and contributions.
 - [x] Add question-bank search, exam question navigation, focused answer review and a seven-day activity chart.
 - [x] Expand school review to 10 sets with explanations in Flutter demo, Fastify memory and the Prisma seed.

@@ -234,6 +234,8 @@
   "materialDetailTitle": "Tài liệu học tập",
   "materialSource": "Nguồn",
   "externalResource": "Tài nguyên bên ngoài",
+  "openStudyMaterialLink": "Mở tài liệu",
+  "studyMaterialLinkOpenFailed": "Không mở được tài liệu. Bạn có thể sao chép liên kết bên trên.",
   "uploadedFile": "Tệp đã tải lên",
   "fileUnavailable": "Tệp này chưa khả dụng trong bản thử nghiệm.",
   "fileNameLabel": "Tệp: {name}",

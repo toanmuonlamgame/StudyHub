@@ -234,6 +234,8 @@
   "materialDetailTitle": "Study material",
   "materialSource": "Source",
   "externalResource": "External resource",
+  "openStudyMaterialLink": "Open resource",
+  "studyMaterialLinkOpenFailed": "Could not open the resource. You can copy the link above.",
   "uploadedFile": "Uploaded file",
   "fileUnavailable": "This file is not available in the prototype yet.",
   "fileNameLabel": "File: {name}",

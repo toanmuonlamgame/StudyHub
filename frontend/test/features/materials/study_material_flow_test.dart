@@ -34,6 +34,7 @@ void main() {
     await tester.tap(find.text('Database normalization notes'));
     await tester.pumpAndSettle();
     expect(find.text('External resource'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Open resource'), findsOneWidget);
     expect(find.textContaining('postgresql.org'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
   });
@@ -71,6 +72,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('Download'), findsNothing);
+    expect(find.text('Open resource'), findsNothing);
 
     await tester.pageBack();
     await tester.pumpAndSettle();

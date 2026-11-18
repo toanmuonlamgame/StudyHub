@@ -1484,6 +1484,18 @@ abstract class AppLocalizations {
   /// **'External resource'**
   String get externalResource;
 
+  /// No description provided for @openStudyMaterialLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Open resource'**
+  String get openStudyMaterialLink;
+
+  /// No description provided for @studyMaterialLinkOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the resource. You can copy the link above.'**
+  String get studyMaterialLinkOpenFailed;
+
   /// No description provided for @uploadedFile.
   ///
   /// In en, this message translates to:
