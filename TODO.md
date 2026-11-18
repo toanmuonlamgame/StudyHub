@@ -2,6 +2,9 @@
 
 ## Learner interface refresh
 
+- [x] Unify light/dark learner surfaces and extend the illustrated experience to auth, library, quiz results, games and contributions.
+- [x] Add question-bank search, exam question navigation, focused answer review and a seven-day activity chart.
+- [x] Expand school review to 10 sets with explanations in Flutter demo, Fastify memory and the Prisma seed.
 - [x] Refresh the learner colors, home shortcuts, subject discovery, and quiz flow.
 - [x] Add three bundled illustrations and three Vietnamese school review sets in demo mode.
 - [ ] Verify the refreshed screens on a physical Android device.

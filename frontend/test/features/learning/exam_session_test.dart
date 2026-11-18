@@ -23,6 +23,29 @@ const _questionSet = QuestionSet(
 );
 
 void main() {
+  testWidgets('question map jumps to another question and retains answers', (
+    tester,
+  ) async {
+    await _pumpExam(tester);
+    await _selectAnswer(tester, 'let');
+    await _scrollExamToTop(tester);
+    await tester.tap(find.byTooltip('Question map'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Question 3 of 3 · Unanswered'));
+    await tester.pumpAndSettle();
+    expect(find.text('Question 3 of 3'), findsOneWidget);
+    await tester.tap(find.byTooltip('Question map'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Question 1 of 3 · Answered'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<RadioGroup<String>>(find.byType(RadioGroup<String>))
+          .groupValue,
+      'js_b1_c',
+    );
+  });
+
   testWidgets('keeps changed answers across previous and next navigation', (
     tester,
   ) async {
@@ -99,6 +122,18 @@ void main() {
         '`let` declares a block-scoped variable whose value may be reassigned.',
       ),
       findsOneWidget,
+    );
+    await Scrollable.ensureVisible(
+      tester.element(find.text('Needs review')),
+      alignment: .25,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Needs review'));
+    await tester.pumpAndSettle();
+    expect(find.text('Your answer: Not answered'), findsNWidgets(2));
+    expect(
+      find.textContaining('`let` declares a block-scoped variable'),
+      findsNothing,
     );
   });
 

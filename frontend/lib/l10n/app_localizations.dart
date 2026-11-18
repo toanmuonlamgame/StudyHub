@@ -98,6 +98,84 @@ abstract class AppLocalizations {
     Locale('vi'),
   ];
 
+  /// No description provided for @questionBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Question bank'**
+  String get questionBank;
+
+  /// No description provided for @schoolReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School review'**
+  String get schoolReviewTitle;
+
+  /// No description provided for @schoolReviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Math, English, science and digital skills'**
+  String get schoolReviewSubtitle;
+
+  /// No description provided for @browseAllExams.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse all exams'**
+  String get browseAllExams;
+
+  /// No description provided for @studySpaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Your study spaces'**
+  String get studySpaces;
+
+  /// No description provided for @examQuestionMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Question map'**
+  String get examQuestionMap;
+
+  /// No description provided for @examJumpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a question to jump to it. Your answers are kept.'**
+  String get examJumpHint;
+
+  /// No description provided for @examAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered'**
+  String get examAnswered;
+
+  /// No description provided for @reviewAllAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'All answers'**
+  String get reviewAllAnswers;
+
+  /// No description provided for @reviewNeedsWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs review'**
+  String get reviewNeedsWork;
+
+  /// No description provided for @reviewNoMistakes.
+  ///
+  /// In en, this message translates to:
+  /// **'You answered every question correctly.'**
+  String get reviewNoMistakes;
+
+  /// No description provided for @studyWeekHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get studyWeekHeading;
+
+  /// No description provided for @studyWeekCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed sessions on this device'**
+  String get studyWeekCaption;
+
   /// No description provided for @progressCompletedSessions.
   ///
   /// In en, this message translates to:
@@ -1151,7 +1229,7 @@ abstract class AppLocalizations {
   /// No description provided for @continueLearningBody.
   ///
   /// In en, this message translates to:
-  /// **'Pick a subject and continue to a focused question set.'**
+  /// **'Pick a subject and practice one topic at a time.'**
   String get continueLearningBody;
 
   /// No description provided for @learningModesCompactSubtitle.

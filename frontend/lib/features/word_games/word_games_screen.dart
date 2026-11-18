@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import '../../core/app_motion.dart';
+import '../../core/app_design_tokens.dart';
+import '../../core/widgets/study_illustration.dart';
+import '../../core/widgets/studyhub_ui.dart';
 import '../../l10n/app_localizations_x.dart';
 
 part 'word_challenge_screen.dart';
@@ -38,6 +41,21 @@ class WordGamesScreen extends StatelessWidget {
     return _GamePage(
       title: l10n.englishGames,
       children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.playAndLearn,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
+            const SizedBox.square(
+              dimension: 66,
+              child: StudyIllustration(StudyArtwork.english),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
         _GameChoice(
           icon: Icons.style_outlined,
           title: l10n.wordMatch,
@@ -118,10 +136,15 @@ class _GameChoice extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: color,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadii.card),
+      ),
       clipBehavior: Clip.antiAlias,
       child: ListTile(
-        leading: Icon(icon),
+        leading: StudyHubIconSurface(
+          icon: icon,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+        ),
         title: Text(title),
         subtitle: Text(description),
         trailing: const Icon(Icons.chevron_right),

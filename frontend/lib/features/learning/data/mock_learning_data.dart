@@ -21,11 +21,7 @@ const List<Subject> mockSubjects = [
     name: 'Database Fundamentals',
     description: 'Relational databases and basic SQL.',
   ),
-  Subject(
-    id: schoolReviewSubjectId,
-    name: 'Ôn tập phổ thông',
-    description: 'Luyện nhanh Toán, Tiếng Anh và Khoa học với các đề mẫu.',
-  ),
+  schoolReviewSubject,
 ];
 
 const List<Topic> mockTopics = [

@@ -42,6 +42,7 @@ class QuizResultScreen extends StatefulWidget {
 class _QuizResultScreenState extends State<QuizResultScreen> {
   bool _localSaveStarted = false;
   bool _attemptSaveStarted = false;
+  bool _reviewMistakesOnly = false;
   ExamAttemptSaveController? _attemptSaveController;
 
   QuizResult get result =>
@@ -154,6 +155,13 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
         : result.percentageScore >= 50
         ? l10n.goodResultMessage
         : l10n.learningResultMessage;
+    final indexedReviews = result.answerReviews.indexed
+        .where(
+          (entry) =>
+              !_reviewMistakesOnly ||
+              entry.$2.status != AnswerReviewStatus.correct,
+        )
+        .toList(growable: false);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -200,102 +208,96 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
               ),
             ],
             const SizedBox(height: 18),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    IllustratedStudyPanel(
-                      artwork: StudyArtwork.trophy,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 104,
-                            height: 104,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(26),
-                            ),
-                            child: TweenAnimationBuilder<double>(
-                              tween: Tween(end: result.percentageScore),
-                              duration: AppMotion.duration(
-                                context,
-                                const Duration(milliseconds: 280),
-                              ),
-                              curve: Curves.easeOutCubic,
-                              builder: (context, value, child) => Text(
-                                NumberFormat.percentPattern(
-                                  Localizations.localeOf(
-                                    context,
-                                  ).toLanguageTag(),
-                                ).format(value / 100),
-                                style: theme.textTheme.headlineMedium?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            message,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
+            IllustratedStudyPanel(
+              artwork: StudyArtwork.trophy,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(end: result.percentageScore),
+                    duration: AppMotion.duration(
+                      context,
+                      const Duration(milliseconds: 280),
+                    ),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, child) => Text(
+                      NumberFormat.percentPattern(
+                        Localizations.localeOf(context).toLanguageTag(),
+                      ).format(value / 100),
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        final statWidth = (constraints.maxWidth - 12) / 2;
-                        return Wrap(
-                          spacing: 12,
-                          runSpacing: 16,
-                          children: [
-                            SizedBox(
-                              width: statWidth,
-                              child: _ResultStat(
-                                label: l10n.correctAnswers,
-                                value: result.correctCount.toString(),
-                                color: theme.colorScheme.secondary,
-                              ),
-                            ),
-                            SizedBox(
-                              width: statWidth,
-                              child: _ResultStat(
-                                label: l10n.wrongAnswers,
-                                value: result.wrongCount.toString(),
-                                color: theme.colorScheme.error,
-                              ),
-                            ),
-                            SizedBox(
-                              width: statWidth,
-                              child: _ResultStat(
-                                label: l10n.unansweredAnswers,
-                                value: result.unansweredCount.toString(),
-                                color: theme.colorScheme.tertiary,
-                              ),
-                            ),
-                            SizedBox(
-                              width: statWidth,
-                              child: _ResultStat(
-                                label: l10n.totalQuestions,
-                                value: result.totalCount.toString(),
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    message,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                  ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    const spacing = 8.0;
+                    final columns =
+                        constraints.maxWidth >= 320 &&
+                            MediaQuery.textScalerOf(context).scale(14) < 18
+                        ? 4
+                        : 2;
+                    final statWidth =
+                        (constraints.maxWidth - spacing * (columns - 1)) /
+                        columns;
+                    return Wrap(
+                      spacing: spacing,
+                      runSpacing: 12,
+                      children: [
+                        SizedBox(
+                          width: statWidth,
+                          child: _ResultStat(
+                            label: l10n.correctAnswers,
+                            value: result.correctCount.toString(),
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ),
+                        SizedBox(
+                          width: statWidth,
+                          child: _ResultStat(
+                            label: l10n.wrongAnswers,
+                            value: result.wrongCount.toString(),
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                        SizedBox(
+                          width: statWidth,
+                          child: _ResultStat(
+                            label: l10n.unansweredAnswers,
+                            value: result.unansweredCount.toString(),
+                            color: theme.colorScheme.tertiary,
+                          ),
+                        ),
+                        SizedBox(
+                          width: statWidth,
+                          child: _ResultStat(
+                            label: l10n.totalQuestions,
+                            value: result.totalCount.toString(),
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
             TweenAnimationBuilder<double>(
               tween: Tween(end: 1),
               duration: AppMotion.duration(
@@ -307,15 +309,33 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(l10n.answerReview, style: theme.textTheme.titleLarge),
+                  if (result.answerReviews.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        ChoiceChip(
+                          label: Text(l10n.reviewAllAnswers),
+                          selected: !_reviewMistakesOnly,
+                          onSelected: (_) =>
+                              setState(() => _reviewMistakesOnly = false),
+                        ),
+                        ChoiceChip(
+                          label: Text(l10n.reviewNeedsWork),
+                          selected: _reviewMistakesOnly,
+                          onSelected: (_) =>
+                              setState(() => _reviewMistakesOnly = true),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 12),
-                  for (
-                    var index = 0;
-                    index < result.answerReviews.length;
-                    index++
-                  ) ...[
+                  if (_reviewMistakesOnly && indexedReviews.isEmpty)
+                    Text(l10n.reviewNoMistakes),
+                  for (final (index, review) in indexedReviews) ...[
                     _AnswerReviewCard(
-                      key: ValueKey(result.answerReviews[index].questionId),
-                      answerReview: result.answerReviews[index],
+                      key: ValueKey(review.questionId),
+                      answerReview: review,
                       questionNumber: index + 1,
                     ),
                     const SizedBox(height: 12),

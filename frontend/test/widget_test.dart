@@ -110,7 +110,7 @@ void main() {
     );
     final shortcut = find.text('Vừa học vừa chơi');
     await tester.scrollUntilVisible(
-      shortcut,
+      shortcut.hitTestable(),
       150,
       scrollable: _homeScrollable(),
     );
@@ -126,6 +126,30 @@ void main() {
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
       0,
     );
+  });
+
+  testWidgets('home question bank searches across subjects', (tester) async {
+    await tester.pumpWidget(
+      const StudyHubApp(initialLocaleSelection: AppLocaleSelection.english),
+    );
+    final search = find.widgetWithText(
+      OutlinedButton,
+      'Search question-set titles',
+    );
+    await tester.scrollUntilVisible(
+      search.hitTestable(),
+      140,
+      scrollable: _homeScrollable(),
+    );
+    await tester.tap(search);
+    await tester.pumpAndSettle();
+    expect(find.text('Question bank'), findsOneWidget);
+    final field = find.byKey(const ValueKey('question-set-search-field'));
+    await tester.enterText(field, 'Thống kê');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+    expect(find.text('Toán: Thống kê và xác suất'), findsOneWidget);
+    expect(find.text('JavaScript Basics Check'), findsNothing);
   });
 
   for (final (name, size, insets) in [

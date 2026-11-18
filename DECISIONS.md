@@ -2,6 +2,13 @@
 
 Use this file to record decisions that affect project direction, architecture, tools, or workflow.
 
+## 2026-11-18 - Illustrated learner experience and starter catalog
+
+- The four learner destinations use a bottom bar on phones and a rail on wide screens. Shared Material tokens keep light and dark modes aligned.
+- The starter school catalog lives in `school_review_data.dart`. Run `dart tools/catalog/sync_school_review.dart` from the repository root when editing it. The generated server module feeds both Fastify memory and the Prisma seed. Correctness remains available to learners only through check-answer and submit flows.
+- Use `npm run prisma:seed:school-review` in `backend` against the intended migrated database to upsert just the starter school catalog.
+- The seven-day activity chart summarizes completed sessions stored on the current device.
+
 ## 2026-07-21 - MVP Integration Retry And Runtime Configuration
 Decision:
 - Atomic Question Set contribution uses a client-generated submission ID. The

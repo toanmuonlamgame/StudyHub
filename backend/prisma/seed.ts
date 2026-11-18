@@ -2,17 +2,28 @@ import { PrismaClient } from '@prisma/client';
 
 import {
   getCorrectAnswerOptionId,
+  getQuestionExplanation,
   questions,
   questionSets,
   subjects,
   topics,
 } from '../src/data/mockLearningData.js';
 import { studyMaterials } from '../src/data/mockStudyMaterials.js';
+import { schoolReviewCatalog } from '../src/data/schoolReview.generated.js';
 
 const prisma = new PrismaClient();
+const schoolReviewOnly = process.argv.includes('--school-review-only');
+const catalog = schoolReviewOnly
+  ? {
+      subjects: [schoolReviewCatalog.subject],
+      topics: schoolReviewCatalog.topics,
+      questionSets: schoolReviewCatalog.sets,
+      questions: schoolReviewCatalog.questions,
+    }
+  : { subjects, topics, questionSets, questions };
 
 async function seedSubjects() {
-  for (const subject of subjects) {
+  for (const subject of catalog.subjects) {
     const data = {
       name: subject.name,
       school: subject.school ?? null,
@@ -30,7 +41,7 @@ async function seedSubjects() {
 }
 
 async function seedTopics() {
-  for (const topic of topics) {
+  for (const topic of catalog.topics) {
     const data = {
       subjectId: topic.subjectId,
       name: topic.name,
@@ -45,7 +56,7 @@ async function seedTopics() {
 }
 
 async function seedQuestionSets() {
-  for (const questionSet of questionSets) {
+  for (const questionSet of catalog.questionSets) {
     const data = {
       subjectId: questionSet.subjectId,
       topicId: questionSet.topicId ?? null,
@@ -90,8 +101,8 @@ async function seedStudyMaterials() {
 }
 
 async function seedQuestionsAndAnswerOptions() {
-  for (const questionSet of questionSets) {
-    const questionSetQuestions = questions.filter(
+  for (const questionSet of catalog.questionSets) {
+    const questionSetQuestions = catalog.questions.filter(
       (question) => question.questionSetId === questionSet.id,
     );
 
@@ -100,6 +111,7 @@ async function seedQuestionsAndAnswerOptions() {
         questionSetId: question.questionSetId,
         text: question.text,
         position: questionIndex + 1,
+        explanation: getQuestionExplanation(question.id),
       };
 
       await prisma.question.upsert({
@@ -144,7 +156,7 @@ async function main() {
   await seedSubjects();
   await seedTopics();
   await seedQuestionSets();
-  await seedStudyMaterials();
+  if (!schoolReviewOnly) await seedStudyMaterials();
   await seedQuestionsAndAnswerOptions();
 }
 

@@ -9,14 +9,14 @@ class AppColors {
   static const purple = Color(0xFF7C3AED);
   static const teal = Color(0xFF0F766E);
   static const tealContainer = Color(0xFFD2FAE9);
-  static const warm = Color(0xFFEA7C19);
+  static const warm = Color(0xFFA84A09);
   static const warmContainer = Color(0xFFFFEBC1);
   static const success = Color(0xFF15803D);
   static const warning = Color(0xFFB45309);
   static const error = Color(0xFFB42318);
-  static const ink = Color(0xFF171A21);
-  static const mutedInk = Color(0xFF5B6170);
-  static const canvas = Color(0xFFFBF9FF);
+  static const ink = Color(0xFF241D39);
+  static const mutedInk = Color(0xFF5F566F);
+  static const canvas = Color(0xFFF9F7FD);
   static const surface = Color(0xFFFFFFFF);
   static const surfaceTinted = Color(0xFFF0F1FA);
   static const info = Color(0xFF2563EB);
@@ -41,9 +41,9 @@ class AppSpacing {
 class AppRadii {
   const AppRadii._();
 
-  static const control = 12.0;
-  static const card = 16.0;
-  static const feature = 20.0;
+  static const control = 16.0;
+  static const card = 20.0;
+  static const feature = 24.0;
 }
 
 class AppIconSizes {

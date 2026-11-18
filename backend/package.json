@@ -18,7 +18,8 @@
     "prisma:studio": "prisma studio",
     "prisma:validate": "prisma validate",
     "prisma:format": "prisma format",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:seed:school-review": "tsx prisma/seed.ts --school-review-only"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",

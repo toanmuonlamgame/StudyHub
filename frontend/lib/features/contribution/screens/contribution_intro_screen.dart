@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/study_illustration.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../../learning/repositories/learning_repository.dart';
 import '../models/question_set_draft.dart';
@@ -30,17 +31,14 @@ class ContributionIntroScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                Icon(
-                  Icons.post_add_rounded,
-                  size: 56,
-                  color: Theme.of(context).colorScheme.primary,
+                IllustratedStudyPanel(
+                  artwork: StudyArtwork.books,
+                  child: Text(
+                    l10n.contributionIntroHeading,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  l10n.contributionIntroHeading,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 18),
                 FilledButton.icon(
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
@@ -73,7 +71,10 @@ class ContributionIntroScreen extends StatelessWidget {
                   label: Text(l10n.myContributions),
                 ),
                 const SizedBox(height: 24),
-                Text(l10n.contributionIntroBody),
+                Text(
+                  l10n.contributionIntroBody,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 12),
                 _Guideline(
                   icon: Icons.fact_check_outlined,

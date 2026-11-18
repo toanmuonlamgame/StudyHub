@@ -9,9 +9,14 @@ import '../widgets/learning_state_view.dart';
 import 'question_set_list_screen.dart';
 
 class SubjectListScreen extends StatefulWidget {
-  const SubjectListScreen({super.key, required this.learningRepository});
+  const SubjectListScreen({
+    super.key,
+    required this.learningRepository,
+    this.onBrowseAll,
+  });
 
   final LearningRepository learningRepository;
+  final VoidCallback? onBrowseAll;
 
   @override
   State<SubjectListScreen> createState() => _SubjectListScreenState();
@@ -87,6 +92,14 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const _SubjectListHeader(),
+                      if (widget.onBrowseAll != null) ...[
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: widget.onBrowseAll,
+                          icon: const Icon(Icons.search_rounded),
+                          label: Text(l10n.browseAllExams),
+                        ),
+                      ],
                       if (schools.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(

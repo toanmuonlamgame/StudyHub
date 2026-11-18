@@ -138,29 +138,46 @@ class StudyHubPageHeader extends StatelessWidget {
 
     return Semantics(
       header: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          StudyHubIconSurface(icon: icon, size: 48),
-          const SizedBox(height: AppSpacing.lg),
-          if (eyebrow != null) ...[
-            Text(
-              eyebrow!,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-          ],
-          Text(title, style: theme.textTheme.headlineSmall),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            body,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              theme.colorScheme.primaryContainer,
+              theme.colorScheme.surface,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-        ],
+          borderRadius: BorderRadius.circular(AppRadii.feature),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              StudyHubIconSurface(icon: icon, size: 48),
+              const SizedBox(height: AppSpacing.lg),
+              if (eyebrow != null) ...[
+                Text(
+                  eyebrow!,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+              ],
+              Text(title, style: theme.textTheme.headlineSmall),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                body,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -191,7 +208,7 @@ class StudyHubStateView extends StatelessWidget {
         theme.colorScheme.primaryContainer,
       ),
       StudyHubStateTone.success => (
-        AppColors.success,
+        theme.colorScheme.onSecondaryContainer,
         theme.colorScheme.secondaryContainer,
       ),
       StudyHubStateTone.error => (

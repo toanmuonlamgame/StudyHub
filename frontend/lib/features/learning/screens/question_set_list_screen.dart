@@ -16,11 +16,13 @@ import 'question_set_detail_screen.dart';
 class QuestionSetListScreen extends StatefulWidget {
   const QuestionSetListScreen({
     super.key,
-    required this.subject,
+    this.subject,
+    this.initialQuery = '',
     required this.learningRepository,
   });
 
-  final Subject subject;
+  final Subject? subject;
+  final String initialQuery;
   final LearningRepository learningRepository;
 
   @override
@@ -34,6 +36,8 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
   final TextEditingController _searchController = TextEditingController();
   final List<QuestionSet> _questionSets = [];
   List<Topic> _topics = const [];
+  List<Subject> _subjects = const [];
+  String? _selectedSubjectId;
   Timer? _searchTimer;
   String _query = '';
   String? _selectedTopicId;
@@ -49,7 +53,14 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
   @override
   void initState() {
     super.initState();
-    unawaited(_loadTopics());
+    _selectedSubjectId = widget.subject?.id;
+    _query = widget.initialQuery.trim();
+    _searchController.text = _query;
+    if (widget.subject == null) {
+      unawaited(_loadSubjects());
+    } else {
+      unawaited(_loadTopics(widget.subject!.id));
+    }
     unawaited(_loadFirstPage());
   }
 
@@ -72,7 +83,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
         child: Column(
           children: [
             _QuestionSetListHeader(
-              subjectName: widget.subject.name,
+              subjectName: widget.subject?.name ?? l10n.questionBank,
               compact: keyboardOpen,
             ),
             Padding(
@@ -93,10 +104,33 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
                           onPressed: _clearSearch,
                           icon: const Icon(Icons.close),
                         ),
-                  border: const OutlineInputBorder(),
                 ),
               ),
             ),
+            if (!keyboardOpen && widget.subject == null && _subjects.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 2, 20, 8),
+                child: DropdownButtonFormField<String>(
+                  isExpanded: true,
+                  initialValue: _selectedSubjectId ?? '',
+                  decoration: InputDecoration(
+                    labelText: l10n.browseSubjectsTitle,
+                  ),
+                  items: [
+                    DropdownMenuItem(value: '', child: Text(l10n.allSubjects)),
+                    for (final subject in _subjects)
+                      DropdownMenuItem(
+                        value: subject.id,
+                        child: Text(
+                          subject.name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: (value) =>
+                      _selectSubject(value == '' ? null : value),
+                ),
+              ),
             if (_topics.isNotEmpty)
               Semantics(
                 label: l10n.topicsLabel,
@@ -179,7 +213,9 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
         title: searching ? l10n.noSearchResultsTitle : l10n.noQuestionSetsTitle,
         message: searching
             ? l10n.noSearchResultsMessage
-            : l10n.noQuestionSetsMessage(widget.subject.name),
+            : l10n.noQuestionSetsMessage(
+                widget.subject?.name ?? l10n.questionBank,
+              ),
         actionLabel: searching
             ? l10n.clearSearch
             : _language != null
@@ -196,25 +232,29 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
       );
     }
 
-    return ListView.separated(
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-      itemCount: _questionSets.length + 1,
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        if (index == _questionSets.length) {
-          return _buildLoadMore(context);
-        }
+    return RefreshIndicator(
+      onRefresh: _loadFirstPage,
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+        itemCount: _questionSets.length + 1,
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          if (index == _questionSets.length) {
+            return _buildLoadMore(context);
+          }
 
-        final questionSet = _questionSets[index];
-        final topic = _findTopic(questionSet.topicId);
-        return _QuestionSetCard(
-          key: ValueKey(questionSet.id),
-          questionSet: questionSet,
-          topic: topic,
-          onTap: () => _openQuestionSet(context, questionSet, topic),
-        );
-      },
+          final questionSet = _questionSets[index];
+          final topic = _findTopic(questionSet.topicId);
+          return _QuestionSetCard(
+            key: ValueKey(questionSet.id),
+            questionSet: questionSet,
+            topic: topic,
+            onTap: () => _openQuestionSet(context, questionSet, topic),
+          );
+        },
+      ),
     );
   }
 
@@ -270,12 +310,30 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
     );
   }
 
-  Future<void> _loadTopics() async {
+  Future<void> _loadSubjects() async {
+    try {
+      final subjects = await widget.learningRepository.getSubjects();
+      if (mounted) setState(() => _subjects = subjects);
+    } catch (_) {
+      // The global search can still show results when subject metadata fails.
+    }
+  }
+
+  void _selectSubject(String? subjectId) {
+    if (subjectId == _selectedSubjectId) return;
+    _selectedSubjectId = subjectId;
+    _selectedTopicId = null;
+    _topics = const [];
+    if (subjectId != null) unawaited(_loadTopics(subjectId));
+    unawaited(_loadFirstPage());
+  }
+
+  Future<void> _loadTopics(String subjectId) async {
     try {
       final topics = await widget.learningRepository.getTopicsBySubjectId(
-        widget.subject.id,
+        subjectId,
       );
-      if (mounted) {
+      if (mounted && subjectId == _selectedSubjectId) {
         setState(() => _topics = topics);
       }
     } catch (_) {
@@ -297,7 +355,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
 
     try {
       final page = await widget.learningRepository.listQuestionSets(
-        subjectId: widget.subject.id,
+        subjectId: _selectedSubjectId,
         topicId: _selectedTopicId,
         language: _language,
         q: _query.isEmpty ? null : _query,
@@ -334,7 +392,7 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
 
     try {
       final page = await widget.learningRepository.listQuestionSets(
-        subjectId: widget.subject.id,
+        subjectId: _selectedSubjectId,
         topicId: _selectedTopicId,
         language: _language,
         q: _query.isEmpty ? null : _query,
@@ -422,10 +480,16 @@ class _QuestionSetListScreenState extends State<QuestionSetListScreen> {
     QuestionSet questionSet,
     Topic? topic,
   ) {
+    final subject =
+        widget.subject ??
+        _subjects
+            .where((subject) => subject.id == questionSet.subjectId)
+            .firstOrNull ??
+        Subject(id: questionSet.subjectId, name: context.l10n.questionBank);
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => QuestionSetDetailScreen(
-          subject: widget.subject,
+          subject: subject,
           questionSet: questionSet,
           topic: topic,
           learningRepository: widget.learningRepository,
@@ -496,11 +560,12 @@ class _QuestionSetCard extends StatelessWidget {
         questionSet.estimatedMinutes ??
         (questionSet.questionCount * 1.5).ceil();
     final difficulty = questionSet.difficulty ?? 'easy';
-    final artwork = switch (questionSet.topicId) {
-      'review_math' => StudyArtwork.trophy,
-      'review_english' => StudyArtwork.books,
-      'review_science' => StudyArtwork.compass,
-      _ => null,
+    final artwork = artworkForTopic(questionSet.topicId);
+    final coverColor = switch (artwork) {
+      StudyArtwork.science ||
+      StudyArtwork.compass => theme.colorScheme.secondaryContainer,
+      StudyArtwork.english => theme.colorScheme.tertiaryContainer,
+      _ => theme.colorScheme.primaryContainer,
     };
 
     return Semantics(
@@ -535,11 +600,16 @@ class _QuestionSetCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (artwork != null &&
-                        MediaQuery.textScalerOf(context).scale(14) <= 21) ...[
+                    if (MediaQuery.textScalerOf(context).scale(14) <= 21) ...[
                       const SizedBox(width: 12),
-                      SizedBox.square(
-                        dimension: 68,
+                      Container(
+                        width: 82,
+                        height: 82,
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: coverColor,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
                         child: StudyIllustration(artwork),
                       ),
                     ],

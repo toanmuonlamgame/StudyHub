@@ -242,7 +242,7 @@ test('GET /learning/subjects returns subjects', async (t) => {
   const body = response.json();
 
   assert.equal(response.statusCode, 200);
-  assert.equal(body.subjects.length, 3);
+  assert.equal(body.subjects.length, 4);
   assert.equal(body.subjects[0].id, 'subject_javascript');
 });
 
@@ -272,7 +272,7 @@ test('GET paginated question sets returns the default page shape', async (t) => 
   const body = response.json();
 
   assert.equal(response.statusCode, 200);
-  assert.equal(body.items.length, 4);
+  assert.equal(body.items.length, 14);
   assert.equal(body.hasMore, false);
   assert.equal(body.nextCursor, null);
   assert.equal(typeof body.items[0].createdAt, 'string');
@@ -290,12 +290,12 @@ test('GET paginated question sets respects limit and cursor', async (t) => {
   const app = createTestApp(t);
   const firstResponse = await app.inject({
     method: 'GET',
-    url: '/learning/question-sets?limit=2',
+    url: '/learning/question-sets?limit=7',
   });
   const firstPage = firstResponse.json();
 
   assert.equal(firstResponse.statusCode, 200);
-  assert.equal(firstPage.items.length, 2);
+  assert.equal(firstPage.items.length, 7);
   assert.equal(firstPage.hasMore, true);
   assert.equal(typeof firstPage.nextCursor, 'string');
   assert.deepEqual(
@@ -307,12 +307,12 @@ test('GET paginated question sets respects limit and cursor', async (t) => {
 
   const secondResponse = await app.inject({
     method: 'GET',
-    url: `/learning/question-sets?limit=2&cursor=${encodeURIComponent(firstPage.nextCursor)}`,
+    url: `/learning/question-sets?limit=7&cursor=${encodeURIComponent(firstPage.nextCursor)}`,
   });
   const secondPage = secondResponse.json();
 
   assert.equal(secondResponse.statusCode, 200);
-  assert.equal(secondPage.items.length, 2);
+  assert.equal(secondPage.items.length, 7);
   assert.equal(secondPage.hasMore, false);
   assert.equal(secondPage.nextCursor, null);
   assert.deepEqual(
@@ -320,7 +320,7 @@ test('GET paginated question sets respects limit and cursor', async (t) => {
       ...firstPage.items.map(({ id }) => id),
       ...secondPage.items.map(({ id }) => id),
     ]).size,
-    4,
+    14,
   );
 });
 
@@ -578,6 +578,26 @@ test('POST submit scores unanswered questions without rejecting them', async (t)
   assert.equal(result.answerReviews[0].selectedAnswerOptionId, null);
   assert.equal(result.answerReviews[0].selectedAnswerText, null);
   assert.equal(result.answerReviews[0].isCorrect, false);
+});
+
+test('school review sets expose safe questions and score original content', async (t) => {
+  const app = createTestApp(t);
+  const listing = await app.inject('/learning/question-sets?subjectId=subject_school_review&language=vi');
+  assert.equal(listing.statusCode, 200);
+  assert.equal(listing.json().items.length, 10);
+  const questionsResponse = await app.inject('/learning/question-sets/school_review_equations/questions');
+  assert.equal(questionsResponse.statusCode, 200);
+  assert.equal(questionsResponse.json().questions.length, 5);
+  assert.doesNotMatch(questionsResponse.body, /"isCorrect"|"correctAnswerOptionId"|"explanation"/);
+
+  const feedback = await app.inject({
+    method: 'POST',
+    url: '/learning/questions/school_review_equations_1/check-answer',
+    payload: { selectedAnswerOptionId: 'school_review_equations_1_1' },
+  });
+  assert.equal(feedback.statusCode, 200);
+  assert.equal(feedback.json().result.isCorrect, true);
+  assert.match(feedback.json().result.explanation, /x = 5/);
 });
 
 test('POST check-answer returns correct feedback', async (t) => {

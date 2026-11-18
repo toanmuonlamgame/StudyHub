@@ -4,6 +4,7 @@ import type {
   Subject,
   Topic,
 } from '../types/learning.js';
+import { schoolReviewCatalog } from './schoolReview.generated.js';
 
 export const subjects: Subject[] = [
   {
@@ -21,6 +22,7 @@ export const subjects: Subject[] = [
     name: 'Database Fundamentals',
     description: 'Relational databases and basic SQL.',
   },
+  schoolReviewCatalog.subject,
 ];
 
 export const topics: Topic[] = [
@@ -54,6 +56,7 @@ export const topics: Topic[] = [
     subjectId: 'subject_database',
     name: 'Relational Design',
   },
+  ...schoolReviewCatalog.topics,
 ];
 
 export const questionSets: QuestionSet[] = [
@@ -93,6 +96,7 @@ export const questionSets: QuestionSet[] = [
     description: 'Review SQL and relational database concepts.',
     questionCount: 3,
   },
+  ...schoolReviewCatalog.sets,
 ];
 
 export const questions: Question[] = [
@@ -228,6 +232,7 @@ export const questions: Question[] = [
       { id: 'db_3_d', text: 'Column alias' },
     ],
   },
+  ...schoolReviewCatalog.questions,
 ];
 
 const correctAnswerOptionIdsByQuestionId: Record<string, string> = {
@@ -253,9 +258,11 @@ const explanationsByQuestionId: Record<string, string> = {
 };
 
 export function getCorrectAnswerOptionId(questionId: string): string | undefined {
-  return correctAnswerOptionIdsByQuestionId[questionId];
+  return schoolReviewCatalog.answers[questionId]?.optionId ??
+    correctAnswerOptionIdsByQuestionId[questionId];
 }
 
 export function getQuestionExplanation(questionId: string): string | undefined {
-  return explanationsByQuestionId[questionId];
+  return schoolReviewCatalog.answers[questionId]?.explanation ??
+    explanationsByQuestionId[questionId];
 }

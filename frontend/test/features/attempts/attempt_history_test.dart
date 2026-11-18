@@ -220,6 +220,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('attempt-attempt_1')));
     await tester.pumpAndSettle();
     expect(find.text('Exam Result'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Question?'), 160);
     expect(find.text('Question?'), findsOneWidget);
     expect(find.text('Correct answer: Answer'), findsOneWidget);
     expect(progressStore.saveCalls, 0);

@@ -112,6 +112,11 @@ void main() {
     expect(find.byKey(const ValueKey('progress-history')), findsOneWidget);
     expect(find.text('Completed sessions'), findsOneWidget);
     expect(find.text('75%'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Database Review'),
+      180,
+      scrollable: _progressScrollable(),
+    );
     expect(find.text('Database Review'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('JavaScript Basics Check'),
@@ -142,6 +147,11 @@ void main() {
     );
     await _openProgress(tester, 'Progress');
 
+    await tester.scrollUntilVisible(
+      find.byTooltip('Clear history'),
+      160,
+      scrollable: _progressScrollable(),
+    );
     await tester.tap(find.byTooltip('Clear history'));
     await tester.pumpAndSettle();
     expect(find.text('Clear local history?'), findsOneWidget);
@@ -173,6 +183,11 @@ void main() {
     await _openProgress(tester, 'Tiến độ');
 
     expect(find.text('Phiên đã hoàn thành'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Luyện tập'),
+      180,
+      scrollable: _progressScrollable(),
+    );
     expect(find.text('Kết quả gần đây'), findsOneWidget);
     expect(find.text('Luyện tập'), findsOneWidget);
   });

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/study_illustration.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../../learning/repositories/learning_repository.dart';
 import '../../learning/widgets/learning_state_view.dart';
@@ -84,7 +85,13 @@ class _MaterialDetailContent extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
             children: [
-              Text(material.title, style: theme.textTheme.headlineSmall),
+              IllustratedStudyPanel(
+                artwork: StudyArtwork.books,
+                child: Text(
+                  material.title,
+                  style: theme.textTheme.headlineSmall,
+                ),
+              ),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,

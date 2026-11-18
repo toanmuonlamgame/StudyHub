@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/widgets/studyhub_ui.dart';
+import '../../core/widgets/study_illustration.dart';
 import '../../l10n/app_localizations_x.dart';
 import 'models/completed_learning_session.dart';
 import 'progress_store_scope.dart';
 import 'repositories/progress_store.dart';
 import 'widgets/progress_widgets.dart';
+import 'widgets/study_week_chart.dart';
 import '../attempts/attempt_repository_scope.dart';
 import '../attempts/screens/exam_attempt_history_screen.dart';
 
@@ -172,10 +174,9 @@ class _ProgressEmptyState extends StatelessWidget {
           subtitle: l10n.progressLocalOnlyNote,
         ),
         const SizedBox(height: 36),
-        Icon(
-          Icons.insights_outlined,
-          size: 68,
-          color: theme.colorScheme.primary,
+        const SizedBox(
+          height: 108,
+          child: StudyIllustration(StudyArtwork.trophy),
         ),
         const SizedBox(height: 18),
         Text(
@@ -261,6 +262,8 @@ class _ProgressHistory extends StatelessWidget {
           subtitle: l10n.progressLocalOnlyNote,
         ),
         const SizedBox(height: 16),
+        StudyWeekChart(sessions: sessions),
+        const SizedBox(height: 14),
         LayoutBuilder(
           builder: (context, constraints) {
             final textScale = MediaQuery.textScalerOf(context).scale(1);

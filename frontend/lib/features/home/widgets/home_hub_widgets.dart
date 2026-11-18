@@ -127,14 +127,26 @@ class PrimaryLearningCard extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     return IllustratedStudyPanel(
-      artwork: StudyArtwork.books,
+      artwork: StudyArtwork.launch,
       featured: true,
+      footer: FilledButton.icon(
+        key: const ValueKey('home-primary-start-learning'),
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: const Color(0xFFDCFAAA),
+          foregroundColor: const Color(0xFF262143),
+        ),
+        icon: const Icon(Icons.arrow_forward_rounded, size: 20),
+        label: Text(l10n.startLearning),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l10n.continueLearningSection,
-            style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
@@ -142,18 +154,6 @@ class PrimaryLearningCard extends StatelessWidget {
             style: theme.textTheme.bodyMedium?.copyWith(
               color: const Color(0xFFEDE5FF),
             ),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            key: const ValueKey('home-primary-start-learning'),
-            onPressed: onPressed,
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFFFEBC1),
-              foregroundColor: const Color(0xFF312178),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            ),
-            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-            label: Text(l10n.startLearning),
           ),
         ],
       ),

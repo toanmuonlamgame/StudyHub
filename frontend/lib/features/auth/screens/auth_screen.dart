@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_design_tokens.dart';
 import '../../../core/app_motion.dart';
-import '../../../core/widgets/studyhub_ui.dart';
+import '../../../core/widgets/study_illustration.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../auth_controller.dart';
 
@@ -48,25 +48,17 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.xl),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(AppRadii.feature),
-                        ),
+                      IllustratedStudyPanel(
+                        artwork: StudyArtwork.books,
+                        featured: true,
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            StudyHubIconSurface(
-                              icon: Icons.auto_stories_rounded,
-                              foregroundColor: theme.colorScheme.onPrimary,
-                              backgroundColor: theme.colorScheme.primary,
-                              size: 58,
-                            ),
-                            const SizedBox(height: AppSpacing.md),
                             Text(
                               l10n.appTitle,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.headlineMedium,
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                color: Colors.white,
+                              ),
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             AnimatedSwitcher(
@@ -77,16 +69,16 @@ class _AuthScreenState extends State<AuthScreen> {
                               child: Text(
                                 l10n.authWelcome,
                                 key: ValueKey(_registering),
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.titleMedium,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                             const SizedBox(height: AppSpacing.xs),
                             Text(
                               l10n.authWelcomeBody,
-                              textAlign: TextAlign.center,
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer,
+                                color: const Color(0xFFECE5FF),
                               ),
                             ),
                           ],

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_motion.dart';
+import '../../../core/app_design_tokens.dart';
 import '../../../core/device_feedback.dart';
 import '../../media/widgets/study_media_image.dart';
 import '../../../l10n/app_localizations_x.dart';
@@ -37,6 +38,7 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   final Map<String, String> _examSelectedAnswerIds = {};
+  final _scrollController = ScrollController();
   late Future<List<Question>> _questionsFuture;
   bool _isSubmittingExamModeQuiz = false;
   bool _isConfirmingExamSubmission = false;
@@ -68,6 +70,12 @@ class _QuizScreenState extends State<QuizScreen> {
     _examSubmissionId =
         '${widget.questionSet.id}-${_examStartedAt.microsecondsSinceEpoch}';
     _questionsFuture = _loadQuestions();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -128,10 +136,12 @@ class _QuizScreenState extends State<QuizScreen> {
     final isLastQuestion = _examQuestionIndex == questions.length - 1;
 
     return ListView(
+      controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
       children: [
         _QuizProgressPanel(
           icon: Icons.assignment_outlined,
+          onOpenMap: _isExamBusy ? null : () => _openQuestionMap(questions),
           title: l10n.questionProgress(
             _examQuestionIndex + 1,
             questions.length,
@@ -203,12 +213,100 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
+  Future<void> _openQuestionMap(List<Question> questions) async {
+    final l10n = context.l10n;
+    final chosen = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) => FractionallySizedBox(
+        heightFactor:
+            questions.length <= 10 &&
+                MediaQuery.sizeOf(sheetContext).height >= 620 &&
+                MediaQuery.textScalerOf(sheetContext).scale(14) <= 21
+            ? .46
+            : .72,
+        child: SafeArea(
+          top: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.examQuestionMap,
+                      style: Theme.of(sheetContext).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(l10n.examJumpHint),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: GridView.builder(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 84,
+                    mainAxisExtent: 60,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: questions.length,
+                  itemBuilder: (context, index) {
+                    final answered = _examSelectedAnswerIds.containsKey(
+                      questions[index].id,
+                    );
+                    final current = index == _examQuestionIndex;
+                    final number = '${index + 1}';
+                    return Semantics(
+                      selected: current,
+                      child: Tooltip(
+                        message:
+                            '${l10n.questionProgress(index + 1, questions.length)} · '
+                            '${answered ? l10n.examAnswered : l10n.unansweredAnswers}',
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            backgroundColor: current
+                                ? Theme.of(context).colorScheme.primaryContainer
+                                : null,
+                          ),
+                          onPressed: () => Navigator.pop(sheetContext, index),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(number),
+                              if (answered)
+                                const Icon(Icons.check_rounded, size: 15),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (chosen != null && mounted && !_isExamBusy) {
+      setState(() => _examQuestionIndex = chosen);
+      _scrollToQuestion();
+    }
+  }
+
   Widget _buildPracticeContent(BuildContext context, List<Question> questions) {
     final l10n = context.l10n;
     final question = questions[_practiceQuestionIndex];
     final isLastQuestion = _practiceQuestionIndex == questions.length - 1;
 
     return ListView(
+      controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
       children: [
         _QuizProgressPanel(
@@ -398,10 +496,16 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void _nextExamQuestion() {
     setState(() => _examQuestionIndex++);
+    _scrollToQuestion();
   }
 
   void _previousExamQuestion() {
     setState(() => _examQuestionIndex--);
+    _scrollToQuestion();
+  }
+
+  void _scrollToQuestion() {
+    if (_scrollController.hasClients) _scrollController.jumpTo(0);
   }
 
   Future<void> _checkPracticeAnswer(
@@ -474,6 +578,7 @@ class _QuizScreenState extends State<QuizScreen> {
       _practiceAnswerCheckResult = null;
       _practiceAnswerCheckFailed = false;
     });
+    _scrollToQuestion();
   }
 
   void _showPracticeResult(int totalQuestions) {
@@ -619,12 +724,14 @@ class _QuizProgressPanel extends StatelessWidget {
     required this.title,
     required this.detail,
     required this.value,
+    this.onOpenMap,
   });
 
   final IconData icon;
   final String title;
   final String detail;
   final double value;
+  final VoidCallback? onOpenMap;
 
   @override
   Widget build(BuildContext context) {
@@ -633,7 +740,7 @@ class _QuizProgressPanel extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.primaryContainer,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadii.card),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -652,6 +759,13 @@ class _QuizProgressPanel extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (onOpenMap != null)
+                  IconButton(
+                    onPressed: onOpenMap,
+                    tooltip: context.l10n.examQuestionMap,
+                    icon: const Icon(Icons.grid_view_rounded),
+                    color: colors.onPrimaryContainer,
+                  ),
               ],
             ),
             const SizedBox(height: 4),

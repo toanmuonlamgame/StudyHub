@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/study_illustration.dart';
+import '../../../core/widgets/studyhub_ui.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../../learning/models/subject.dart';
 import '../../learning/repositories/learning_repository.dart';
@@ -62,18 +64,25 @@ class _StudyMaterialListScreenState extends State<StudyMaterialListScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  l10n.studyMaterialsSubtitle,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+            if (MediaQuery.viewInsetsOf(context).bottom == 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.studyMaterialsSubtitle,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const SizedBox.square(
+                      dimension: 62,
+                      child: StudyIllustration(StudyArtwork.books),
+                    ),
+                  ],
                 ),
               ),
-            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
               child: TextField(
@@ -92,7 +101,6 @@ class _StudyMaterialListScreenState extends State<StudyMaterialListScreen> {
                           onPressed: _clearSearch,
                           icon: const Icon(Icons.close),
                         ),
-                  border: const OutlineInputBorder(),
                 ),
               ),
             ),
@@ -418,7 +426,10 @@ class _StudyMaterialCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(_materialIcon(material.materialType)),
+                    StudyHubIconSurface(
+                      icon: _materialIcon(material.materialType),
+                      size: 38,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(

@@ -44,6 +44,7 @@ class _MyExamsScreenState extends State<MyExamsScreen> {
   @override
   Widget build(BuildContext context) {
     final user = AuthScope.maybeOf(context)?.user ?? _demoUser;
+    final colors = Theme.of(context).colorScheme;
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -100,33 +101,45 @@ class _MyExamsScreenState extends State<MyExamsScreen> {
                   AppSpacing.xl,
                   AppSpacing.md,
                 ),
-                child: Row(
-                  children: [
-                    UserAvatar(user: user, radius: 30),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            user.displayName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          Text(
-                            context.l10n.personalLearningLibrary,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                          ),
-                        ],
-                      ),
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        colors.primaryContainer,
+                        colors.secondaryContainer,
+                      ],
                     ),
-                  ],
+                    borderRadius: BorderRadius.circular(AppRadii.card),
+                  ),
+                  child: Row(
+                    children: [
+                      UserAvatar(user: user, radius: 30),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user.displayName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            Text(
+                              context.l10n.personalLearningLibrary,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               FutureBuilder<({int uploaded, int completed, int saved})>(

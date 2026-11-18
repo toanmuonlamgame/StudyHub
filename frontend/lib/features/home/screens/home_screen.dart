@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_design_tokens.dart';
 import '../../../core/widgets/studyhub_ui.dart';
+import '../../../core/widgets/study_illustration.dart';
 import '../../auth/auth_scope.dart';
 import '../../../l10n/app_localizations_x.dart';
 import '../widgets/home_hub_widgets.dart';
@@ -17,6 +18,8 @@ class HomeScreen extends StatelessWidget {
     required this.onOpenStudyMaterials,
     required this.onOpenContribution,
     required this.onOpenSaved,
+    required this.onBrowseAll,
+    required this.onSchoolReview,
   });
 
   final VoidCallback onStartLearning;
@@ -24,6 +27,8 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback onOpenStudyMaterials;
   final VoidCallback onOpenContribution;
   final VoidCallback onOpenSaved;
+  final VoidCallback onBrowseAll;
+  final VoidCallback onSchoolReview;
 
   @override
   Widget build(BuildContext context) {
@@ -76,30 +81,55 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 PrimaryLearningCard(onPressed: onStartLearning),
                 const SizedBox(height: 12),
-                Card(
-                  color: theme.colorScheme.secondaryContainer,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadii.card),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: ListTile(
-                    leading: StudyHubIconSurface(
-                      icon: Icons.sports_esports_rounded,
-                      backgroundColor: theme.colorScheme.surface,
-                      foregroundColor: theme.colorScheme.secondary,
-                    ),
-                    title: Text(
-                      l10n.playAndLearn,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    subtitle: Text(l10n.englishGames),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const WordGamesScreen(),
+                OutlinedButton.icon(
+                  onPressed: onBrowseAll,
+                  icon: const Icon(Icons.search_rounded),
+                  label: Text(l10n.searchQuestionSetsHint),
+                ),
+                const SizedBox(height: AppSpacing.xxl),
+                StudyHubSectionHeader(title: l10n.studySpaces),
+                const SizedBox(height: AppSpacing.md),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final colors = theme.colorScheme;
+                    final review = _StudySpace(
+                      artwork: StudyArtwork.math,
+                      title: l10n.schoolReviewTitle,
+                      subtitle: l10n.schoolReviewSubtitle,
+                      color: colors.secondaryContainer,
+                      foreground: colors.onSecondaryContainer,
+                      onTap: onSchoolReview,
+                    );
+                    final games = _StudySpace(
+                      artwork: StudyArtwork.english,
+                      title: l10n.playAndLearn,
+                      subtitle: l10n.englishGames,
+                      color: colors.tertiaryContainer,
+                      foreground: colors.onTertiaryContainer,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const WordGamesScreen(),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                    if (constraints.maxWidth < 300 ||
+                        MediaQuery.textScalerOf(context).scale(16) > 21) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [review, const SizedBox(height: 12), games],
+                      );
+                    }
+                    return IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(child: review),
+                          const SizedBox(width: 12),
+                          Expanded(child: games),
+                        ],
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 28),
                 StudyHubSectionHeader(title: l10n.quickActionsSection),
@@ -170,6 +200,75 @@ class _HomeHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _StudySpace extends StatelessWidget {
+  const _StudySpace({
+    required this.artwork,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.foreground,
+    required this.onTap,
+  });
+
+  final StudyArtwork artwork;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final Color foreground;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Card(
+      elevation: 0,
+      color: color,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadii.feature),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox.square(
+                    dimension: 64,
+                    child: StudyIllustration(artwork),
+                  ),
+                  Icon(
+                    Icons.arrow_outward_rounded,
+                    size: 18,
+                    color: foreground,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: text.titleMedium?.copyWith(
+                  color: foreground,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                subtitle,
+                style: text.bodySmall?.copyWith(color: foreground),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -83,12 +83,29 @@ class _QuestionSetDetailScreenState extends State<QuestionSetDetailScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+        child: Align(
+          heightFactor: 1,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => _chooseMode(context),
+                icon: const Icon(Icons.arrow_forward_rounded),
+                label: Text(l10n.chooseLearningMode),
+              ),
+            ),
+          ),
+        ),
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           children: [
             IllustratedStudyPanel(
-              artwork: StudyArtwork.books,
+              artwork: artworkForTopic(widget.questionSet.topicId),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -172,12 +189,6 @@ class _QuestionSetDetailScreenState extends State<QuestionSetDetailScreen> {
                   Expanded(child: Text(l10n.answersHiddenDetail)),
                 ],
               ),
-            ),
-            const SizedBox(height: 30),
-            FilledButton.icon(
-              onPressed: () => _chooseMode(context),
-              icon: const Icon(Icons.arrow_forward),
-              label: Text(l10n.chooseLearningMode),
             ),
           ],
         ),

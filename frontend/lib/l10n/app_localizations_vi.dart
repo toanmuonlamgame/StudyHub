@@ -9,6 +9,46 @@ class AppLocalizationsVi extends AppLocalizations {
   AppLocalizationsVi([String locale = 'vi']) : super(locale);
 
   @override
+  String get questionBank => 'Ngân hàng đề';
+
+  @override
+  String get schoolReviewTitle => 'Ôn tập phổ thông';
+
+  @override
+  String get schoolReviewSubtitle => 'Toán, Tiếng Anh, Khoa học và kỹ năng số';
+
+  @override
+  String get browseAllExams => 'Xem tất cả đề';
+
+  @override
+  String get studySpaces => 'Góc học tập của bạn';
+
+  @override
+  String get examQuestionMap => 'Danh sách câu hỏi';
+
+  @override
+  String get examJumpHint =>
+      'Chọn câu bạn muốn xem. Đáp án đã chọn được giữ lại.';
+
+  @override
+  String get examAnswered => 'Đã trả lời';
+
+  @override
+  String get reviewAllAnswers => 'Tất cả câu';
+
+  @override
+  String get reviewNeedsWork => 'Cần xem lại';
+
+  @override
+  String get reviewNoMistakes => 'Bạn đã trả lời đúng tất cả các câu.';
+
+  @override
+  String get studyWeekHeading => '7 ngày gần đây';
+
+  @override
+  String get studyWeekCaption => 'Số buổi học đã hoàn thành trên thiết bị này';
+
+  @override
   String get progressCompletedSessions => 'Phiên đã hoàn thành';
 
   @override
@@ -603,7 +643,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get continueLearningBody =>
-      'Chọn môn học rồi tiếp tục với một bộ câu hỏi tập trung.';
+      'Chọn môn bạn muốn ôn và luyện theo từng chủ đề.';
 
   @override
   String get learningModesCompactSubtitle =>

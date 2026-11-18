@@ -5,6 +5,9 @@ import '../features/home/screens/home_screen.dart';
 import '../features/contribution/repositories/contribution_repository.dart';
 import '../features/contribution/screens/contribution_intro_screen.dart';
 import '../features/learning/repositories/learning_repository.dart';
+import '../features/learning/data/school_review_data.dart'
+    show schoolReviewSubject;
+import '../features/learning/screens/question_set_list_screen.dart';
 import '../features/learning/screens/subject_list_screen.dart';
 import '../features/materials/screens/study_material_list_screen.dart';
 import '../features/progress/progress_screen.dart';
@@ -64,50 +67,85 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final selectedIndex = widget.navigationController.selectedTab;
+    final colors = Theme.of(context).colorScheme;
+    final wide = MediaQuery.sizeOf(context).width >= 1040;
+    final destinations = [
+      (Icons.home_outlined, Icons.home_rounded, l10n.homeTab),
+      (Icons.explore_outlined, Icons.explore_rounded, l10n.exploreTab),
+      (Icons.folder_copy_outlined, Icons.folder_copy_rounded, l10n.myExams),
+      (Icons.person_outline_rounded, Icons.person_rounded, l10n.profile),
+    ];
 
     return Scaffold(
-      body: IndexedStack(
-        index: selectedIndex,
-        children: List.generate(
-          4,
-          (index) => _builtTabs[index] ?? const SizedBox.shrink(),
-        ),
-      ),
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: Theme.of(context).colorScheme.outlineVariant,
+      body: Row(
+        children: [
+          if (wide) ...[
+            NavigationRail(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: _selectTab,
+              extended: true,
+              minExtendedWidth: 206,
+              backgroundColor: colors.surface,
+              leading: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 12,
+                ),
+                child: Text(
+                  l10n.appTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              destinations: [
+                for (final (icon, selectedIcon, label) in destinations)
+                  NavigationRailDestination(
+                    icon: Icon(icon),
+                    selectedIcon: Icon(selectedIcon),
+                    label: Text(label),
+                  ),
+              ],
+            ),
+            const VerticalDivider(width: 1),
+          ],
+          Expanded(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 780),
+                child: IndexedStack(
+                  index: selectedIndex,
+                  children: List.generate(
+                    destinations.length,
+                    (index) => _builtTabs[index] ?? const SizedBox.shrink(),
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-        child: NavigationBar(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: _selectTab,
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home_rounded),
-              label: l10n.homeTab,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.explore_outlined),
-              selectedIcon: const Icon(Icons.explore_rounded),
-              label: l10n.exploreTab,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.folder_copy_outlined),
-              selectedIcon: const Icon(Icons.folder_copy_rounded),
-              label: l10n.myExams,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.person_outline_rounded),
-              selectedIcon: const Icon(Icons.person_rounded),
-              label: l10n.profile,
-            ),
-          ],
-        ),
+        ],
       ),
+      bottomNavigationBar: wide
+          ? null
+          : DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                ),
+              ),
+              child: NavigationBar(
+                selectedIndex: selectedIndex,
+                onDestinationSelected: _selectTab,
+                destinations: [
+                  for (final (icon, selectedIcon, label) in destinations)
+                    NavigationDestination(
+                      icon: Icon(icon),
+                      selectedIcon: Icon(selectedIcon),
+                      label: label,
+                    ),
+                ],
+              ),
+            ),
     );
   }
 
@@ -130,7 +168,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget _buildTab(int index) {
     return switch (index) {
       0 => _buildHome(),
-      1 => SubjectListScreen(learningRepository: widget.learningRepository),
+      1 => SubjectListScreen(
+        learningRepository: widget.learningRepository,
+        onBrowseAll: _openQuestionBank,
+      ),
       2 => MyExamsScreen(
         learningRepository: widget.learningRepository,
         contributionRepository: widget.contributionRepository,
@@ -148,6 +189,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget _buildHome() {
     return HomeScreen(
       onStartLearning: () => _selectTab(1),
+      onBrowseAll: _openQuestionBank,
+      onSchoolReview: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => QuestionSetListScreen(
+            subject: schoolReviewSubject,
+            learningRepository: widget.learningRepository,
+          ),
+        ),
+      ),
       onOpenProgress: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (progressContext) => ProgressScreen(
@@ -178,6 +228,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           builder: (_) => SavedQuestionSetsScreen(
             learningRepository: widget.learningRepository,
           ),
+        ),
+      ),
+    );
+  }
+
+  void _openQuestionBank() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => QuestionSetListScreen(
+          learningRepository: widget.learningRepository,
         ),
       ),
     );

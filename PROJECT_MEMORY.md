@@ -303,3 +303,15 @@ Handoff summary:
   top-level navigation, and invalidates the backend session when reachable.
 - Production avatar media still requires object storage; local storage remains
   a development adapter.
+
+## Learner experience and school catalog
+
+- The Home study spaces link to school review, English games and a searchable
+  question bank without preloading catalog data.
+- Exam Mode supports jumping between questions and preserves selected answers.
+  Result review can show all answers or only incorrect and unanswered ones.
+- The Progress tab's seven-day chart reflects completed sessions on the
+  current device.
+- School review includes ten Vietnamese sets across math, English, science and
+  digital skills. The Flutter demo and Fastify memory data share the content
+  generated for the Prisma seed as documented in DECISIONS.md.

@@ -44,7 +44,7 @@ void main() {
       subjectId: 'subject_school_review',
       language: 'vi',
     );
-    expect(sets.items, hasLength(3));
+    expect(sets.items, hasLength(10));
 
     for (final set in sets.items) {
       final questions = await repository.getQuestionsByQuestionSetId(set.id);

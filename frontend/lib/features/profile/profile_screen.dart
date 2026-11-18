@@ -531,7 +531,7 @@ class _ActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListTile(
     minTileHeight: 56,
-    leading: Icon(icon),
+    leading: StudyHubIconSurface(icon: icon, size: 36),
     title: Text(title),
     subtitle: subtitle == null ? null : Text(subtitle!),
     trailing: onTap == null ? null : const Icon(Icons.chevron_right_rounded),

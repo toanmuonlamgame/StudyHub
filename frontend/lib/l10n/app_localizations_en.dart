@@ -9,6 +9,47 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get questionBank => 'Question bank';
+
+  @override
+  String get schoolReviewTitle => 'School review';
+
+  @override
+  String get schoolReviewSubtitle =>
+      'Math, English, science and digital skills';
+
+  @override
+  String get browseAllExams => 'Browse all exams';
+
+  @override
+  String get studySpaces => 'Your study spaces';
+
+  @override
+  String get examQuestionMap => 'Question map';
+
+  @override
+  String get examJumpHint =>
+      'Pick a question to jump to it. Your answers are kept.';
+
+  @override
+  String get examAnswered => 'Answered';
+
+  @override
+  String get reviewAllAnswers => 'All answers';
+
+  @override
+  String get reviewNeedsWork => 'Needs review';
+
+  @override
+  String get reviewNoMistakes => 'You answered every question correctly.';
+
+  @override
+  String get studyWeekHeading => 'Last 7 days';
+
+  @override
+  String get studyWeekCaption => 'Completed sessions on this device';
+
+  @override
   String get progressCompletedSessions => 'Completed sessions';
 
   @override
@@ -606,7 +647,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueLearningBody =>
-      'Pick a subject and continue to a focused question set.';
+      'Pick a subject and practice one topic at a time.';
 
   @override
   String get learningModesCompactSubtitle =>
